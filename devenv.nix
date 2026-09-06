@@ -60,6 +60,7 @@ in
       fvm
       gitleaks
       jq
+      llvm
       extra.monochange
       nixfmt-rfc-style
       patchelf
