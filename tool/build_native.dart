@@ -17,9 +17,17 @@ Future<void> main(List<String> arguments) async {
   await _ensureUpstream(repositoryRoot, upstream);
   _applyCompatibilityPatches(repositoryRoot, upstream, target);
 
+  final Map<String, String> buildEnvironment = <String, String>{
+    'USE_BAZEL_VERSION': '7.4.1',
+    if (target.isAndroid) 'ANDROID_NDK_HOME': _androidNdk().path,
+    if (target.os == 'macos') ...await resolveMacOsToolchainEnvironment(),
+  };
   final List<String> bazelArguments = <String>[
     'build',
     ...target.bazelArguments,
+    if (target.os == 'macos')
+      for (final String name in <String>['CC', 'CXX', 'DEVELOPER_DIR'])
+        '--repo_env=$name=${buildEnvironment[name]}',
     '--lockfile_mode=update',
     '--experimental_google_legacy_api',
     '--repo_env=HERMETIC_PYTHON_VERSION=3.12',
@@ -39,10 +47,7 @@ Future<void> main(List<String> arguments) async {
     'bazelisk',
     bazelArguments,
     workingDirectory: upstream.path,
-    environment: <String, String>{
-      'USE_BAZEL_VERSION': '7.4.1',
-      if (target.isAndroid) 'ANDROID_NDK_HOME': _androidNdk().path,
-    },
+    environment: buildEnvironment,
   );
 
   final List<File> artifacts = _findArtifacts(upstream, target);
@@ -56,6 +61,40 @@ Future<void> main(List<String> arguments) async {
   await _makeLibrariesRelocatable(copied, target: target, workingDirectory: repositoryRoot.path);
   await _writeManifest(output, target.name, copied);
   stdout.writeln('Built ${copied.length} libraries in ${output.path}');
+}
+
+/// Resolves the system compiler shims and active Xcode developer directory.
+///
+/// Bazel must not discover a Nix-provided Clang on macOS: its libc++ headers can
+/// target a different Apple SDK than the Xcode selected by the runner. The
+/// `/usr/bin` shims also add the selected macOS SDK sysroot, which invoking the
+/// compiler binary inside Xcode directly does not do.
+Future<Map<String, String>> resolveMacOsToolchainEnvironment({
+  Future<String> Function(String executable, List<String> arguments)? commandRunner,
+}) async {
+  final Future<String> Function(String, List<String>) runCommand = commandRunner ?? _runTool;
+  final String developerDirectory = await runCommand('xcode-select', const <String>[
+    '--print-path',
+  ]);
+  return <String, String>{
+    'CC': '/usr/bin/clang',
+    'CXX': '/usr/bin/clang++',
+    'DEVELOPER_DIR': developerDirectory,
+  };
+}
+
+Future<String> _runTool(String executable, List<String> arguments) async {
+  final ProcessResult result = await Process.run(executable, arguments);
+  final String output = (result.stdout as String).trim();
+  if (result.exitCode != 0 || output.isEmpty) {
+    throw ProcessException(
+      executable,
+      arguments,
+      'Could not resolve the active Xcode toolchain: ${result.stderr}',
+      result.exitCode,
+    );
+  }
+  return output;
 }
 
 Future<NativeTarget> _readTarget(List<String> arguments) async {
