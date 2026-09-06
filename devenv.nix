@@ -60,6 +60,7 @@ in
       fvm
       gitleaks
       jq
+      ktlint
       llvm
       extra.monochange
       nixfmt-rfc-style
@@ -69,6 +70,8 @@ in
     ++ lib.optionals stdenv.isDarwin [
       cocoapods
       coreutils
+    ]
+    ++ lib.optionals (!stdenv.isDarwin || stdenv.hostPlatform.isAarch64) [
       swift-format
       swiftlint
     ];
@@ -96,6 +99,11 @@ in
       binary = "bash";
       packages = [ pkgs.fvm ];
       description = "Run Dart from the repository-pinned Flutter SDK.";
+    };
+    "repo-swift-format" = {
+      exec =
+        if pkgs.stdenv.isDarwin then ''exec xcrun swift-format "$@"'' else ''exec swift-format "$@"'';
+      description = "Run swift-format from Xcode or the pinned Nix package.";
     };
     install = {
       exec = ''
@@ -127,18 +135,37 @@ in
       description = "Validate GitHub Actions workflows.";
     };
     "lint:kotlin" = {
-      exec = "cd packages/mp_text/example/android && ./gradlew :mp_genai:ktlintCheck :mp_text:ktlintCheck";
-      description = "Check Android plugin Kotlin formatting.";
+      exec = ''
+        set -euo pipefail
+        kotlin_files=()
+        while IFS= read -r -d "" path; do
+          kotlin_files+=("$path")
+        done < <(git ls-files -z "*.kt" "*.kts")
+        ktlint --relative --editorconfig=.editorconfig "''${kotlin_files[@]}"
+      '';
+      description = "Lint every tracked Kotlin source and Gradle Kotlin script.";
     };
     "lint:swift" = {
-      exec = "xcrun swift-format lint --strict --recursive packages/mp_text/ios/Classes";
-      description = "Check iOS plugin Swift formatting.";
+      exec = ''
+        set -euo pipefail
+        swift_files=()
+        while IFS= read -r -d "" path; do
+          swift_files+=("$path")
+        done < <(git ls-files -z "*.swift")
+        repo-swift-format lint --strict --parallel --configuration .swift-format \
+          "''${swift_files[@]}"
+        swiftlint lint --strict --no-cache --config .swiftlint.yml \
+          "''${swift_files[@]}"
+      '';
+      description = "Check swift-format conformance and run SwiftLint on every tracked Swift file.";
     };
     "lint:all" = {
       exec = ''
         set -euo pipefail
         lint:format
         lint:dart
+        lint:kotlin
+        lint:swift
         lint:actions
         monochange check
       '';
@@ -154,12 +181,12 @@ in
       description = "Format source and configuration files.";
     };
     "fix:kotlin" = {
-      exec = "cd packages/mp_text/example/android && ./gradlew :mp_genai:ktlintFormat :mp_text:ktlintFormat";
-      description = "Format Android plugin Kotlin sources.";
+      exec = ''dprint fmt "**/*.{kt,kts}"'';
+      description = "Format Kotlin through dprint and ktlint.";
     };
     "fix:swift" = {
-      exec = "xcrun swift-format format --in-place --recursive packages/mp_text/ios/Classes";
-      description = "Format iOS plugin Swift sources.";
+      exec = ''dprint fmt "**/*.swift"'';
+      description = "Format Swift through dprint and swift-format.";
     };
     "test:unit" = {
       exec = ''
