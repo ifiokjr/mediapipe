@@ -14,6 +14,12 @@ The unclaimed names are first reserved with minimal `0.0.0` packages. pub.dev al
 
 No bootstrap package claims production support. The first feature release is prepared only after the relevant platform integration checks pass.
 
+Feature releases use the same ordering. The publish workflow runs every four
+hours, reads the oldest draft `v*` release, queries pub.dev for package versions
+that are still missing, and publishes at most four. A later run publishes the
+remaining packages and makes the draft GitHub release public. Reruns are safe:
+versions already present on pub.dev are skipped.
+
 ## Release chain
 
 1. Validate changesets and compute the grouped release plan.

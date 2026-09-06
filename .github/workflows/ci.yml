@@ -123,7 +123,9 @@ jobs:
         shell: devenv shell bash -- -e {0}
 
   mobile-ios:
-    runs-on: macos-14
+    # MediaPipeTasksCommon 1.0 references Metal residency APIs from the iOS 18
+    # SDK. macOS 15 provides Xcode 16.4 and that SDK on hosted runners.
+    runs-on: macos-15
     timeout-minutes: 30
     steps:
       - name: Check out repository

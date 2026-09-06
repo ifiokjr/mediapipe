@@ -25,6 +25,7 @@ doc/api/
 .devenv*
 devenv.local.nix
 .direnv/
+.pre-commit-config.yaml
 
 # Editors and operating systems
 .DS_Store
