@@ -228,7 +228,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install pinned Android NDK
-        run: sdkmanager "ndk;28.2.13676358"
+        run: |
+          set -euo pipefail
+          android_sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          "$android_sdk/cmdline-tools/latest/bin/sdkmanager" "ndk;28.2.13676358"
 
       - name: Build the Android ARM64 runtime
         run: native:build --target android-arm64
