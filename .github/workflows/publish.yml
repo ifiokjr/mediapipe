@@ -1,0 +1,158 @@
+name: Publish
+
+on:
+  schedule:
+    # Pub.dev accepts at most four new versions in a four-hour window. Each
+    # scheduled run publishes one dependency-ordered batch from the oldest
+    # draft release.
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to resume; defaults to the oldest draft release
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-pub-dev
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'ifiokjr/mediapipe'
+    environment: publisher
+    permissions:
+      contents: write
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Resolve release tag
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REQUESTED_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="$REQUESTED_TAG"
+          if [ -z "$tag" ]; then
+            tag="$(
+              gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+                --jq '[.[] | select(.draft == true and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+([+-].*)?$")))] | sort_by(.created_at) | .[0].tag_name'
+            )"
+          fi
+
+          if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+            echo "No draft package release is waiting to be published."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Refusing unexpected release tag '$tag'."
+            exit 1
+          fi
+
+          {
+            echo "present=true"
+            echo "tag=$tag"
+            echo "version=${tag#v}"
+          } >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Check out release tag
+        if: steps.release.outputs.present == 'true'
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release commit
+        if: steps.release.outputs.present == 'true'
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git fetch --force origin main:refs/remotes/origin/main --tags
+          tag_commit="$(git rev-list -n1 "$RELEASE_TAG")"
+          if [ "$(git rev-parse HEAD)" != "$tag_commit" ]; then
+            echo "::error::The checkout does not match $RELEASE_TAG."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$tag_commit" refs/remotes/origin/main; then
+            echo "::error::$RELEASE_TAG is not reachable from main."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Set up Dart trusted publishing
+        if: steps.release.outputs.present == 'true'
+        uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260 # v1.7.2
+
+      - name: Set up toolchains
+        if: steps.release.outputs.present == 'true'
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Select the next pub.dev batch
+        if: steps.release.outputs.present == 'true'
+        id: batch
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: repo-dart run tool/plan_pub_batch.dart --version "$RELEASE_VERSION"
+        shell: devenv shell -- bash -e {0}
+
+      - name: Check publish readiness
+        if: steps.batch.outputs.count != '0'
+        env:
+          PACKAGE_IDS: ${{ steps.batch.outputs.packages }}
+        run: |
+          set -euo pipefail
+          package_args=()
+          while IFS= read -r package; do
+            package_args+=(--package "$package")
+          done < <(jq -r '.[]' <<<"$PACKAGE_IDS")
+          monochange step publish-readiness \
+            --from HEAD \
+            --output "$RUNNER_TEMP/publish-readiness.json" \
+            --format json \
+            "${package_args[@]}"
+        shell: devenv shell -- bash -e {0}
+
+      - name: Publish package batch
+        if: steps.batch.outputs.count != '0'
+        env:
+          PACKAGE_IDS: ${{ steps.batch.outputs.packages }}
+        run: |
+          set -euo pipefail
+          package_args=()
+          while IFS= read -r package; do
+            package_args+=(--package "$package")
+          done < <(jq -r '.[]' <<<"$PACKAGE_IDS")
+          monochange step publish-packages \
+            --output "$RUNNER_TEMP/publish-result.json" \
+            --format json \
+            "${package_args[@]}"
+        shell: devenv shell -- bash -e {0}
+
+      - name: Publish the GitHub release
+        if: steps.batch.outputs.count == '0' || steps.batch.outputs.final == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: monochange step publish-release --from-ref HEAD --format json
+        shell: devenv shell -- bash -e {0}
+
+      - name: Upload MonoChange reports
+        if: always() && steps.release.outputs.present == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: monochange-publish-${{ steps.release.outputs.tag }}
+          path: |
+            ${{ runner.temp }}/publish-readiness.json
+            ${{ runner.temp }}/publish-result.json
+          if-no-files-found: ignore
+          retention-days: 14

@@ -27,6 +27,23 @@ provider = "github"
 owner = "ifiokjr"
 repo = "mediapipe"
 
+[source.releases]
+enabled = true
+draft = false
+prerelease = false
+source = "monochange"
+branches = ["main"]
+enforce_for_tags = true
+enforce_for_publish = true
+
+[source.pull_requests]
+enabled = true
+branch_prefix = "chore/release"
+base = "main"
+title = "chore(release): prepare release"
+labels = ["release"]
+auto_merge = false
+
 [cli.release]
 help_text = "Prepare, commit, and open the grouped MP release pull request."
 steps = [
@@ -73,7 +90,7 @@ enabled = true
 publish.enabled = true
 publish.mode = "builtin"
 publish.registry = "pub_dev"
-publish.trusted_publishing = true
+publish.trusted_publishing = { enabled = true, repository = "ifiokjr/mediapipe", workflow = "publish.yml", environment = "publisher" }
 publish.rate_limits.enforce = true
 versioned_files = [
   { path = "**/pubspec.yaml", type = "dart", fields = [

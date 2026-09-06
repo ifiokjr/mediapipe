@@ -161,7 +161,11 @@ in
       description = "Format iOS plugin Swift sources.";
     };
     "test:unit" = {
-      exec = "repo-dart run melos exec --dir-exists=test --fail-fast --concurrency=1 -- repo-flutter test test";
+      exec = ''
+        set -euo pipefail
+        repo-dart test test
+        repo-dart run melos exec --dir-exists=test --fail-fast --concurrency=1 -- repo-flutter test test
+      '';
       description = "Run unit tests for every public package.";
     };
     "test:native" = {
