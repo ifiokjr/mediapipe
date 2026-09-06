@@ -10,7 +10,7 @@ runs:
   using: composite
   steps:
     - name: Install Nix
-      uses: cachix/install-nix-action@b97f05dcb019ddea06450a50ef6203d2fdc19fee # v31
+      uses: cachix/install-nix-action@b97f05dcb019ddea06450a50ef6203d2fdc19fee # v31.11.1
       with:
         github_access_token: ${{ inputs.github-token }}
 

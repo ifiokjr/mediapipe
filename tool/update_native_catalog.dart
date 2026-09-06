@@ -37,7 +37,9 @@ Future<Map<String, Object>> buildNativeArtifactCatalog({
   final Map<String, Object> artifacts = <String, Object>{};
   for (final File archiveFile in archives) {
     final RegExpMatch? filename = RegExp(
-      r'^mediapipe-(v\d+\.\d+\.\d+)-((?:macos|linux|windows)-(?:arm64|x64))\.zip$',
+      r'^mediapipe-(v\d+\.\d+\.\d+)-('
+      r'(?:(?:macos|linux)-(?:arm64|x64)|windows-x64|android-(?:arm|arm64|x64))'
+      r')\.zip$',
     ).firstMatch(archiveFile.uri.pathSegments.last);
     if (filename == null) {
       throw FormatException('Unexpected native archive name: ${archiveFile.path}');

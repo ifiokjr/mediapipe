@@ -5,7 +5,7 @@ import 'package:hooks/hooks.dart';
 
 import 'native_artifact.dart';
 
-/// Bundles the MediaPipe Tasks C libraries for a desktop target.
+/// Bundles the MediaPipe Tasks C libraries for a native target.
 ///
 /// Source checkouts can set `hooks.user_defines.mp_core` /
 /// `native_library_directory` to test a local build. Published packages resolve
@@ -18,12 +18,18 @@ Future<void> main(List<String> arguments) async {
     final OS targetOS = input.config.code.targetOS;
     final String? mainLibraryName = _mainLibraryName(targetOS);
     if (mainLibraryName == null) return;
+    final String target = '${targetOS.name}-${input.config.code.targetArchitecture.name}';
 
     Directory? directory;
     final Uri? configured = input.userDefines.path('native_library_directory');
     if (configured != null) {
-      final Directory localDirectory = Directory.fromUri(configured);
-      if (localDirectory.existsSync()) directory = localDirectory;
+      final Directory configuredDirectory = Directory.fromUri(configured);
+      final Directory targetDirectory = Directory.fromUri(configured.resolve('$target/'));
+      if (targetDirectory.existsSync()) {
+        directory = targetDirectory;
+      } else if (File.fromUri(configuredDirectory.uri.resolve(mainLibraryName)).existsSync()) {
+        directory = configuredDirectory;
+      }
     }
 
     if (directory == null) {
@@ -33,7 +39,6 @@ Future<void> main(List<String> arguments) async {
       final NativeArtifactCatalog catalog = NativeArtifactCatalog.parse(
         await catalogFile.readAsString(),
       );
-      final String target = '${targetOS.name}-${input.config.code.targetArchitecture.name}';
       final NativeArtifact? artifact = catalog.artifacts[target];
       if (artifact == null) return;
       directory = await resolveNativeArtifact(
@@ -74,7 +79,7 @@ Future<void> main(List<String> arguments) async {
 String? _mainLibraryName(OS os) => switch (os) {
   OS.macOS => 'libmediapipe.dylib',
   OS.linux || OS.android => 'libmediapipe.so',
-  OS.windows => 'mediapipe.dll',
+  OS.windows => 'libmediapipe.dll',
   _ => null,
 };
 

@@ -3,19 +3,23 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
+import 'native_target.dart';
+
 const String _mediaPipeVersion = 'v1.0.0';
 const String _repository = 'https://github.com/google-ai-edge/mediapipe.git';
 
 Future<void> main(List<String> arguments) async {
   final Directory repositoryRoot = _findRepositoryRoot();
+  final NativeTarget target = await _readTarget(arguments);
   final Directory upstream = Directory.fromUri(
-    repositoryRoot.uri.resolve('.dart_tool/upstream/mediapipe/'),
+    repositoryRoot.uri.resolve('.dart_tool/upstream/mediapipe-${target.name}/'),
   );
   await _ensureUpstream(repositoryRoot, upstream);
-  _applyCompatibilityPatches(repositoryRoot, upstream);
+  _applyCompatibilityPatches(repositoryRoot, upstream, target);
 
   final List<String> bazelArguments = <String>[
     'build',
+    ...target.bazelArguments,
     '--lockfile_mode=update',
     '--experimental_google_legacy_api',
     '--repo_env=HERMETIC_PYTHON_VERSION=3.12',
@@ -26,7 +30,7 @@ Future<void> main(List<String> arguments) async {
     '--strip',
     'always',
     '--define',
-    'MEDIAPIPE_DISABLE_GPU=1',
+    'MEDIAPIPE_DISABLE_GPU=${target.isAndroid ? 0 : 1}',
     '--define',
     'OPENCV=source',
     '//mediapipe/tasks/c:libmediapipe',
@@ -35,21 +39,31 @@ Future<void> main(List<String> arguments) async {
     'bazelisk',
     bazelArguments,
     workingDirectory: upstream.path,
-    environment: const <String, String>{'USE_BAZEL_VERSION': '7.4.1'},
+    environment: <String, String>{
+      'USE_BAZEL_VERSION': '7.4.1',
+      if (target.isAndroid) 'ANDROID_NDK_HOME': _androidNdk().path,
+    },
   );
 
-  final List<File> artifacts = _findArtifacts(upstream);
-  final String target = await _hostTarget();
-  final Directory output = Directory.fromUri(repositoryRoot.uri.resolve('.mp-sdk/$target/'));
+  final List<File> artifacts = _findArtifacts(upstream, target);
+  final Directory output = Directory.fromUri(repositoryRoot.uri.resolve('.mp-sdk/${target.name}/'));
   if (output.existsSync()) output.deleteSync(recursive: true);
   output.createSync(recursive: true);
   final List<File> copied = <File>[];
   for (final File artifact in artifacts) {
     copied.add(await artifact.copy(output.uri.resolve(_baseName(artifact)).toFilePath()));
   }
-  await _makeLibrariesRelocatable(copied, workingDirectory: repositoryRoot.path);
-  await _writeManifest(output, target, copied);
+  await _makeLibrariesRelocatable(copied, target: target, workingDirectory: repositoryRoot.path);
+  await _writeManifest(output, target.name, copied);
   stdout.writeln('Built ${copied.length} libraries in ${output.path}');
+}
+
+Future<NativeTarget> _readTarget(List<String> arguments) async {
+  if (arguments.isEmpty) return NativeTarget.host();
+  if (arguments case ['--target', final String value]) {
+    return NativeTarget.parse(value);
+  }
+  throw const FormatException('Usage: build_native.dart [--target <os-architecture>]');
 }
 
 Future<void> _ensureUpstream(Directory repositoryRoot, Directory upstream) async {
@@ -74,7 +88,18 @@ Future<void> _ensureUpstream(Directory repositoryRoot, Directory upstream) async
   }
 }
 
-void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream) {
+void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream, NativeTarget target) {
+  final String javaDependency = target.isAndroid
+      ? 'bazel_dep(name = "rules_android_ndk", version = "0.1.3")\n'
+            'android_ndk_repository_extension = use_extension(\n'
+            '    "@rules_android_ndk//:extension.bzl",\n'
+            '    "android_ndk_repository_extension",\n'
+            ')\n'
+            'android_ndk_repository_extension.configure(api_level = 24)\n'
+            'use_repo(android_ndk_repository_extension, "androidndk")\n'
+            'register_toolchains("@androidndk//:all")\n\n'
+            'bazel_dep(name = "rules_java", version = "8.3.2")'
+      : 'bazel_dep(name = "rules_java", version = "8.3.2")';
   _replaceExactly(
     File.fromUri(upstream.uri.resolve('MODULE.bazel')),
     'bazel_dep(name = "rules_java", version = "7.10.0")\n'
@@ -82,16 +107,16 @@ void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream) {
         '    module_name = "rules_java",\n'
         '    version = "7.10.0",\n'
         ')',
-    'bazel_dep(name = "rules_java", version = "8.3.2")\n'
+    '$javaDependency\n'
         'single_version_override(\n'
         '    module_name = "rules_java",\n'
         '    version = "8.3.2",\n'
         ')',
   );
 
-  const String patchName = 'opencv_macos_modern_sdk.patch';
+  const String patchName = 'opencv_modern_toolchains.patch';
   final File sourcePatch = File.fromUri(
-    repositoryRoot.uri.resolve('tool/patches/opencv-macos-modern-sdk.patch'),
+    repositoryRoot.uri.resolve('tool/patches/opencv-modern-toolchains.patch'),
   );
   final File upstreamPatch = File.fromUri(upstream.uri.resolve('third_party/$patchName'));
   upstreamPatch.writeAsStringSync(sourcePatch.readAsStringSync());
@@ -113,6 +138,47 @@ void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream) {
         '    patches = ["@//third_party:$patchName"],\n'
         '    strip_prefix = "opencv-3.4.11",',
   );
+  _replaceExactly(
+    File.fromUri(upstream.uri.resolve('third_party/BUILD')),
+    '        "BUILD_EXAMPLES": "OFF",\n'
+        '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
+    '        "BUILD_EXAMPLES": "OFF",\n'
+        '        # Build image dependencies inside the sandbox. Host discovery can\n'
+        '        # otherwise find a library without making its headers available.\n'
+        '        "BUILD_ZLIB": "ON",\n'
+        '        "BUILD_PNG": "ON",\n'
+        '        # OpenCV 3.4 cannot generate projects for current Android SDKs.\n'
+        '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
+        '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
+  );
+  if (target.isAndroid) {
+    _replaceExactly(
+      File.fromUri(upstream.uri.resolve('third_party/BUILD')),
+      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
+          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
+      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
+          '        # rules_android_ndk does not expose its C++ runtime to\n'
+          '        # rules_foreign_cc. OpenCV is linked with clang rather than\n'
+          '        # clang++, so supply the shared runtime explicitly.\n'
+          '        "CMAKE_CXX_STANDARD_LIBRARIES": "-lc++_shared -lc -lm -latomic -ldl -landroid -llog",\n'
+          '        # Every Android shared object must be compatible with 16 KB\n'
+          '        # page-size devices, including foreign CMake outputs.\n'
+          '        "CMAKE_SHARED_LINKER_FLAGS": "-Wl,-z,noexecstack -Wl,-z,separate-code -Wl,--no-rosegment -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 -Wl,--gc-sections -Wl,--build-id=md5 -Wl,--exclude-libs,libunwind.a -fuse-ld=lld -Wl,--icf=safe -Wl,--no-undefined",\n'
+          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
+    );
+  } else if (target.os == 'macos') {
+    _replaceExactly(
+      File.fromUri(upstream.uri.resolve('third_party/BUILD')),
+      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
+          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
+      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
+          '        # Xcode 16 cannot compile OpenCV 3.4 CPU feature probes with\n'
+          '        # their original warning policy. ARM64 already guarantees\n'
+          '        # NEON, so use the compiler target as the baseline.\n'
+          '        "CPU_BASELINE": "DETECT",\n'
+          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
+    );
+  }
 }
 
 void _replaceExactly(File file, String original, String replacement) {
@@ -124,15 +190,15 @@ void _replaceExactly(File file, String original, String replacement) {
   file.writeAsStringSync(contents.replaceFirst(original, replacement));
 }
 
-List<File> _findArtifacts(Directory upstream) {
+List<File> _findArtifacts(Directory upstream, NativeTarget target) {
   final Directory output = Directory.fromUri(upstream.uri.resolve('bazel-bin/mediapipe/tasks/c/'));
   final List<File> candidates = output
       .listSync()
       .whereType<File>()
-      .where((File file) => file.uri.pathSegments.last == _libraryName())
+      .where((File file) => file.uri.pathSegments.last == target.libraryName)
       .toList();
   if (candidates.length != 1) {
-    throw StateError('Expected one ${_libraryName()} in ${output.path}, found $candidates.');
+    throw StateError('Expected one ${target.libraryName} in ${output.path}, found $candidates.');
   }
   final Directory openCvOutput = Directory.fromUri(
     upstream.uri.resolve('bazel-bin/third_party/opencv_cmake/lib/'),
@@ -141,29 +207,57 @@ List<File> _findArtifacts(Directory upstream) {
       openCvOutput
           .listSync()
           .whereType<File>()
-          .where((File file) => _isSharedLibrary(_baseName(file)))
+          .where((File file) => _isSharedLibrary(_baseName(file), target.os))
           .toList()
         ..sort((File left, File right) => left.path.compareTo(right.path));
   if (openCvLibraries.isEmpty) {
     throw StateError('No OpenCV shared libraries found in ${openCvOutput.path}.');
   }
-  return <File>[candidates.single, ...openCvLibraries];
+  return <File>[
+    candidates.single,
+    ...openCvLibraries,
+    if (target.isAndroid) _androidCxxRuntime(target),
+  ];
 }
 
-bool _isSharedLibrary(String name) {
-  if (Platform.isMacOS) return name.endsWith('.dylib');
-  if (Platform.isLinux) return name.contains('.so');
-  if (Platform.isWindows) return name.endsWith('.dll');
-  return false;
+File _androidCxxRuntime(NativeTarget target) {
+  final Directory prebuilt = Directory.fromUri(
+    _androidNdk().uri.resolve('toolchains/llvm/prebuilt/'),
+  );
+  final List<Directory> hosts = prebuilt.listSync().whereType<Directory>().toList();
+  if (hosts.length != 1) {
+    throw StateError('Expected one Android NDK host toolchain in ${prebuilt.path}.');
+  }
+  final String triple = switch (target.architecture) {
+    'arm' => 'arm-linux-androideabi',
+    'arm64' => 'aarch64-linux-android',
+    'x64' => 'x86_64-linux-android',
+    _ => throw StateError('Unsupported Android architecture: ${target.architecture}.'),
+  };
+  final File runtime = File.fromUri(
+    hosts.single.uri.resolve('sysroot/usr/lib/$triple/libc++_shared.so'),
+  );
+  if (!runtime.existsSync()) {
+    throw StateError('Android C++ runtime does not exist at ${runtime.path}.');
+  }
+  return runtime;
 }
+
+bool _isSharedLibrary(String name, String os) => switch (os) {
+  'macos' => name.endsWith('.dylib'),
+  'linux' || 'android' => name.endsWith('.so') || name.contains('.so.'),
+  'windows' => name.endsWith('.dll'),
+  _ => false,
+};
 
 String _baseName(File file) => file.uri.pathSegments.last;
 
 Future<void> _makeLibrariesRelocatable(
   List<File> libraries, {
+  required NativeTarget target,
   required String workingDirectory,
 }) async {
-  if (Platform.isMacOS) {
+  if (target.os == 'macos') {
     for (final File library in libraries) {
       final String name = _baseName(library);
       await _runStreaming('install_name_tool', <String>[
@@ -174,7 +268,7 @@ Future<void> _makeLibrariesRelocatable(
         library.path,
       ], workingDirectory: workingDirectory);
     }
-  } else if (Platform.isLinux) {
+  } else if (target.os == 'linux') {
     for (final File library in libraries) {
       await _runStreaming('patchelf', <String>[
         '--set-rpath',
@@ -199,34 +293,22 @@ Future<void> _writeManifest(Directory output, String target, List<File> librarie
   await manifest.writeAsString('$contents\n');
 }
 
-String _libraryName() {
-  if (Platform.isMacOS) return 'libmediapipe.dylib';
-  if (Platform.isLinux || Platform.isAndroid) return 'libmediapipe.so';
-  if (Platform.isWindows) return 'mediapipe.dll';
-  throw UnsupportedError(
-    'Native MediaPipe builds are not configured for ${Platform.operatingSystem}.',
-  );
-}
-
-Future<String> _hostTarget() async {
-  final String architecture = Platform.isWindows
-      ? (Platform.environment['PROCESSOR_ARCHITECTURE'] ?? '').toLowerCase()
-      : (await _run('uname', const <String>[
-          '-m',
-        ], workingDirectory: Directory.current.path)).trim();
-  final String normalizedArchitecture = switch (architecture) {
-    'arm64' || 'aarch64' => 'arm64',
-    'x86_64' || 'amd64' => 'x64',
-    _ => throw UnsupportedError('Unsupported host architecture: $architecture'),
-  };
-  final String os = Platform.isMacOS
-      ? 'macos'
-      : Platform.isLinux
-      ? 'linux'
-      : Platform.isWindows
-      ? 'windows'
-      : throw UnsupportedError('Unsupported host OS: ${Platform.operatingSystem}');
-  return '$os-$normalizedArchitecture';
+Directory _androidNdk() {
+  const String pinnedVersion = '28.2.13676358';
+  final String? explicit = Platform.environment['ANDROID_NDK_HOME'];
+  final String? sdk =
+      Platform.environment['ANDROID_SDK_ROOT'] ?? Platform.environment['ANDROID_HOME'];
+  final Directory ndk = explicit != null && explicit.isNotEmpty
+      ? Directory(explicit)
+      : sdk != null && sdk.isNotEmpty
+      ? Directory.fromUri(Directory(sdk).uri.resolve('ndk/$pinnedVersion/'))
+      : throw StateError(
+          'Set ANDROID_NDK_HOME, ANDROID_SDK_ROOT, or ANDROID_HOME to build Android artifacts.',
+        );
+  if (!ndk.existsSync()) {
+    throw StateError('Android NDK does not exist at ${ndk.path}.');
+  }
+  return ndk;
 }
 
 Directory _findRepositoryRoot() {

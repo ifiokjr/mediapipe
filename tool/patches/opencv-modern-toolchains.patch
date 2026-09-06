@@ -12,3 +12,15 @@ index e9fd7f1..8adb120 100644
 @@ -521 +521 @@
 -    defined(THINK_C) || defined(__SC__) || defined(TARGET_OS_MAC)
 +    defined(THINK_C) || defined(__SC__)
+diff --git a/3rdparty/cpufeatures/cpu-features.c b/3rdparty/cpufeatures/cpu-features.c
+index 9b9f471..3fd446f 100644
+--- a/3rdparty/cpufeatures/cpu-features.c
++++ b/3rdparty/cpufeatures/cpu-features.c
+@@ -68,6 +68,7 @@
+ #include <fcntl.h>
+ #include <pthread.h>
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include <sys/system_properties.h>
+ #include <unistd.h>

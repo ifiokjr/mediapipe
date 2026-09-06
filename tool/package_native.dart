@@ -6,7 +6,9 @@ import 'package:crypto/crypto.dart';
 
 Future<void> main(List<String> arguments) async {
   final String target = _readOption(arguments, '--target');
-  if (!RegExp(r'^(macos|linux|windows)-(arm64|x64)$').hasMatch(target)) {
+  if (!RegExp(
+    r'^(?:(?:macos|linux)-(?:arm64|x64)|windows-x64|android-(?:arm|arm64|x64))$',
+  ).hasMatch(target)) {
     throw FormatException('Invalid native target: $target');
   }
 

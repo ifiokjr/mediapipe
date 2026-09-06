@@ -24,7 +24,7 @@ jobs:
         shell: devenv shell bash -- -e {0}
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -73,7 +73,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -102,12 +102,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
       - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@4733eaac7c1b0da527e4206b7671e0061de1ce37 # v6
+        uses: gradle/actions/wrapper-validation@4733eaac7c1b0da527e4206b7671e0061de1ce37 # v6.3.0
 
       - name: Set up toolchains
         uses: ./.github/actions/devenv
@@ -129,7 +129,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -154,7 +154,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -173,6 +173,7 @@ jobs:
           test -f .mp-sdk/macos-arm64/manifest.json
           jq -e '.mediaPipeVersion == "v1.0.0" and (.libraries | length > 1)' \
             .mp-sdk/macos-arm64/manifest.json
+          native:verify --target macos-arm64
           otool -L .mp-sdk/macos-arm64/libmediapipe.dylib
         shell: devenv shell bash -- -e {0}
 
@@ -185,7 +186,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -204,6 +205,7 @@ jobs:
           test -f .mp-sdk/linux-x64/manifest.json
           jq -e '.mediaPipeVersion == "v1.0.0" and (.libraries | length > 1)' \
             .mp-sdk/linux-x64/manifest.json
+          native:verify --target linux-x64
           ldd .mp-sdk/linux-x64/libmediapipe.so
         shell: devenv shell bash -- -e {0}
 
@@ -220,7 +222,7 @@ jobs:
       security-events: write
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - name: Audit workflow permissions
