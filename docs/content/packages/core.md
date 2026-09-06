@@ -5,6 +5,20 @@ description: Shared model, media, result, lifecycle, and platform primitives.
 
 `mp_core` is the only dependency shared by all task packages. It contains no task-specific public API.
 
+## Public type groups
+
+| Area                         | Main types                                                                        |
+| ---------------------------- | --------------------------------------------------------------------------------- |
+| Models and execution         | `ModelAsset`, `BaseOptions`, `MpDelegate`, `LiteRtOptions`                        |
+| Images                       | `MpImage`, `MpImageFormat`, `ImageProcessingOptions`, `NormalizedRect`            |
+| Audio                        | `AudioData`, `AudioRunningMode`                                                   |
+| Classification and detection | `Category`, `ClassificationResult`, `Detection`, `DetectionResult`, `BoundingBox` |
+| Embeddings                   | `Embedding`, `EmbeddingResult`, `EmbedderOptions`                                 |
+| Landmarks and masks          | `NormalizedLandmark`, `Landmark`, `MpImage`, `MpMatrix`                           |
+| Lifecycle and errors         | `MpTask`, `TaskLifecycle`, `TimestampTracker`, `MpException`, `MpStatus`          |
+
+Task package signatures refer to these types, but the task packages do not re-export them. Application code should depend on and import `mp_core` when constructing models or media inputs.
+
 ## Model sources
 
 `ModelAsset.path`, `ModelAsset.bytes`, and `ModelAsset.uri` make ownership explicit. Byte models are defensively copied. URI models may carry a lowercase SHA-256 digest; the browser backend verifies that digest before passing bytes to MediaPipe.

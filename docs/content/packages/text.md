@@ -3,6 +3,18 @@ title: mp_text
 description: Text task constructors, results, streaming APIs, and backend availability.
 ---
 
+## API
+
+| Task               | Methods                           | Result types                                    |
+| ------------------ | --------------------------------- | ----------------------------------------------- |
+| `LanguageDetector` | `detect(text)`                    | `LanguageDetectorResult`                        |
+| `TextClassifier`   | `classify(text)`                  | `ClassificationResult`                          |
+| `TextEmbedder`     | `embed(text, formatContext: ...)` | `EmbeddingResult`                               |
+| `TextProofreader`  | `proofread`, `proofreadStreaming` | `TextProofreaderResult`, `TextProofreaderChunk` |
+| `TextSummarizer`   | `summarize`, `summarizeStreaming` | `TextSummarizerResult`, `TextSummarizerChunk`   |
+
+Create each task with `TaskName.create(TaskNameOptions(...))` and release it with `close()`. All options contain `BaseOptions`; classifier and embedder options also contain their shared `mp_core` option groups.
+
 ## LanguageDetector
 
 Returns ordered BCP-47 language predictions and probabilities. A real-browser integration test runs the official language detector model and verifies the model digest path.
