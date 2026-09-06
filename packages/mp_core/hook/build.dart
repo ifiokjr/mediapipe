@@ -3,29 +3,50 @@ import 'dart:io';
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
 
-/// Bundles a caller-supplied MediaPipe Tasks C library directory.
+import 'native_artifact.dart';
+
+/// Bundles the MediaPipe Tasks C libraries for a desktop target.
 ///
-/// Release builds populate this from the checksummed native artifact selected
-/// for the target. Source checkouts can set `hooks.user_defines.mp_core` /
-/// `native_library_directory` in the workspace pubspec while developing a new
-/// artifact. The directory must contain the main MediaPipe library and any
-/// adjacent dynamic libraries it references. A directory for a different
-/// target operating system is ignored.
+/// Source checkouts can set `hooks.user_defines.mp_core` /
+/// `native_library_directory` to test a local build. Published packages resolve
+/// the target from `native_artifacts.json`, download the immutable release
+/// archive into the hook's shared cache, and verify both the archive and each
+/// library before bundling them.
 Future<void> main(List<String> arguments) async {
   await build(arguments, (BuildInput input, BuildOutputBuilder output) async {
     if (!input.config.buildCodeAssets) return;
-    final Uri? configured = input.userDefines.path('native_library_directory');
-    if (configured == null) return;
-
-    final String? mainLibraryName = _mainLibraryName(input.config.code.targetOS);
+    final OS targetOS = input.config.code.targetOS;
+    final String? mainLibraryName = _mainLibraryName(targetOS);
     if (mainLibraryName == null) return;
-    final Directory directory = Directory.fromUri(configured);
-    if (!directory.existsSync()) return;
+
+    Directory? directory;
+    final Uri? configured = input.userDefines.path('native_library_directory');
+    if (configured != null) {
+      final Directory localDirectory = Directory.fromUri(configured);
+      if (localDirectory.existsSync()) directory = localDirectory;
+    }
+
+    if (directory == null) {
+      final Uri catalogUri = input.packageRoot.resolve('hook/native_artifacts.json');
+      final File catalogFile = File.fromUri(catalogUri);
+      output.dependencies.add(catalogUri);
+      final NativeArtifactCatalog catalog = NativeArtifactCatalog.parse(
+        await catalogFile.readAsString(),
+      );
+      final String target = '${targetOS.name}-${input.config.code.targetArchitecture.name}';
+      final NativeArtifact? artifact = catalog.artifacts[target];
+      if (artifact == null) return;
+      directory = await resolveNativeArtifact(
+        artifact: artifact,
+        sharedOutputDirectory: input.outputDirectoryShared,
+      );
+    }
+
     final List<File> libraries =
         directory
             .listSync()
             .whereType<File>()
-            .where((File file) => _isDynamicLibrary(file.path, input.config.code.targetOS))
+            .where((File file) => _isDynamicLibrary(file.path, targetOS))
             .toList(growable: false)
           ..sort((File left, File right) => left.path.compareTo(right.path));
     if (libraries.isEmpty) return;

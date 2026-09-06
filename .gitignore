@@ -16,6 +16,7 @@ doc/api/
 
 # Generated native SDK artifacts
 .mp-sdk/
+/dist/
 *.dylib
 *.dll
 *.so

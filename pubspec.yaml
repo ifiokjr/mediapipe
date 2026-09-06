@@ -20,6 +20,7 @@ workspace:
   - packages/mp_vision
 
 dev_dependencies:
+  archive: ^4.0.9
   coverage: ^1.14.0
   crypto: ^3.0.7
   melos: ^7.8.1
