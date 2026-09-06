@@ -51,7 +51,7 @@ Future<void> main(List<String> arguments) async {
   output.createSync(recursive: true);
   final List<File> copied = <File>[];
   for (final File artifact in artifacts) {
-    copied.add(await artifact.copy(output.uri.resolve(_baseName(artifact)).toFilePath()));
+    copied.add(await _copyWritable(artifact, output.uri.resolve(_baseName(artifact))));
   }
   await _makeLibrariesRelocatable(copied, target: target, workingDirectory: repositoryRoot.path);
   await _writeManifest(output, target.name, copied);
@@ -138,6 +138,50 @@ void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream, Na
         '    patches = ["@//third_party:$patchName"],\n'
         '    strip_prefix = "opencv-3.4.11",',
   );
+  final File aggregateBuild = File.fromUri(upstream.uri.resolve('mediapipe/tasks/c/BUILD'));
+  if (target.isAndroid) {
+    _replaceExactly(
+      File.fromUri(upstream.uri.resolve('third_party/BUILD')),
+      '        "//conditions:default": ["libopencv_%s.so.%s" % (module, OPENCV_SO_VERSION) for module in OPENCV_MODULES],',
+      '        # Android assigns unversioned SONAMEs and emits unversioned files.\n'
+          '        "//conditions:default": ["libopencv_%s.so" % module for module in OPENCV_MODULES],',
+    );
+    _replaceExactly(
+      aggregateBuild,
+      '    linkopts = select({\n'
+          '        "@platforms//os:linux": [',
+      '    linkopts = select({\n'
+          '        "@platforms//os:android": [\n'
+          '            "-Wl,-soname=libmediapipe.so",\n'
+          '            "-Wl,--version-script=\$(location :mediapipe_tasks_c_version_script.lds)",\n'
+          '            "-fvisibility=hidden",\n'
+          '        ],\n'
+          '        "@platforms//os:linux": [',
+    );
+  }
+  final String targetCacheEntries = switch (target.os) {
+    'android' =>
+      '        # rules_android_ndk does not expose its C++ runtime to\n'
+          '        # rules_foreign_cc. OpenCV is linked with clang rather than\n'
+          '        # clang++, so supply the shared runtime explicitly.\n'
+          '        "CMAKE_CXX_STANDARD_LIBRARIES": "-lc++_shared -lc -lm -latomic -ldl -landroid -llog",\n'
+          '        # Every Android shared object must be compatible with 16 KB\n'
+          '        # page-size devices, including foreign CMake outputs.\n'
+          '        "CMAKE_SHARED_LINKER_FLAGS": "-Wl,-z,noexecstack -Wl,-z,separate-code -Wl,--no-rosegment -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 -Wl,--gc-sections -Wl,--build-id=md5 -Wl,--exclude-libs,libunwind.a -fuse-ld=lld -Wl,--icf=safe -Wl,--no-undefined",\n'
+          '        # OpenCV otherwise uses its Android SDK directory layout,\n'
+          '        # while rules_foreign_cc consumes a conventional lib folder.\n'
+          '        "OPENCV_INCLUDE_INSTALL_PATH": "include",\n'
+          '        "OPENCV_LIB_INSTALL_PATH": "lib",\n'
+          '        "OPENCV_LIB_ARCHIVE_INSTALL_PATH": "lib",\n'
+          '        "OPENCV_3P_LIB_INSTALL_PATH": "lib",\n',
+    'macos' =>
+      '        # OpenCV 3.4 reports its NEON probe as unavailable with Xcode 16.\n'
+          '        # NEON is part of the Apple ARM64 architecture, so retain that\n'
+          '        # baseline without relying on the incompatible probe.\n'
+          '        "CPU_BASELINE": "NEON",\n'
+          '        "CPU_NEON_SUPPORTED": "ON",\n',
+    _ => '',
+  };
   _replaceExactly(
     File.fromUri(upstream.uri.resolve('third_party/BUILD')),
     '        "BUILD_EXAMPLES": "OFF",\n'
@@ -147,38 +191,15 @@ void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream, Na
         '        # otherwise find a library without making its headers available.\n'
         '        "BUILD_ZLIB": "ON",\n'
         '        "BUILD_PNG": "ON",\n'
+        '        # Protobuf is only used by OpenCV DNN, which is not in the\n'
+        '        # MediaPipe task module allowlist.\n'
+        '        "BUILD_PROTOBUF": "OFF",\n'
+        '        "WITH_PROTOBUF": "OFF",\n'
         '        # OpenCV 3.4 cannot generate projects for current Android SDKs.\n'
         '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
+        '$targetCacheEntries'
         '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
   );
-  if (target.isAndroid) {
-    _replaceExactly(
-      File.fromUri(upstream.uri.resolve('third_party/BUILD')),
-      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
-          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
-      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
-          '        # rules_android_ndk does not expose its C++ runtime to\n'
-          '        # rules_foreign_cc. OpenCV is linked with clang rather than\n'
-          '        # clang++, so supply the shared runtime explicitly.\n'
-          '        "CMAKE_CXX_STANDARD_LIBRARIES": "-lc++_shared -lc -lm -latomic -ldl -landroid -llog",\n'
-          '        # Every Android shared object must be compatible with 16 KB\n'
-          '        # page-size devices, including foreign CMake outputs.\n'
-          '        "CMAKE_SHARED_LINKER_FLAGS": "-Wl,-z,noexecstack -Wl,-z,separate-code -Wl,--no-rosegment -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 -Wl,--gc-sections -Wl,--build-id=md5 -Wl,--exclude-libs,libunwind.a -fuse-ld=lld -Wl,--icf=safe -Wl,--no-undefined",\n'
-          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
-    );
-  } else if (target.os == 'macos') {
-    _replaceExactly(
-      File.fromUri(upstream.uri.resolve('third_party/BUILD')),
-      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
-          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
-      '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
-          '        # Xcode 16 cannot compile OpenCV 3.4 CPU feature probes with\n'
-          '        # their original warning policy. ARM64 already guarantees\n'
-          '        # NEON, so use the compiler target as the baseline.\n'
-          '        "CPU_BASELINE": "DETECT",\n'
-          '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
-    );
-  }
 }
 
 void _replaceExactly(File file, String original, String replacement) {
@@ -252,15 +273,37 @@ bool _isSharedLibrary(String name, String os) => switch (os) {
 
 String _baseName(File file) => file.uri.pathSegments.last;
 
+Future<File> _copyWritable(File source, Uri destination) async {
+  final File output = File.fromUri(destination);
+  await source.openRead().pipe(output.openWrite());
+  return output;
+}
+
 Future<void> _makeLibrariesRelocatable(
   List<File> libraries, {
   required NativeTarget target,
   required String workingDirectory,
 }) async {
   if (target.os == 'macos') {
+    final Set<String> packagedNames = libraries.map(_baseName).toSet();
     for (final File library in libraries) {
       final String name = _baseName(library);
+      final String linkedLibraries = await _run('otool', <String>[
+        '-L',
+        library.path,
+      ], workingDirectory: workingDirectory);
+      final List<String> changes = <String>[];
+      for (final String line in linkedLibraries.split('\n').skip(1)) {
+        final String dependency = line.trim().split(RegExp(r'\s+')).firstOrNull ?? '';
+        if (dependency.isEmpty) continue;
+        final String dependencyName = dependency.split('/').last;
+        if (!packagedNames.contains(dependencyName) || dependency == '@rpath/$dependencyName') {
+          continue;
+        }
+        changes.addAll(<String>['-change', dependency, '@rpath/$dependencyName']);
+      }
       await _runStreaming('install_name_tool', <String>[
+        ...changes,
         '-id',
         '@rpath/$name',
         '-add_rpath',
