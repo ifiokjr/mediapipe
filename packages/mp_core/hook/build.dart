@@ -17,14 +17,10 @@ Future<void> main(List<String> arguments) async {
     final Uri? configured = input.userDefines.path('native_library_directory');
     if (configured == null) return;
 
-    final Directory directory = Directory.fromUri(configured);
-    if (!directory.existsSync()) {
-      throw StateError(
-        'The configured mp_core native library directory does not exist: ${directory.path}',
-      );
-    }
     final String? mainLibraryName = _mainLibraryName(input.config.code.targetOS);
     if (mainLibraryName == null) return;
+    final Directory directory = Directory.fromUri(configured);
+    if (!directory.existsSync()) return;
     final List<File> libraries =
         directory
             .listSync()
