@@ -27,12 +27,13 @@ Conditional exports keep `dart:js_interop` out of native compilation and `dart:i
 
 ## GenAI runtime
 
-GenAI is isolated because upstream does not expose it through the classic C aggregate. Web, Android, and iOS backends implement a Dart-owned session interface. Unsupported backend features fail at creation or invocation with a stable status.
+GenAI is isolated because upstream does not expose it through the classic C aggregate. The web backend implements LLM inference. The Android plugin implements LLM inference, function calling, RAG, and image generation. iOS and desktop GenAI calls currently fail with an explicit unsupported status.
 
 ## Test coverage
 
 Unit tests cover option validation, lifecycle, result conversion, media
 conversion, scheduling, and failure cleanup. The current real-model lanes run
 language detection in Chrome and macOS, plus face detection against the macOS C
-runtime. The mobile `mp_text` fixture compiles and launches the Android and iOS
-plugin; proofreader and summarizer model tests remain pending.
+runtime. The mobile fixture compiles and launches the Android `mp_text` and
+`mp_genai` plugins and the iOS `mp_text` plugin. Proofreader, summarizer, and
+Android GenAI model tests remain pending.

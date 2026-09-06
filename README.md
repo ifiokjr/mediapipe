@@ -19,11 +19,9 @@ integrity-checked HTTPS URI.
 | [`mp_camera`](packages/mp_camera) | Flutter camera conversion, orientation metadata, and latest-frame scheduling                                                   |
 | [`mp_text`](packages/mp_text)     | Language detection, classification, embedding, proofreading, and summarization                                                 |
 | [`mp_audio`](packages/mp_audio)   | Audio-clip and streaming classification                                                                                        |
-| [`mp_genai`](packages/mp_genai)   | Stateful, multimodal LLM inference and streaming generation                                                                    |
+| [`mp_genai`](packages/mp_genai)   | LLM inference, Android function calling, RAG, and image generation                                                             |
 
-The six packages are one MonoChange release group and always share a version.
-The workspace has six public packages. They are versioned and released together
-with MonoChange.
+The six packages form one MonoChange release group and always share a version.
 
 ## Quick start
 

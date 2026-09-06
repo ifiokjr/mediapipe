@@ -5,8 +5,11 @@ import 'dart:typed_data';
 import 'package:mp_core/mp_core.dart';
 import 'package:mp_core/web.dart';
 
+import 'function_calling.dart';
+import 'image_generator.dart';
 import 'llm_inference.dart';
 import 'options.dart';
+import 'rag.dart';
 import 'runtime.dart';
 
 final WebTaskAssets _defaultAssets = WebTaskAssets(
@@ -26,6 +29,30 @@ final class WebGenAiRuntime implements GenAiRuntime {
 
   /// Locations of the JavaScript module and Wasm files.
   final WebTaskAssets assets;
+
+  @override
+  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) async =>
+      throw const MpException(
+        MpStatus.unimplemented,
+        'MediaPipe Function Calling is available only on Android.',
+        task: 'GenerativeModel',
+      );
+
+  @override
+  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) async =>
+      throw const MpException(
+        MpStatus.unimplemented,
+        'MediaPipe Image Generator is available only on Android.',
+        task: 'ImageGenerator',
+      );
+
+  @override
+  Future<RagPipelineBackend> createRagPipeline(RagPipelineOptions options) async =>
+      throw const MpException(
+        MpStatus.unimplemented,
+        'MediaPipe RAG is available only on Android.',
+        task: 'RagPipeline',
+      );
 
   @override
   Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) async {

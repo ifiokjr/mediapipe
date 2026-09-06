@@ -1,5 +1,5 @@
 name: mp_genai
-description: Cross-platform MediaPipe generative AI tasks for Dart and Flutter.
+description: MediaPipe generative AI APIs for Flutter with Web and Android backends.
 version: 0.0.0
 repository: https://github.com/ifiokjr/mediapipe/tree/main/packages/mp_genai
 issue_tracker: https://github.com/ifiokjr/mediapipe/issues
@@ -12,13 +12,25 @@ topics:
 
 environment:
   sdk: ^3.12.0
+  flutter: ">=3.44.0"
 
 resolution: workspace
 
 dependencies:
+  flutter:
+    sdk: flutter
   meta: ^1.17.0
   mp_core: ^0.0.0
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   lints: ^6.0.0
   test: ^1.26.3
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.ifiokjr.mpgenai
+        pluginClass: MpGenAiPlugin

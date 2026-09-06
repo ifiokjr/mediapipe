@@ -192,7 +192,11 @@ class PackageGrid extends StatelessComponent {
       ),
       ('mp_text', 'packages/text', 'Detection, classification, embeddings, proofreading, and summarization.'),
       ('mp_audio', 'packages/audio', 'Clip and stream classification over immutable audio frames.'),
-      ('mp_genai', 'packages/genai', 'LLM sessions, multimodal inputs, streaming generation, and LoRA adapters.'),
+      (
+        'mp_genai',
+        'packages/genai',
+        'LLM inference plus Android function calling, RAG, and image generation.',
+      ),
     ];
     return div(classes: 'mp-package-grid', [
       for (final (String name, String href, String description) in packages)

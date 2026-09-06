@@ -18,7 +18,7 @@ The workspace contains six public packages. Depend on the package for the task f
 | Detection, landmarks, classification, embedding, or segmentation for images             | `mp_vision` |
 | Language detection, text classification, text embedding, proofreading, or summarization | `mp_text`   |
 | Audio classification                                                                    | `mp_audio`  |
-| Local LLM sessions and generation                                                       | `mp_genai`  |
+| LLM inference, function calling, RAG, or image generation                               | `mp_genai`  |
 
 ## Common API shape
 
@@ -52,7 +52,7 @@ The classic task packages expose the public MediaPipe Tasks families available t
 | `mp_vision` | Image classification and embedding, object and face detection, image and interactive segmentation, gesture recognition, and hand, pose, face, and holistic landmarks |
 | `mp_text`   | Language detection, text classification, text embedding, text proofreading, text summarization                                                                       |
 | `mp_audio`  | Audio classification for clips and timestamped frames                                                                                                                |
-| `mp_genai`  | LLM sessions, streaming generation, multimodal prompts, LoRA adapters, cloning, and sampling controls where the upstream backend supports them                       |
+| `mp_genai`  | LLM sessions and streaming; Android function calling, RAG, and diffusion image generation                                                                            |
 
 ## Runtime boundaries
 
