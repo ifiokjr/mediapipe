@@ -199,10 +199,14 @@ in
       exec = ''
         set -euo pipefail
         device_id="''${SEEKER_DEVICE_ID:-SM02E4060324957}"
+        if [ ! -f "$DEVENV_ROOT/.mp-sdk/android-arm64/manifest.json" ]; then
+          echo "Build the Android runtime first: native:build --target android-arm64" >&2
+          exit 1
+        fi
         cd packages/mp_text/example
         repo-flutter test integration_test/native_plugin_contract_test.dart -d "$device_id"
       '';
-      description = "Run native plugin contract tests on the attached Android device.";
+      description = "Run plugin and classic-runtime tests on an attached Android device.";
     };
     "test:all" = {
       exec = ''
@@ -232,12 +236,16 @@ in
       description = "Validate all pub.dev package archives.";
     };
     "native:build" = {
-      exec = "repo-dart run tool/build_native.dart";
-      description = "Build the pinned MediaPipe Tasks C runtime for the host.";
+      exec = ''repo-dart run tool/build_native.dart "$@"'';
+      description = "Build the pinned MediaPipe Tasks C runtime for a host or Android target.";
     };
     "native:package" = {
       exec = ''repo-dart run tool/package_native.dart "$@"'';
       description = "Create a deterministic, checksummed native runtime archive.";
+    };
+    "native:verify" = {
+      exec = ''repo-dart run tool/verify_native.dart "$@"'';
+      description = "Verify a native runtime manifest, checksums, and Android ELF properties.";
     };
   };
 

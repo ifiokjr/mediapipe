@@ -157,7 +157,7 @@ For stepwise execution, call `setInputs` once and then `execute`. `execute(showR
 
 ## Platform and model constraints
 
-- The Android plugin compiles against pinned MediaPipe and Google AI Edge artifacts. Model-backed Android qualification is pending.
+- The Android plugin compiles against pinned MediaPipe and Google AI Edge artifacts. Its LLM constructor is covered by a device test; successful model-backed qualification is pending.
 - The web backend implements only `LlmInference` and loads the pinned official MediaPipe GenAI JavaScript package.
 - iOS and desktop calls currently return `MpStatus.unimplemented`.
 - MediaPipe deprecated its Android LLM Inference API in favor of LiteRT-LM.

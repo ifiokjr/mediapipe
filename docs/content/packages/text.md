@@ -36,13 +36,13 @@ final proofreader = await TextProofreader.create(
 
 ## Backend availability
 
-| Task                | Web             | C runtime       | Android                           | iOS                               |
-| ------------------- | --------------- | --------------- | --------------------------------- | --------------------------------- |
-| Language detection  | Implemented     | Implemented     | C runtime planned                 | C runtime planned                 |
-| Text classification | Implemented     | Implemented     | C runtime planned                 | C runtime planned                 |
-| Text embedding      | Implemented     | Implemented     | C runtime planned                 | C runtime planned                 |
-| Text proofreading   | No upstream API | No upstream API | Plugin builds; model test pending | Plugin builds; model test pending |
-| Text summarization  | No upstream API | No upstream API | Plugin builds; model test pending | Plugin builds; model test pending |
+| Task                | Web             | C runtime       | Android                   | iOS                       |
+| ------------------- | --------------- | --------------- | ------------------------- | ------------------------- |
+| Language detection  | Implemented     | Implemented     | C packaging in validation | Planned                   |
+| Text classification | Implemented     | Implemented     | C packaging in validation | Planned                   |
+| Text embedding      | Implemented     | Implemented     | C packaging in validation | Planned                   |
+| Text proofreading   | No upstream API | No upstream API | Native constructor tested | Native constructor tested |
+| Text summarization  | No upstream API | No upstream API | Native constructor tested | Native constructor tested |
 
 Unsupported combinations fail during task creation with `MpStatus.unimplemented`.
 

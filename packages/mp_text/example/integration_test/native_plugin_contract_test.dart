@@ -47,6 +47,34 @@ void main() {
         throwsA(_nativeFailure('LlmInference')),
       );
     });
+
+    testWidgets('Android runs a classic text task through the C runtime', (
+      WidgetTester tester,
+    ) async {
+      if (defaultTargetPlatform != TargetPlatform.android) return;
+
+      final LanguageDetector detector = await LanguageDetector.create(
+        LanguageDetectorOptions(
+          baseOptions: BaseOptions(
+            modelAsset: ModelAsset.uri(
+              Uri.parse(
+                'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/text/'
+                'language_detector.tflite?generation=1782184334735649',
+              ),
+              sha256: '5f64d821110dd2a3280546e8cd59dff09547e25d5f5c9711ec3f03416414dbb2',
+            ),
+          ),
+        ),
+      );
+      addTearDown(detector.close);
+
+      final LanguageDetectorResult result = await detector.detect(
+        'This sentence is written in English.',
+      );
+
+      expect(result.topPrediction?.languageCode, startsWith('en'));
+      expect(result.topPrediction?.probability, greaterThan(0.8));
+    });
   });
 }
 

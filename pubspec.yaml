@@ -8,7 +8,7 @@ environment:
 hooks:
   user_defines:
     mp_core:
-      native_library_directory: .mp-sdk/macos-arm64
+      native_library_directory: .mp-sdk
 
 workspace:
   - packages/mp_audio

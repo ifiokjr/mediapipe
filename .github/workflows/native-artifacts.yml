@@ -35,11 +35,17 @@ jobs:
             target: linux-x64
           - runner: ubuntu-24.04-arm
             target: linux-arm64
+          - runner: ubuntu-24.04
+            target: android-arm
+          - runner: ubuntu-24.04
+            target: android-arm64
+          - runner: ubuntu-24.04
+            target: android-x64
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 75
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -48,8 +54,15 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install pinned Android NDK
+        if: startsWith(matrix.target, 'android-')
+        run: sdkmanager "ndk;28.2.13676358"
+        shell: bash
+
       - name: Build native runtime
-        run: native:build
+        env:
+          NATIVE_TARGET: ${{ matrix.target }}
+        run: native:build --target "$NATIVE_TARGET"
         shell: devenv shell bash -- -e {0}
 
       - name: Verify target and run real models
@@ -58,7 +71,10 @@ jobs:
         run: |
           set -euo pipefail
           test "$(jq -r .target ".mp-sdk/$EXPECTED_TARGET/manifest.json")" = "$EXPECTED_TARGET"
-          test:native
+          native:verify --target "$EXPECTED_TARGET"
+          if [[ "$EXPECTED_TARGET" != android-* ]]; then
+            test:native
+          fi
         shell: devenv shell bash -- -e {0}
 
       - name: Package native runtime
@@ -87,7 +103,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Check out main
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -129,7 +145,7 @@ jobs:
             dist/*.zip.sha256 \
             --target "$GITHUB_SHA" \
             --title "$NATIVE_RELEASE" \
-            --notes "Checksummed MediaPipe Tasks C runtime archives for MP desktop build hooks. Built from the tagged repository source and tested with real text and vision models." \
+            --notes "Checksummed MediaPipe Tasks C runtime archives for MP native build hooks. Built from the tagged repository source and verified per target." \
             --latest=false
         shell: bash
 
