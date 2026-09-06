@@ -610,15 +610,21 @@ class MpGenAiPlugin :
                 backend = initializedBackend
                 val model =
                     when {
-                        tools.isNotEmpty() ->
+                        tools.isNotEmpty() -> {
                             GenerativeModel(
                                 initializedBackend,
                                 systemInstruction ?: Content.getDefaultInstance(),
                                 tools,
                             )
-                        systemInstruction != null ->
+                        }
+
+                        systemInstruction != null -> {
                             GenerativeModel(initializedBackend, systemInstruction)
-                        else -> GenerativeModel(initializedBackend)
+                        }
+
+                        else -> {
+                            GenerativeModel(initializedBackend)
+                        }
                     }
                 val handle = nextHandle.getAndIncrement()
                 functionModels[handle] = FunctionModelHolder(model, initializedBackend)
@@ -842,7 +848,9 @@ class MpGenAiPlugin :
                 val vectorStore: VectorStore<String> = vectorStoreOptions.toVectorStore()
                 val memory = DefaultSemanticTextMemory(vectorStore, embedder)
                 languageModel = MediaPipeLlmBackend(applicationContext, llmOptions, sessionOptions)
-                check(languageModel.initialize().get()) { "MediaPipe could not initialize the RAG LLM" }
+                check(
+                    languageModel.initialize().get(),
+                ) { "MediaPipe could not initialize the RAG LLM" }
                 val chain =
                     RetrievalAndInferenceChain(
                         ChainConfig.create(
@@ -1050,11 +1058,17 @@ class MpGenAiPlugin :
         requestId: String,
         error: Throwable,
     ) {
+        val code =
+            if (error is java.util.concurrent.CancellationException) {
+                "cancelled"
+            } else {
+                "internal"
+            }
         emit(
             mapOf(
                 "kind" to "error",
                 "requestId" to requestId,
-                "code" to if (error is java.util.concurrent.CancellationException) "cancelled" else "internal",
+                "code" to code,
                 "message" to error.safeMessage(),
             ),
         )
@@ -1105,20 +1119,30 @@ class MpGenAiPlugin :
         val tokenizerPath = optionalStringValue("tokenizerPath")
         val useGpu = requiredBoolean("useGpu")
         return when (requiredString("kind")) {
-            "gecko" -> GeckoEmbeddingModel(modelPath, Optional.ofNullable(tokenizerPath), useGpu)
-            "gemma" ->
+            "gecko" -> {
+                GeckoEmbeddingModel(modelPath, Optional.ofNullable(tokenizerPath), useGpu)
+            }
+
+            "gemma" -> {
                 GemmaEmbeddingModel(
                     modelPath,
                     requireNotNull(tokenizerPath) { "Gemma embedding requires tokenizerPath" },
                     useGpu,
                 )
-            else -> throw IllegalArgumentException("Unknown RAG embedding model")
+            }
+
+            else -> {
+                throw IllegalArgumentException("Unknown RAG embedding model")
+            }
         }
     }
 
     private fun Map<String, Any?>.toVectorStore(): VectorStore<String> =
         when (requiredString("kind")) {
-            "memory" -> DefaultVectorStore()
+            "memory" -> {
+                DefaultVectorStore()
+            }
+
             "sqlite" -> {
                 val dimensions = requiredInt("embeddingDimensions")
                 val databasePath = requiredString("databasePath")
@@ -1145,7 +1169,10 @@ class MpGenAiPlugin :
                     )
                 }
             }
-            else -> throw IllegalArgumentException("Unknown RAG vector store")
+
+            else -> {
+                throw IllegalArgumentException("Unknown RAG vector store")
+            }
         }
 
     private fun Map<String, Any?>.toSqliteColumn(): ColumnConfig =
@@ -1279,7 +1306,8 @@ class MpGenAiPlugin :
             else -> throw IllegalArgumentException("Unknown conditionType: $this")
         }
 
-    private fun MethodCall.optionalImage(): OwnedMpImage? = argument<Map<String, Any?>>("image")?.toOwnedMpImage()
+    private fun MethodCall.optionalImage(): OwnedMpImage? =
+        argument<Map<String, Any?>>("image")?.toOwnedMpImage()
 
     private fun MethodCall.requiredImage(): OwnedMpImage =
         argument<Map<String, Any?>>("image")?.toOwnedMpImage()
@@ -1333,7 +1361,10 @@ class MpGenAiPlugin :
         argument<String>(name)?.takeIf { it.isNotEmpty() }
             ?: throw IllegalArgumentException("$name must be a non-empty string")
 
-    private fun MethodCall.optionalString(name: String): String? = argument<String>(name)?.takeIf { it.isNotEmpty() }
+    private fun MethodCall.optionalString(name: String): String? =
+        argument<String>(name)?.takeIf {
+            it.isNotEmpty()
+        }
 
     private fun MethodCall.requiredLong(name: String): Long =
         argument<Number>(name)?.toLong()
@@ -1408,8 +1439,11 @@ class MpGenAiPlugin :
     private fun Map<String, Any?>.toPart(): Part {
         val builder = Part.newBuilder()
         when (requiredString("kind")) {
-            "text" -> builder.setText(requiredString("text"))
-            "functionCall" ->
+            "text" -> {
+                builder.setText(requiredString("text"))
+            }
+
+            "functionCall" -> {
                 builder.setFunctionCall(
                     FunctionCall
                         .newBuilder()
@@ -1417,7 +1451,9 @@ class MpGenAiPlugin :
                         .setArgs(requiredMapValue("value").toStruct())
                         .build(),
                 )
-            "functionResponse" ->
+            }
+
+            "functionResponse" -> {
                 builder.setFunctionResponse(
                     FunctionResponse
                         .newBuilder()
@@ -1425,7 +1461,11 @@ class MpGenAiPlugin :
                         .setResponse(requiredMapValue("value").toStruct())
                         .build(),
                 )
-            else -> throw IllegalArgumentException("Unknown function content part")
+            }
+
+            else -> {
+                throw IllegalArgumentException("Unknown function content part")
+            }
         }
         return builder.build()
     }
@@ -1494,14 +1534,16 @@ class MpGenAiPlugin :
     private fun Map<String, Any?>.toConstraintOptions(): ConstraintOptions {
         val builder = ConstraintOptions.newBuilder()
         when (requiredString("kind")) {
-            "toolCallOnly" ->
+            "toolCallOnly" -> {
                 builder.setToolCallOnly(
                     ConstraintOptions.ToolCallOnly
                         .newBuilder()
                         .setConstraintPrefix(requiredStringValue("prefix"))
                         .setConstraintSuffix(requiredStringValue("suffix")),
                 )
-            "textAndOr" ->
+            }
+
+            "textAndOr" -> {
                 builder.setTextAndOr(
                     ConstraintOptions.TextAndOr
                         .newBuilder()
@@ -1509,14 +1551,20 @@ class MpGenAiPlugin :
                         .setStopPhraseSuffix(requiredStringValue("stopPhraseSuffix"))
                         .setConstraintSuffix(requiredStringValue("constraintSuffix")),
                 )
-            "textUntil" ->
+            }
+
+            "textUntil" -> {
                 builder.setTextUntil(
                     ConstraintOptions.TextUntil
                         .newBuilder()
                         .setStopPhrase(requiredString("stopPhrase"))
                         .setConstraintSuffix(requiredStringValue("constraintSuffix")),
                 )
-            else -> throw IllegalArgumentException("Unknown function-calling constraint")
+            }
+
+            else -> {
+                throw IllegalArgumentException("Unknown function-calling constraint")
+            }
         }
         return builder.build()
     }
@@ -1532,20 +1580,29 @@ class MpGenAiPlugin :
 
     private fun Part.toDartPart(): Map<String, Any?> =
         when (dataCase) {
-            Part.DataCase.TEXT -> mapOf("kind" to "text", "text" to text)
-            Part.DataCase.FUNCTION_CALL ->
+            Part.DataCase.TEXT -> {
+                mapOf("kind" to "text", "text" to text)
+            }
+
+            Part.DataCase.FUNCTION_CALL -> {
                 mapOf(
                     "kind" to "functionCall",
                     "name" to functionCall.name,
                     "value" to functionCall.args.toDartMap(),
                 )
-            Part.DataCase.FUNCTION_RESPONSE ->
+            }
+
+            Part.DataCase.FUNCTION_RESPONSE -> {
                 mapOf(
                     "kind" to "functionResponse",
                     "name" to functionResponse.name,
                     "value" to functionResponse.response.toDartMap(),
                 )
-            else -> throw IllegalStateException("MediaPipe returned an empty content part")
+            }
+
+            else -> {
+                throw IllegalStateException("MediaPipe returned an empty content part")
+            }
         }
 
     private fun Map<String, Any?>.requiredMapValue(name: String): Map<String, Any?> =
@@ -1562,9 +1619,11 @@ class MpGenAiPlugin :
         this[name] as? List<String>
             ?: throw IllegalArgumentException("$name must be a string list")
 
-    private fun Map<String, Any?>.optionalLong(name: String): Long? = (this[name] as? Number)?.toLong()
+    private fun Map<String, Any?>.optionalLong(name: String): Long? =
+        (this[name] as? Number)?.toLong()
 
-    private fun Map<String, Any?>.optionalDouble(name: String): Double? = (this[name] as? Number)?.toDouble()
+    private fun Map<String, Any?>.optionalDouble(name: String): Double? =
+        (this[name] as? Number)?.toDouble()
 
     private fun Map<String, Any?>.toStruct(): Struct {
         val builder = Struct.newBuilder()
@@ -1575,30 +1634,50 @@ class MpGenAiPlugin :
     private fun Any?.toProtoValue(): Value {
         val builder = Value.newBuilder()
         when (this) {
-            null -> builder.setNullValue(NullValue.NULL_VALUE)
-            is Boolean -> builder.setBoolValue(this)
-            is String -> builder.setStringValue(this)
-            is Number -> builder.setNumberValue(toDouble())
-            is List<*> ->
+            null -> {
+                builder.setNullValue(NullValue.NULL_VALUE)
+            }
+
+            is Boolean -> {
+                builder.setBoolValue(this)
+            }
+
+            is String -> {
+                builder.setStringValue(this)
+            }
+
+            is Number -> {
+                builder.setNumberValue(toDouble())
+            }
+
+            is List<*> -> {
                 builder.setListValue(
                     ListValue.newBuilder().addAllValues(map { it.toProtoValue() }),
                 )
+            }
+
             is Map<*, *> -> {
                 val values =
                     entries.associate { entry ->
                         val key =
                             entry.key as? String
-                                ?: throw IllegalArgumentException("JSON object keys must be strings")
+                                ?: throw IllegalArgumentException(
+                                    "JSON object keys must be strings",
+                                )
                         key to entry.value
                     }
                 builder.setStructValue(values.toStruct())
             }
-            else -> throw IllegalArgumentException("Value is not JSON-compatible")
+
+            else -> {
+                throw IllegalArgumentException("Value is not JSON-compatible")
+            }
         }
         return builder.build()
     }
 
-    private fun Struct.toDartMap(): Map<String, Any?> = fieldsMap.mapValues { it.value.toDartValue() }
+    private fun Struct.toDartMap(): Map<String, Any?> =
+        fieldsMap.mapValues { it.value.toDartValue() }
 
     private fun Value.toDartValue(): Any? =
         when (kindCase) {

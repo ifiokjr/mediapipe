@@ -1,0 +1,36 @@
+strict: true
+
+opt_in_rules:
+  - array_init
+  - async_without_await
+  - discarded_notification_center_observer
+  - empty_count
+  - empty_string
+  - fallthrough
+  - first_where
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - last_where
+  - legacy_multiple
+  - lower_acl_than_parent
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - unowned_variable_capture
+  - weak_delegate
+  - yoda_condition
+
+trailing_comma:
+  mandatory_comma: true
+
+opening_brace:
+  ignore_multiline_function_signatures: true
+
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+type_body_length:
+  warning: 400
+  error: 500

@@ -2,11 +2,29 @@
   "$schema": "https://dprint.dev/schemas/v0.json",
   "excludes": [
     "**/.dart_tool/**",
+    "**/.fvm/**",
+    "**/Pods/**",
     "**/build/**",
     "**/*.g.dart",
     "**/*.jaspr.dart",
     "devenv.lock"
   ],
+  "exec": {
+    "commands": [
+      {
+        "cacheKeyFiles": [".editorconfig", "devenv.lock"],
+        "command": "ktlint --format --ignore-autocorrect-failures --stdin --stdin-path={{file_path}} --editorconfig=.editorconfig --log-level=none",
+        "exts": ["kt", "kts"]
+      },
+      {
+        "cacheKeyFiles": [".swift-format", "devenv.lock"],
+        "command": "repo-swift-format format --configuration .swift-format --assume-filename {{file_path}} --no-color-diagnostics",
+        "exts": ["swift"]
+      }
+    ],
+    "cwd": "${configDir}",
+    "timeout": 60
+  },
   "incremental": true,
   "json": {},
   "markdown": {},
@@ -14,7 +32,8 @@
     "https://plugins.dprint.dev/json-0.23.0.wasm",
     "https://plugins.dprint.dev/markdown-0.23.3.wasm",
     "https://plugins.dprint.dev/toml-0.8.0.wasm",
-    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.6.0.wasm"
+    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.6.0.wasm",
+    "https://plugins.dprint.dev/exec-0.7.3.json@a7898d5f1897e77bff474cec3d948c3ec3a7f455e32de2cc60c8adb9a5dd24aa"
   ],
   "toml": {},
   "yaml": {}

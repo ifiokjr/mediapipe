@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 
+private typealias DartCorrection = Map<String, String>
+
 /** Android implementation of the mobile-only MediaPipe text generation tasks. */
 class MpTextPlugin :
     FlutterPlugin,
@@ -71,9 +73,16 @@ class MpTextPlugin :
         val maxTokens = call.optionalInt("maxTokens")
         executor.execute {
             try {
-                val options = TextProofreader.TextProofreaderOptions.builder().setModelPath(modelPath)
+                val options =
+                    TextProofreader.TextProofreaderOptions.builder().setModelPath(
+                        modelPath,
+                    )
                 maxTokens?.let(options::setMaxNumTokens)
-                val proofreader = TextProofreader.createFromOptions(applicationContext, options.build())
+                val proofreader =
+                    TextProofreader.createFromOptions(
+                        applicationContext,
+                        options.build(),
+                    )
                 val handle = nextHandle.getAndIncrement()
                 proofreaders[handle] = proofreader
                 result.successOnMain(handle)
@@ -189,7 +198,11 @@ class MpTextPlugin :
                         .setModelPath(modelPath)
                         .setMode(mode)
                 maxTokens?.let(options::setMaxNumTokens)
-                val summarizer = TextSummarizer.createFromOptions(applicationContext, options.build())
+                val summarizer =
+                    TextSummarizer.createFromOptions(
+                        applicationContext,
+                        options.build(),
+                    )
                 val handle = nextHandle.getAndIncrement()
                 summarizers[handle] = summarizer
                 result.successOnMain(handle)
@@ -350,7 +363,7 @@ class MpTextPlugin :
 
     private fun Throwable.safeMessage(): String = message ?: javaClass.simpleName
 
-    private fun List<TextProofreaderResult.Correction>.toDartCorrections(): List<Map<String, String>> =
+    private fun List<TextProofreaderResult.Correction>.toDartCorrections(): List<DartCorrection> =
         map { correction ->
             mapOf(
                 "type" to correction.type.name.lowercase(),

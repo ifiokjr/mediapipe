@@ -7,11 +7,7 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
   private static let methodChannelName = "dev.ifiokjr.mp_text/methods"
   private static let eventChannelName = "dev.ifiokjr.mp_text/events"
 
-  private let worker = DispatchQueue(
-    label: "dev.ifiokjr.mp_text.worker",
-    qos: .userInitiated,
-    attributes: .concurrent
-  )
+  private let worker = DispatchQueue(label: "dev.ifiokjr.mp_text.worker", qos: .userInitiated, attributes: .concurrent)
   private let lock = NSLock()
   private var nextHandle: Int64 = 1
   private var proofreaders: [Int64: TextProofreader] = [:]
@@ -21,14 +17,8 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
   private var eventChannel: FlutterEventChannel?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let methodChannel = FlutterMethodChannel(
-      name: methodChannelName,
-      binaryMessenger: registrar.messenger()
-    )
-    let eventChannel = FlutterEventChannel(
-      name: eventChannelName,
-      binaryMessenger: registrar.messenger()
-    )
+    let methodChannel = FlutterMethodChannel(name: methodChannelName, binaryMessenger: registrar.messenger())
+    let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: registrar.messenger())
     let instance = MpTextPlugin()
     instance.methodChannel = methodChannel
     instance.eventChannel = eventChannel
@@ -39,32 +29,20 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     do {
       switch call.method {
-      case "proofreader.create":
-        try createProofreader(call, result: result)
-      case "proofreader.proofread":
-        try proofread(call, result: result)
-      case "proofreader.stream":
-        try proofreadStreaming(call, result: result)
-      case "proofreader.close":
-        try closeProofreader(call, result: result)
-      case "summarizer.create":
-        try createSummarizer(call, result: result)
-      case "summarizer.summarize":
-        try summarize(call, result: result)
-      case "summarizer.stream":
-        try summarizeStreaming(call, result: result)
-      case "summarizer.close":
-        try closeSummarizer(call, result: result)
-      default:
-        result(FlutterMethodNotImplemented)
+      case "proofreader.create": try createProofreader(call, result: result)
+      case "proofreader.proofread": try proofread(call, result: result)
+      case "proofreader.stream": try proofreadStreaming(call, result: result)
+      case "proofreader.close": try closeProofreader(call, result: result)
+      case "summarizer.create": try createSummarizer(call, result: result)
+      case "summarizer.summarize": try summarize(call, result: result)
+      case "summarizer.stream": try summarizeStreaming(call, result: result)
+      case "summarizer.close": try closeSummarizer(call, result: result)
+      default: result(FlutterMethodNotImplemented)
       }
-    } catch {
-      result(flutterError(error, code: "invalid_argument"))
-    }
+    } catch { result(flutterError(error, code: "invalid_argument")) }
   }
 
-  private func createProofreader(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws
-  {
+  private func createProofreader(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
     let arguments = try call.argumentsMap()
     let modelPath = try arguments.requiredString("modelPath")
     let maxTokens = arguments.optionalInt("maxTokens")
@@ -82,9 +60,7 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
           return handle
         }
         complete(result, value: handle)
-      } catch {
-        complete(result, error: error)
-      }
+      } catch { complete(result, error: error) }
     }
   }
 
@@ -99,23 +75,12 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
       guard let self else { return }
       do {
         let output = try proofreader.proofread(text: text)
-        complete(
-          result,
-          value: [
-            "text": output.proofreadText,
-            "corrections": output.corrections.map(correctionMap),
-          ]
-        )
-      } catch {
-        complete(result, error: error)
-      }
+        complete(result, value: ["text": output.proofreadText, "corrections": output.corrections.map(correctionMap)])
+      } catch { complete(result, error: error) }
     }
   }
 
-  private func proofreadStreaming(
-    _ call: FlutterMethodCall,
-    result: @escaping FlutterResult
-  ) throws {
+  private func proofreadStreaming(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
     try requireEventSink()
     let arguments = try call.argumentsMap()
     let handle = try arguments.requiredInt64("handle")
@@ -135,18 +100,13 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
           }
           guard let output else { return }
           emit([
-            "kind": "data",
-            "requestId": requestId,
-            "text": output.chunk,
-            "isDone": output.done,
+            "kind": "data", "requestId": requestId, "text": output.chunk, "isDone": output.done,
             "corrections": output.corrections?.map(correctionMap) as Any,
           ])
           if output.done { emitDone(requestId: requestId) }
         }
         complete(result, value: nil)
-      } catch {
-        complete(result, error: error)
-      }
+      } catch { complete(result, error: error) }
     }
   }
 
@@ -160,9 +120,7 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
       do {
         try proofreader.close()
         complete(result, value: nil)
-      } catch {
-        complete(result, error: error)
-      }
+      } catch { complete(result, error: error) }
     }
   }
 
@@ -191,9 +149,7 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
           return handle
         }
         complete(result, value: handle)
-      } catch {
-        complete(result, error: error)
-      }
+      } catch { complete(result, error: error) }
     }
   }
 
@@ -206,18 +162,13 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     }
     worker.async { [weak self] in
       guard let self else { return }
-      do {
-        complete(result, value: ["summary": try summarizer.summarize(text: text).summary])
-      } catch {
+      do { complete(result, value: ["summary": try summarizer.summarize(text: text).summary]) } catch {
         complete(result, error: error)
       }
     }
   }
 
-  private func summarizeStreaming(
-    _ call: FlutterMethodCall,
-    result: @escaping FlutterResult
-  ) throws {
+  private func summarizeStreaming(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
     try requireEventSink()
     let arguments = try call.argumentsMap()
     let handle = try arguments.requiredInt64("handle")
@@ -236,18 +187,11 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
           }
           guard let output else { return }
-          emit([
-            "kind": "data",
-            "requestId": requestId,
-            "text": output.chunk,
-            "isDone": output.done,
-          ])
+          emit(["kind": "data", "requestId": requestId, "text": output.chunk, "isDone": output.done])
           if output.done { emitDone(requestId: requestId) }
         }
         complete(result, value: nil)
-      } catch {
-        complete(result, error: error)
-      }
+      } catch { complete(result, error: error) }
     }
   }
 
@@ -261,16 +205,11 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
       do {
         try summarizer.close()
         complete(result, value: nil)
-      } catch {
-        complete(result, error: error)
-      }
+      } catch { complete(result, error: error) }
     }
   }
 
-  public func onListen(
-    withArguments arguments: Any?,
-    eventSink events: @escaping FlutterEventSink
-  ) -> FlutterError? {
+  public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
     withLock { eventSink = events }
     return nil
   }
@@ -298,8 +237,7 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
   private func requireEventSink() throws {
     guard withLock({ eventSink != nil }) else {
-      throw PluginError.invalidArgument(
-        "Listen to the mp_text event channel before starting a stream")
+      throw PluginError.invalidArgument("Listen to the mp_text event channel before starting a stream")
     }
   }
 
@@ -312,21 +250,12 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
   }
 
   private func emitError(requestId: String, error: Error) {
-    emit([
-      "kind": "error",
-      "requestId": requestId,
-      "code": "internal",
-      "message": error.localizedDescription,
-    ])
+    emit(["kind": "error", "requestId": requestId, "code": "internal", "message": error.localizedDescription])
   }
 
-  private func emitDone(requestId: String) {
-    emit(["kind": "done", "requestId": requestId])
-  }
+  private func emitDone(requestId: String) { emit(["kind": "done", "requestId": requestId]) }
 
-  private func complete(_ result: @escaping FlutterResult, value: Any?) {
-    DispatchQueue.main.async { result(value) }
-  }
+  private func complete(_ result: @escaping FlutterResult, value: Any?) { DispatchQueue.main.async { result(value) } }
 
   private func complete(_ result: @escaping FlutterResult, error: Error) {
     DispatchQueue.main.async { result(self.flutterError(error, code: "internal")) }
@@ -366,9 +295,7 @@ private enum PluginError: LocalizedError {
 
 extension FlutterMethodCall {
   fileprivate func argumentsMap() throws -> [String: Any] {
-    guard let value = arguments as? [String: Any] else {
-      throw PluginError.invalidArgument("Arguments must be a map")
-    }
+    guard let value = arguments as? [String: Any] else { throw PluginError.invalidArgument("Arguments must be a map") }
     return value
   }
 }
@@ -382,13 +309,9 @@ extension Dictionary where Key == String, Value == Any {
   }
 
   fileprivate func requiredInt64(_ key: String) throws -> Int64 {
-    guard let value = self[key] as? NSNumber else {
-      throw PluginError.invalidArgument("\(key) must be an integer")
-    }
+    guard let value = self[key] as? NSNumber else { throw PluginError.invalidArgument("\(key) must be an integer") }
     return value.int64Value
   }
 
-  fileprivate func optionalInt(_ key: String) -> Int? {
-    (self[key] as? NSNumber)?.intValue
-  }
+  fileprivate func optionalInt(_ key: String) -> Int? { (self[key] as? NSNumber)?.intValue }
 }

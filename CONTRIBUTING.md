@@ -36,10 +36,16 @@ the group.
 Before requesting review, run:
 
 ```sh
+devenv shell fix:format
 devenv shell lint:all
 devenv shell test:all
 devenv shell package:check
 ```
+
+`fix:format` runs Dart formatters and dprint. The dprint exec plugin delegates
+tracked Kotlin files to ktlint's formatter and Swift files to `swift-format`.
+`lint:all` separately runs ktlint and SwiftLint so non-formatting violations
+also fail locally and in CI.
 
 Generated FFI bindings must be reproducible from the pinned upstream tag. Never
 edit `bindings.g.dart` manually. Model binaries, credentials, and local native
