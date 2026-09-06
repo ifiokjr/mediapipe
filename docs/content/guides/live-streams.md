@@ -15,8 +15,8 @@ Its `submittedCount`, `processedCount`, `droppedCount`, and `failedCount` values
 
 ## Respect platform semantics
 
-- Native vision runtimes use real asynchronous callbacks only after copying all result memory before callback return.
-- Web vision uses serialized video calls because the JavaScript Tasks API has no live mode.
+- Native and web vision currently serialize calls through their video APIs, then copy each result before publishing it on `results`.
+- Native callback entry points remain disabled until the bridge can copy callback-owned memory safely from native worker threads.
 - Web audio treats each chunk as an independent clip and adjusts its timestamp.
 - Native audio stream mode remains unavailable until the callback-copy bridge is complete.
 
