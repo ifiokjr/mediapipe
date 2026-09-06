@@ -38,12 +38,75 @@ Future<void> main(List<String> arguments) async {
           verifyAndroidElf(bytes, architecture: target.architecture, name: entry.key);
         }
       }
+      await _verifyTaskExports(
+        File.fromUri(directory.uri.resolve(target.libraryName)),
+        target: target,
+      );
       stdout.writeln('Verified ${libraryValues.length} libraries for ${target.name}.');
       return;
     }
     throw const FormatException('Invalid native artifact manifest.');
   }
   throw const FormatException('Usage: verify_native.dart --target <os-architecture>');
+}
+
+const Set<String> _requiredTaskExports = <String>{
+  'MpAudioClassifierCreate',
+  'MpFaceDetectorCreate',
+  'MpFaceLandmarkerCreate',
+  'MpGestureRecognizerCreate',
+  'MpHandLandmarkerCreate',
+  'MpHolisticLandmarkerCreate',
+  'MpImageClassifierCreate',
+  'MpImageEmbedderCreate',
+  'MpImageSegmenterCreate',
+  'MpInteractiveSegmenterLegacyCreate',
+  'MpLanguageDetectorCreate',
+  'MpObjectDetectorCreate',
+  'MpPoseLandmarkerCreate',
+  'MpTextClassifierCreate',
+  'MpTextEmbedderCreate',
+};
+
+Future<void> _verifyTaskExports(File library, {required NativeTarget target}) async {
+  if (target.os == 'windows') return;
+  final List<String> arguments = <String>[
+    if (target.os != 'macos') '--dynamic',
+    '--defined-only',
+    '--extern-only',
+    library.path,
+  ];
+  final ProcessResult result = await Process.run('llvm-nm', arguments);
+  if (result.exitCode != 0) {
+    throw ProcessException(
+      'llvm-nm',
+      arguments,
+      'Could not inspect native exports: ${result.stderr}',
+      result.exitCode,
+    );
+  }
+  final Set<String> symbols = LineSplitter.split(result.stdout as String)
+      .map((String line) => line.trim().split(RegExp(r'\s+')).last)
+      .map((String symbol) => symbol.split('@').first)
+      .map(
+        (String symbol) =>
+            target.os == 'macos' && symbol.startsWith('_') ? symbol.substring(1) : symbol,
+      )
+      .toSet();
+  final Set<String> missing = _requiredTaskExports.difference(symbols);
+  if (missing.isNotEmpty) {
+    throw StateError(
+      '${target.libraryName} does not export: ${(missing.toList()..sort()).join(', ')}.',
+    );
+  }
+  if (target.isAndroid) {
+    final List<String> cxxExports = symbols
+        .where((String symbol) => symbol.startsWith('_Z'))
+        .toList();
+    if (cxxExports.isNotEmpty) {
+      throw StateError('${target.libraryName} exposes C++ implementation symbols.');
+    }
+  }
 }
 
 /// Verifies the architecture and 16 KB load-segment alignment of an Android ELF.
