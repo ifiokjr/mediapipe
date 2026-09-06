@@ -1,0 +1,163 @@
+name: Native artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Immutable native runtime release tag
+        required: true
+        default: native-v1.0.0-1
+        type: string
+      publish:
+        description: Publish assets and open the checksum-catalog PR
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-artifacts-${{ inputs.release }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: macos-arm64
+          - runner: macos-15-intel
+            target: macos-x64
+          - runner: ubuntu-24.04
+            target: linux-x64
+          - runner: ubuntu-24.04-arm
+            target: linux-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build native runtime
+        run: native:build
+        shell: devenv shell bash -- -e {0}
+
+      - name: Verify target and run real models
+        env:
+          EXPECTED_TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          test "$(jq -r .target ".mp-sdk/$EXPECTED_TARGET/manifest.json")" = "$EXPECTED_TARGET"
+          test:native
+        shell: devenv shell bash -- -e {0}
+
+      - name: Package native runtime
+        env:
+          NATIVE_TARGET: ${{ matrix.target }}
+        run: native:package --target "$NATIVE_TARGET"
+        shell: devenv shell bash -- -e {0}
+
+      - name: Upload native runtime
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: native-${{ matrix.target }}
+          path: |
+            dist/mediapipe-v1.0.0-${{ matrix.target }}.zip
+            dist/mediapipe-v1.0.0-${{ matrix.target }}.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    if: inputs.publish && github.ref == 'refs/heads/main' && github.repository == 'ifiokjr/mediapipe'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out main
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download native runtimes
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          pattern: native-*
+          path: dist
+          merge-multiple: true
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate release tag
+        env:
+          NATIVE_RELEASE: ${{ inputs.release }}
+        run: |
+          if [[ ! "$NATIVE_RELEASE" =~ ^native-v1\.0\.0-[0-9]+$ ]]; then
+            echo "::error::Unexpected native release tag '$NATIVE_RELEASE'."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Publish immutable native assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NATIVE_RELEASE: ${{ inputs.release }}
+        run: |
+          set -euo pipefail
+          if gh release view "$NATIVE_RELEASE" >/dev/null 2>&1; then
+            echo "::error::Native release $NATIVE_RELEASE already exists; assets are immutable."
+            exit 1
+          fi
+          gh release create "$NATIVE_RELEASE" \
+            dist/*.zip \
+            dist/*.zip.sha256 \
+            --target "$GITHUB_SHA" \
+            --title "$NATIVE_RELEASE" \
+            --notes "Checksummed MediaPipe Tasks C runtime archives for MP desktop build hooks. Built from the tagged repository source and tested with real text and vision models." \
+            --latest=false
+        shell: bash
+
+      - name: Generate checksum catalog
+        env:
+          NATIVE_RELEASE: ${{ inputs.release }}
+        run: repo-dart run tool/update_native_catalog.dart --release "$NATIVE_RELEASE" --artifacts dist
+        shell: devenv shell -- bash -e {0}
+
+      - name: Open checksum-catalog PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NATIVE_RELEASE: ${{ inputs.release }}
+        run: |
+          set -euo pipefail
+          branch="chore/native-artifacts-${NATIVE_RELEASE#native-}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add packages/mp_core/hook/native_artifacts.json
+          git commit -m "chore: register $NATIVE_RELEASE artifacts"
+          gh auth setup-git
+          git push origin "$branch"
+          body='Registers the immutable desktop runtime URLs and SHA-256 digests produced by the Native artifacts workflow.'
+          body="${body}"$'\n\n''Created on behalf of Ifiok Jr. (@ifiokjr) with Codex (GPT-5, high reasoning).'
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "chore: register $NATIVE_RELEASE artifacts" \
+            --body "$body"
+        shell: bash

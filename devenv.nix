@@ -226,6 +226,10 @@ in
       exec = "repo-dart run tool/build_native.dart";
       description = "Build the pinned MediaPipe Tasks C runtime for the host.";
     };
+    "native:package" = {
+      exec = ''repo-dart run tool/package_native.dart "$@"'';
+      description = "Create a deterministic, checksummed native runtime archive.";
+    };
   };
 
   git-hooks = lib.mkIf (!isCI) {

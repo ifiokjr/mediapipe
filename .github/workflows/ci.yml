@@ -177,6 +177,37 @@ jobs:
         run: test:native
         shell: devenv shell bash -- -e {0}
 
+  native-linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the classic native runtime
+        run: native:build
+        shell: devenv shell bash -- -e {0}
+
+      - name: Verify native artifact manifest
+        run: |
+          set -euo pipefail
+          test -f .mp-sdk/linux-x64/manifest.json
+          jq -e '.mediaPipeVersion == "v1.0.0" and (.libraries | length > 1)' \
+            .mp-sdk/linux-x64/manifest.json
+          ldd .mp-sdk/linux-x64/libmediapipe.so
+        shell: devenv shell bash -- -e {0}
+
+      - name: Run native model integration
+        run: test:native
+        shell: devenv shell bash -- -e {0}
+
   security:
     runs-on: ubuntu-latest
     timeout-minutes: 5
