@@ -147,7 +147,10 @@ jobs:
         shell: devenv shell bash -- -e {0}
 
   native-macos:
-    runs-on: macos-14
+    # OpenCV 3.4's ARM feature probes fail with the macOS 14 runner's older
+    # SDK/toolchain combination. This matches the runner used to publish the
+    # macOS ARM native artifact.
+    runs-on: macos-15
     timeout-minutes: 60
     steps:
       - name: Check out repository
