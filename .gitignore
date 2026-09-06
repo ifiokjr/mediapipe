@@ -35,5 +35,5 @@ devenv.local.nix
 *.iml
 
 # Release artifacts
-.monochange/
+.monochange/local/
 publish-*.json
