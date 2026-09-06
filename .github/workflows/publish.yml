@@ -21,8 +21,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  schedule:
+    name: Dispatch the scheduled publishing batch
+    if: github.repository == 'ifiokjr/mediapipe' && github.event_name == 'schedule'
+    permissions:
+      actions: write # Dispatch the OIDC-eligible workflow_dispatch run.
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch protected publishing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run publish.yml --repo "$GITHUB_REPOSITORY" --ref main
+        shell: bash
+
   publish:
-    if: github.repository == 'ifiokjr/mediapipe'
+    if: github.repository == 'ifiokjr/mediapipe' && github.event_name == 'workflow_dispatch'
     environment: publisher
     permissions:
       contents: write

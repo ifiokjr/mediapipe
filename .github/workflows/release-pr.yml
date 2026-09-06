@@ -128,6 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
+      actions: write # Dispatch publish.yml after creating release tags.
       contents: write
     steps:
       - name: Check out repository
@@ -165,4 +166,32 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: monochange step publish-release --from-ref HEAD --draft --format json
+        shell: devenv shell -- bash -e {0}
+
+      - name: Dispatch protected package publishing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          release_record="$RUNNER_TEMP/release-record.json"
+          monochange step release-record --from HEAD --format json > "$release_record"
+
+          mapfile -t release_tags < <(
+            jq -r '.record.release_targets[] | select(.tag == true) | .tag_name' "$release_record"
+          )
+          if [ "${#release_tags[@]}" -eq 0 ]; then
+            echo "::error::The release record does not contain a publishable tag."
+            exit 1
+          fi
+
+          for tag in "${release_tags[@]}"; do
+            if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::Refusing to dispatch unexpected release tag '$tag'."
+              exit 1
+            fi
+            gh workflow run publish.yml \
+              --repo "$GITHUB_REPOSITORY" \
+              --ref main \
+              --field "tag=$tag"
+          done
         shell: devenv shell -- bash -e {0}
