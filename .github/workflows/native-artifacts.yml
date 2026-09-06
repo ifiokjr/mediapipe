@@ -56,7 +56,10 @@ jobs:
 
       - name: Install pinned Android NDK
         if: startsWith(matrix.target, 'android-')
-        run: sdkmanager "ndk;28.2.13676358"
+        run: |
+          set -euo pipefail
+          android_sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          "$android_sdk/cmdline-tools/latest/bin/sdkmanager" "ndk;28.2.13676358"
         shell: bash
 
       - name: Build native runtime

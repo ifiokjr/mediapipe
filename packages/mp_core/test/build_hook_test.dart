@@ -7,10 +7,9 @@ import 'package:test/test.dart';
 import '../hook/build.dart' as build_hook;
 
 void main() {
-  test('tracks a configured local artifact root before it exists', () async {
+  test('tracks an existing ancestor before the artifact root exists', () async {
     final Directory temporary = await Directory.systemTemp.createTemp('mp-core-hook-');
     addTearDown(() => temporary.deleteSync(recursive: true));
-    final Uri artifacts = Directory.fromUri(temporary.uri.resolve('native')).uri;
 
     await testCodeBuildHook(
       mainMethod: build_hook.main,
@@ -18,7 +17,7 @@ void main() {
       targetOS: OS.current,
       userDefines: _userDefines(temporary, 'native'),
       check: (BuildInput input, BuildOutput output) {
-        expect(output.dependencies, contains(artifacts));
+        expect(output.dependencies, contains(temporary.uri));
         expect(output.assets.code, isEmpty);
       },
     );
