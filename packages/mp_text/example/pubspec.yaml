@@ -1,0 +1,22 @@
+name: mp_text_example
+description: Build and device test application for the mp_text Flutter plugin.
+version: 0.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mp_text: ^0.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

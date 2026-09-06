@@ -1,0 +1,48 @@
+name: mp_workspace
+description: Development workspace for the MP Dart and Flutter SDK.
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+hooks:
+  user_defines:
+    mp_core:
+      native_library_directory: .mp-sdk/macos-arm64
+
+workspace:
+  - packages/mp_audio
+  - packages/mp_camera
+  - packages/mp_core
+  - packages/mp_genai
+  - packages/mp_text
+  - packages/mp_text/example
+  - packages/mp_vision
+
+dev_dependencies:
+  coverage: ^1.14.0
+  crypto: ^3.0.7
+  melos: ^7.8.1
+  test: ^1.26.3
+
+melos:
+  scripts:
+    analyze:
+      run: dart analyze --fatal-infos .
+      description: Analyze every Dart package in the workspace.
+    test:
+      run: dart test
+      exec:
+        concurrency: 1
+        failFast: true
+      packageFilters:
+        noPrivate: true
+      description: Run all public package unit tests.
+    publish:dry-run:
+      run: dart pub publish --dry-run
+      exec:
+        concurrency: 1
+        failFast: true
+      packageFilters:
+        noPrivate: true
+      description: Validate every public package archive.

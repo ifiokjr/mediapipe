@@ -1,0 +1,96 @@
+# :schema https://monochange.github.io/monochange/schemas/monochange.schema.json
+
+[defaults]
+parent_bump = "patch"
+include_private = false
+warn_on_group_mismatch = true
+package_type = "dart"
+changelog = false
+
+[changelog.sections]
+breaking = { heading = "Breaking", priority = 10 }
+feat = { heading = "Features", priority = 20 }
+fix = { heading = "Fixes", priority = 30 }
+docs = { heading = "Documentation", priority = 40 }
+other = { heading = "Other", priority = 50 }
+
+[changelog.types]
+major = { bump = "major", section = "breaking" }
+breaking = { bump = "major", section = "breaking" }
+feat = { bump = "minor", section = "feat" }
+fix = { bump = "patch", section = "fix" }
+docs = { bump = "none", section = "docs" }
+none = { bump = "none", section = "other" }
+
+[source]
+provider = "github"
+owner = "ifiokjr"
+repo = "mediapipe"
+
+[cli.release]
+help_text = "Prepare, commit, and open the grouped MP release pull request."
+steps = [
+  { name = "prepare release", type = "PrepareRelease", allow_empty_changesets = true, inputs = { format = "json" } },
+  { name = "format release commit", type = "Command", shell = "bash", command = "fix:format", when = "{{ number_of_changesets > 0 }}" },
+  { name = "commit release", type = "CommitRelease", inputs = { stage_all = true, no_verify = true }, when = "{{ number_of_changesets > 0 }}" },
+  { name = "open release request", type = "OpenReleaseRequest", inputs = { stage_all = true, no_verify = true }, when = "{{ number_of_changesets > 0 }}" },
+]
+
+[package.mp_core]
+path = "packages/mp_core"
+
+[package.mp_vision]
+path = "packages/mp_vision"
+
+[package.mp_camera]
+path = "packages/mp_camera"
+
+[package.mp_text]
+path = "packages/mp_text"
+
+[package.mp_audio]
+path = "packages/mp_audio"
+
+[package.mp_genai]
+path = "packages/mp_genai"
+
+[group.mp]
+packages = [
+  "mp_core",
+  "mp_vision",
+  "mp_camera",
+  "mp_text",
+  "mp_audio",
+  "mp_genai",
+]
+release = true
+tag = true
+version_format = "primary"
+changelog = { path = "CHANGELOG.md", format = "keep_a_changelog", include = "all" }
+
+[ecosystems.dart]
+enabled = true
+publish.enabled = true
+publish.mode = "builtin"
+publish.registry = "pub_dev"
+publish.trusted_publishing = true
+publish.rate_limits.enforce = true
+versioned_files = [
+  { path = "**/pubspec.yaml", type = "dart", fields = [
+    "dependencies",
+    "dev_dependencies",
+  ] },
+]
+
+[changesets.affected]
+enabled = true
+required = true
+skip_labels = ["release"]
+comment_on_failure = true
+ignored_paths = [
+  "**/test/**",
+  "**/integration_test/**",
+  "**/CHANGELOG.md",
+  "CHANGELOG.md",
+  "docs/**",
+]

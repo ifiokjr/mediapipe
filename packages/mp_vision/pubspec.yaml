@@ -1,0 +1,25 @@
+name: mp_vision
+description: Cross-platform MediaPipe vision tasks for Dart and Flutter.
+version: 0.0.0
+repository: https://github.com/ifiokjr/mediapipe/tree/main/packages/mp_vision
+issue_tracker: https://github.com/ifiokjr/mediapipe/issues
+homepage: https://ifiokjr.github.io/mediapipe/packages/vision/
+topics:
+  - mediapipe
+  - computer-vision
+  - machine-learning
+  - flutter
+
+environment:
+  sdk: ^3.12.0
+
+resolution: workspace
+
+dependencies:
+  collection: ^1.19.1
+  meta: ^1.17.0
+  mp_core: ^0.0.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.3

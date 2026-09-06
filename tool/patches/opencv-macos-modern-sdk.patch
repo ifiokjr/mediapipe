@@ -1,0 +1,14 @@
+diff --git a/3rdparty/zlib/zutil.h b/3rdparty/zlib/zutil.h
+index 0d7f2ba..844f9e7 100644
+--- a/3rdparty/zlib/zutil.h
++++ b/3rdparty/zlib/zutil.h
+@@ -133 +133 @@
+-#if defined(MACOS) || defined(TARGET_OS_MAC)
++#if defined(MACOS)
+diff --git a/3rdparty/libpng/pngpriv.h b/3rdparty/libpng/pngpriv.h
+index e9fd7f1..8adb120 100644
+--- a/3rdparty/libpng/pngpriv.h
++++ b/3rdparty/libpng/pngpriv.h
+@@ -521 +521 @@
+-    defined(THINK_C) || defined(__SC__) || defined(TARGET_OS_MAC)
++    defined(THINK_C) || defined(__SC__)
