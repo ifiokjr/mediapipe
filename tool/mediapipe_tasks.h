@@ -1,0 +1,22 @@
+// Copyright 2026 The MP SDK Authors.
+// SPDX-License-Identifier: Apache-2.0
+
+#include "mediapipe/tasks/c/audio/audio_classifier/audio_classifier.h"
+#include "mediapipe/tasks/c/core/common.h"
+#include "mediapipe/tasks/c/metadata/flatbuffer_api.h"
+#include "mediapipe/tasks/c/text/language_detector/language_detector.h"
+#include "mediapipe/tasks/c/text/text_classifier/text_classifier.h"
+#include "mediapipe/tasks/c/text/text_embedder/text_embedder.h"
+#include "mediapipe/tasks/c/vision/core/image.h"
+#include "mediapipe/tasks/c/vision/core/image_processing_options.h"
+#include "mediapipe/tasks/c/vision/face_detector/face_detector.h"
+#include "mediapipe/tasks/c/vision/face_landmarker/face_landmarker.h"
+#include "mediapipe/tasks/c/vision/gesture_recognizer/gesture_recognizer.h"
+#include "mediapipe/tasks/c/vision/hand_landmarker/hand_landmarker.h"
+#include "mediapipe/tasks/c/vision/holistic_landmarker/holistic_landmarker.h"
+#include "mediapipe/tasks/c/vision/image_classifier/image_classifier.h"
+#include "mediapipe/tasks/c/vision/image_embedder/image_embedder.h"
+#include "mediapipe/tasks/c/vision/image_segmenter/image_segmenter.h"
+#include "mediapipe/tasks/c/vision/interactive_segmenter_legacy/interactive_segmenter_legacy.h"
+#include "mediapipe/tasks/c/vision/object_detector/object_detector.h"
+#include "mediapipe/tasks/c/vision/pose_landmarker/pose_landmarker.h"

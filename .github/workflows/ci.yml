@@ -1,0 +1,191 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: devenv shell bash -- -e {0}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan repository history for secrets
+        run: gitleaks git --redact --no-banner --exit-code 1
+
+      - name: Run lint suite
+        run: lint:all
+
+      - name: Verify changeset coverage
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          changed_path_args=()
+          while IFS= read -r -d '' path; do
+            changed_path_args+=(--changed-paths "$path")
+          done < <(git diff --name-only -z "$BASE_SHA"...HEAD)
+          if (( ${#changed_path_args[@]} > 0 )); then
+            monochange step affected-packages "${changed_path_args[@]}" --verify
+          fi
+
+      - name: Run unit tests
+        run: test:unit
+
+      - name: Build browser examples and run browser integration
+        run: test:web
+
+      - name: Build documentation
+        run: docs:build
+
+      - name: Validate package archives
+        run: package:check
+
+      - name: Verify release preview
+        run: monochange preview --format md
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          cd docs
+          dart pub get
+
+      - name: Analyze packages
+        run: dart analyze --fatal-infos packages
+
+      - name: Run unit tests
+        run: dart run melos exec --dir-exists=test --fail-fast --concurrency=1 -- flutter test test
+
+  mobile-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Kotlin formatting
+        run: lint:kotlin
+        shell: devenv shell bash -- -e {0}
+
+      - name: Build Android plugin fixture
+        run: test:android-build
+        shell: devenv shell bash -- -e {0}
+
+  mobile-ios:
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Swift formatting
+        run: lint:swift
+        shell: devenv shell bash -- -e {0}
+
+      - name: Build iOS plugin fixture
+        run: test:ios-build
+        shell: devenv shell bash -- -e {0}
+
+  native-macos:
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the classic native runtime
+        run: native:build
+        shell: devenv shell bash -- -e {0}
+
+      - name: Verify native artifact manifest
+        run: |
+          set -euo pipefail
+          test -f .mp-sdk/macos-arm64/manifest.json
+          jq -e '.mediaPipeVersion == "v1.0.0" and (.libraries | length > 1)' \
+            .mp-sdk/macos-arm64/manifest.json
+          otool -L .mp-sdk/macos-arm64/libmediapipe.dylib
+        shell: devenv shell bash -- -e {0}
+
+      - name: Run native model integration
+        run: test:native
+        shell: devenv shell bash -- -e {0}
+
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Audit workflow permissions
+        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
+        with:
+          inputs: ".github/workflows/ .github/actions/"
+          advanced-security: true

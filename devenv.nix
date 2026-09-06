@@ -1,0 +1,244 @@
+{
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}:
+
+let
+  isCI = builtins.getEnv "CI" != "";
+  extra = inputs.ifiokjr-nixpkgs.packages.${pkgs.stdenv.system};
+  resolveFlutterSdk = ''
+    unset GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_CONFIG GIT_CONFIG_PARAMETERS
+    unset GIT_CONFIG_COUNT GIT_OBJECT_DIRECTORY GIT_DIR GIT_WORK_TREE
+    unset GIT_IMPLICIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
+
+    if [ "''${CI:-}" = "true" ] && [ -x "''${FLUTTER_ROOT:-}/bin/flutter" ]; then
+      flutter_sdk="''${FLUTTER_ROOT}"
+    else
+      flutter_version="$(awk -F'"' '/"flutter"/ { print $4; exit }' "$DEVENV_ROOT/.fvmrc")"
+      if ! [[ "$flutter_version" =~ ^[A-Za-z0-9._-]+$ ]]; then
+        echo "The Flutter version in .fvmrc is missing or invalid." >&2
+        exit 1
+      fi
+
+      local_flutter_sdk="$DEVENV_ROOT/.fvm/flutter_sdk"
+      fvm_cache_root="''${FVM_CACHE_PATH:-''${FVM_HOME:-$HOME/fvm}}"
+      cached_flutter_sdk="$fvm_cache_root/versions/$flutter_version"
+      if [ -x "$local_flutter_sdk/bin/flutter" ]; then
+        flutter_sdk="$local_flutter_sdk"
+      elif [ -x "$cached_flutter_sdk/bin/flutter" ]; then
+        flutter_sdk="$cached_flutter_sdk"
+      else
+        echo "Flutter $flutter_version is not installed. Run: fvm install $flutter_version" >&2
+        exit 1
+      fi
+    fi
+  '';
+  projectHook =
+    name: script:
+    pkgs.writeShellScript name ''
+      set -euo pipefail
+      project_root="$(${pkgs.git}/bin/git rev-parse --show-toplevel)"
+      cd "$project_root"
+      export DEVENV_ROOT="$project_root"
+      exec "${config.env.DEVENV_PROFILE}/bin/${script}" "$@"
+    '';
+in
+{
+  apple.sdk = null;
+
+  packages =
+    with pkgs;
+    [
+      actionlint
+      bazelisk
+      curl
+      dprint
+      fvm
+      gitleaks
+      jq
+      extra.monochange
+      nixfmt-rfc-style
+      patchelf
+      shfmt
+    ]
+    ++ lib.optionals stdenv.isDarwin [
+      cocoapods
+      coreutils
+      swift-format
+      swiftlint
+    ];
+
+  scripts = {
+    flutter = {
+      exec = ''
+        set -e
+        unset CC CXX LD AR NM RANLIB STRIP OBJCOPY OBJDUMP SIZE STRINGS
+        unset NIX_CC NIX_BINTOOLS NIX_CFLAGS_COMPILE NIX_LDFLAGS
+        unset SDKROOT MACOSX_DEPLOYMENT_TARGET CFLAGS CXXFLAGS LDFLAGS ARCHFLAGS
+        ${resolveFlutterSdk}
+        "$flutter_sdk/bin/flutter" "$@"
+      '';
+      binary = "bash";
+      packages = [ pkgs.fvm ];
+      description = "Run the repository-pinned Flutter SDK.";
+    };
+    dart = {
+      exec = ''
+        set -e
+        ${resolveFlutterSdk}
+        "$flutter_sdk/bin/dart" "$@"
+      '';
+      binary = "bash";
+      packages = [ pkgs.fvm ];
+      description = "Run Dart from the repository-pinned Flutter SDK.";
+    };
+    install = {
+      exec = ''
+        set -euo pipefail
+        flutter pub get
+        (cd docs && dart pub get)
+      '';
+      description = "Resolve the Dart workspace.";
+    };
+    "lint:format" = {
+      exec = ''
+        set -euo pipefail
+        dart format --output=none --set-exit-if-changed .
+        dprint check
+        nixfmt --check devenv.nix
+      '';
+      description = "Check source and configuration formatting.";
+    };
+    "lint:dart" = {
+      exec = ''
+        set -euo pipefail
+        dart analyze --fatal-infos .
+        (cd docs && dart analyze --fatal-infos .)
+      '';
+      description = "Run strict Dart analysis.";
+    };
+    "lint:actions" = {
+      exec = "actionlint .github/workflows/*.yml";
+      description = "Validate GitHub Actions workflows.";
+    };
+    "lint:kotlin" = {
+      exec = "cd packages/mp_text/example/android && ./gradlew :mp_text:ktlintCheck";
+      description = "Check Android plugin Kotlin formatting.";
+    };
+    "lint:swift" = {
+      exec = "xcrun swift-format lint --strict --recursive packages/mp_text/ios/Classes";
+      description = "Check iOS plugin Swift formatting.";
+    };
+    "lint:all" = {
+      exec = ''
+        set -euo pipefail
+        lint:format
+        lint:dart
+        lint:actions
+        monochange check
+      '';
+      description = "Run every repository lint.";
+    };
+    "fix:format" = {
+      exec = ''
+        set -euo pipefail
+        dart format .
+        dprint fmt
+        nixfmt devenv.nix
+      '';
+      description = "Format source and configuration files.";
+    };
+    "fix:kotlin" = {
+      exec = "cd packages/mp_text/example/android && ./gradlew :mp_text:ktlintFormat";
+      description = "Format Android plugin Kotlin sources.";
+    };
+    "fix:swift" = {
+      exec = "xcrun swift-format format --in-place --recursive packages/mp_text/ios/Classes";
+      description = "Format iOS plugin Swift sources.";
+    };
+    "test:unit" = {
+      exec = "dart run melos exec --dir-exists=test --fail-fast --concurrency=1 -- flutter test test";
+      description = "Run unit tests for every public package.";
+    };
+    "test:native" = {
+      exec = ''
+        set -euo pipefail
+        (cd packages/mp_text && dart test integration_test/native_language_detector_test.dart)
+        (cd packages/mp_vision && dart test integration_test/native_face_detector_test.dart)
+      '';
+      description = "Run real text and vision models through the host MediaPipe C runtime.";
+    };
+    "test:web" = {
+      exec = ''
+        set -euo pipefail
+        for package in mp_audio mp_core mp_genai mp_text mp_vision; do
+          dart compile js "packages/$package/example/''${package}_example.dart" \
+            -o "/tmp/''${package}_example.js"
+        done
+        (cd packages/mp_text && dart test --platform chrome integration_test/web_language_detector_test.dart)
+      '';
+      description = "Compile browser entry points and run real Chrome integration tests.";
+    };
+    "test:android-build" = {
+      exec = "cd packages/mp_text/example && flutter build apk --debug";
+      description = "Build the mp_text Android plugin fixture.";
+    };
+    "test:ios-build" = {
+      exec = "cd packages/mp_text/example && flutter build ios --simulator --debug --no-codesign";
+      description = "Build the mp_text iOS plugin fixture for the simulator.";
+    };
+    "test:all" = {
+      exec = ''
+        set -euo pipefail
+        test:unit
+        test:web
+        docs:build
+      '';
+      description = "Run unit tests and build the documentation site.";
+    };
+    "docs:serve" = {
+      exec = "cd docs && dart run jaspr_cli:jaspr serve";
+      description = "Serve the documentation site locally.";
+    };
+    "docs:build" = {
+      exec = "dart run tool/build_docs.dart";
+      description = "Build the static Jaspr documentation site.";
+    };
+    "package:check" = {
+      exec = "dart run melos exec --no-private --concurrency=1 --fail-fast -- dart pub publish --dry-run";
+      description = "Validate all pub.dev package archives.";
+    };
+    "native:build" = {
+      exec = "dart run tool/build_native.dart";
+      description = "Build the pinned MediaPipe Tasks C runtime for the host.";
+    };
+  };
+
+  git-hooks = lib.mkIf (!isCI) {
+    package = pkgs.prek;
+    hooks = {
+      format = {
+        enable = true;
+        entry = "${projectHook "mp-format-hook" "lint:format"}";
+        pass_filenames = false;
+        stages = [ "pre-commit" ];
+      };
+      analyze = {
+        enable = true;
+        entry = "${projectHook "mp-analyze-hook" "lint:dart"}";
+        pass_filenames = false;
+        stages = [ "pre-commit" ];
+      };
+      gitleaks = {
+        enable = true;
+        name = "secrets";
+        entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged --redact";
+        pass_filenames = false;
+        stages = [ "pre-commit" ];
+      };
+    };
+  };
+}

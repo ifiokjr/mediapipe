@@ -1,0 +1,37 @@
+# Existing local experiment. Kept outside this Dart workspace intentionally.
+/expo-mediapipe/
+
+# Dart and Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+**/build/
+coverage/
+**/coverage/
+doc/api/
+
+# Generated native SDK artifacts
+.mp-sdk/
+*.dylib
+*.dll
+*.so
+*.a
+
+# devenv and Nix
+.devenv*
+devenv.local.nix
+.direnv/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Release artifacts
+.monochange/
+publish-*.json

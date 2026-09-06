@@ -1,0 +1,35 @@
+name: Setup devenv
+description: Install the pinned Flutter, Nix, and devenv toolchains.
+
+inputs:
+  github-token:
+    description: GitHub token used by Nix to avoid unauthenticated API limits.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Nix
+      uses: cachix/install-nix-action@b97f05dcb019ddea06450a50ef6203d2fdc19fee # v31
+      with:
+        github_access_token: ${{ inputs.github-token }}
+
+    - name: Install devenv with the shared binary cache
+      shell: bash
+      run: |
+        set -euo pipefail
+        nix profile add --accept-flake-config nixpkgs#cachix
+        cachix use devenv
+        nix profile add nixpkgs#devenv
+
+    - name: Install pinned Flutter SDK
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+      with:
+        channel: stable
+        flutter-version-file: .fvmrc
+        cache: true
+        pub-cache: true
+
+    - name: Install workspace dependencies
+      shell: devenv shell bash -- -e {0}
+      run: install
