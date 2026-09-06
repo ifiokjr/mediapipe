@@ -195,6 +195,15 @@ in
       exec = "cd packages/mp_text/example && repo-flutter build ios --simulator --debug --no-codesign";
       description = "Build the mp_text iOS plugin fixture for the simulator.";
     };
+    "test:android-device" = {
+      exec = ''
+        set -euo pipefail
+        device_id="''${SEEKER_DEVICE_ID:-SM02E4060324957}"
+        cd packages/mp_text/example
+        repo-flutter test integration_test/native_plugin_contract_test.dart -d "$device_id"
+      '';
+      description = "Run native plugin contract tests on the attached Android device.";
+    };
     "test:all" = {
       exec = ''
         set -euo pipefail
