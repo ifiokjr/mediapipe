@@ -97,6 +97,18 @@ final class _FakeGenAiRuntime implements GenAiRuntime {
   final _FakeInferenceBackend engine = _FakeInferenceBackend();
 
   @override
+  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) =>
+      throw UnimplementedError();
+
+  @override
+  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) =>
+      throw UnimplementedError();
+
+  @override
+  Future<RagPipelineBackend> createRagPipeline(RagPipelineOptions options) =>
+      throw UnimplementedError();
+
+  @override
   Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) async => engine;
 }
 

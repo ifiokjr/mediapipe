@@ -10,6 +10,9 @@ Pod::Spec.new do |s|
   s.source_files     = 'Classes/**/*'
   s.dependency 'Flutter'
   s.dependency 'MediaPipeTasksText', '1.0.0'
+  # MediaPipeTasksCommon 1.0.0 references Metal types but omits Metal from its
+  # CocoaPods framework list. Link it here until the upstream pod adds it.
+  s.frameworks = 'Metal'
   s.platform = :ios, '15.0'
   s.static_framework = true
   s.pod_target_xcconfig = {

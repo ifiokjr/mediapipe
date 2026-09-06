@@ -43,6 +43,7 @@ let
       project_root="$(${pkgs.git}/bin/git rev-parse --show-toplevel)"
       cd "$project_root"
       export DEVENV_ROOT="$project_root"
+      export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
       exec "${config.env.DEVENV_PROFILE}/bin/${script}" "$@"
     '';
 in
@@ -72,7 +73,7 @@ in
     ];
 
   scripts = {
-    flutter = {
+    "repo-flutter" = {
       exec = ''
         set -e
         unset CC CXX LD AR NM RANLIB STRIP OBJCOPY OBJDUMP SIZE STRINGS
@@ -85,7 +86,7 @@ in
       packages = [ pkgs.fvm ];
       description = "Run the repository-pinned Flutter SDK.";
     };
-    dart = {
+    "repo-dart" = {
       exec = ''
         set -e
         ${resolveFlutterSdk}
@@ -98,15 +99,15 @@ in
     install = {
       exec = ''
         set -euo pipefail
-        flutter pub get
-        (cd docs && dart pub get)
+        repo-flutter pub get
+        (cd docs && repo-dart pub get)
       '';
       description = "Resolve the Dart workspace.";
     };
     "lint:format" = {
       exec = ''
         set -euo pipefail
-        dart format --output=none --set-exit-if-changed .
+        repo-dart format --output=none --set-exit-if-changed .
         dprint check
         nixfmt --check devenv.nix
       '';
@@ -115,8 +116,8 @@ in
     "lint:dart" = {
       exec = ''
         set -euo pipefail
-        dart analyze --fatal-infos .
-        (cd docs && dart analyze --fatal-infos .)
+        repo-dart analyze --fatal-infos .
+        (cd docs && repo-dart analyze --fatal-infos .)
       '';
       description = "Run strict Dart analysis.";
     };
@@ -125,7 +126,7 @@ in
       description = "Validate GitHub Actions workflows.";
     };
     "lint:kotlin" = {
-      exec = "cd packages/mp_text/example/android && ./gradlew :mp_text:ktlintCheck";
+      exec = "cd packages/mp_text/example/android && ./gradlew :mp_genai:ktlintCheck :mp_text:ktlintCheck";
       description = "Check Android plugin Kotlin formatting.";
     };
     "lint:swift" = {
@@ -145,14 +146,14 @@ in
     "fix:format" = {
       exec = ''
         set -euo pipefail
-        dart format .
+        repo-dart format .
         dprint fmt
         nixfmt devenv.nix
       '';
       description = "Format source and configuration files.";
     };
     "fix:kotlin" = {
-      exec = "cd packages/mp_text/example/android && ./gradlew :mp_text:ktlintFormat";
+      exec = "cd packages/mp_text/example/android && ./gradlew :mp_genai:ktlintFormat :mp_text:ktlintFormat";
       description = "Format Android plugin Kotlin sources.";
     };
     "fix:swift" = {
@@ -160,34 +161,34 @@ in
       description = "Format iOS plugin Swift sources.";
     };
     "test:unit" = {
-      exec = "dart run melos exec --dir-exists=test --fail-fast --concurrency=1 -- flutter test test";
+      exec = "repo-dart run melos exec --dir-exists=test --fail-fast --concurrency=1 -- repo-flutter test test";
       description = "Run unit tests for every public package.";
     };
     "test:native" = {
       exec = ''
         set -euo pipefail
-        (cd packages/mp_text && dart test integration_test/native_language_detector_test.dart)
-        (cd packages/mp_vision && dart test integration_test/native_face_detector_test.dart)
+        (cd packages/mp_text && repo-dart test integration_test/native_language_detector_test.dart)
+        (cd packages/mp_vision && repo-dart test integration_test/native_face_detector_test.dart)
       '';
       description = "Run real text and vision models through the host MediaPipe C runtime.";
     };
     "test:web" = {
       exec = ''
         set -euo pipefail
-        for package in mp_audio mp_core mp_genai mp_text mp_vision; do
-          dart compile js "packages/$package/example/''${package}_example.dart" \
+        for package in mp_audio mp_core mp_genai mp_vision; do
+          repo-dart compile js "packages/$package/example/''${package}_example.dart" \
             -o "/tmp/''${package}_example.js"
         done
-        (cd packages/mp_text && dart test --platform chrome integration_test/web_language_detector_test.dart)
+        (cd packages/mp_text && repo-dart test --platform chrome integration_test/web_language_detector_test.dart)
       '';
       description = "Compile browser entry points and run real Chrome integration tests.";
     };
     "test:android-build" = {
-      exec = "cd packages/mp_text/example && flutter build apk --debug";
+      exec = "cd packages/mp_text/example && repo-flutter build apk --debug";
       description = "Build the mp_text Android plugin fixture.";
     };
     "test:ios-build" = {
-      exec = "cd packages/mp_text/example && flutter build ios --simulator --debug --no-codesign";
+      exec = "cd packages/mp_text/example && repo-flutter build ios --simulator --debug --no-codesign";
       description = "Build the mp_text iOS plugin fixture for the simulator.";
     };
     "test:all" = {
@@ -200,19 +201,25 @@ in
       description = "Run unit tests and build the documentation site.";
     };
     "docs:serve" = {
-      exec = "cd docs && dart run jaspr_cli:jaspr serve";
+      exec = ''
+        set -euo pipefail
+        ${resolveFlutterSdk}
+        export PATH="$flutter_sdk/bin/cache/dart-sdk/bin:$PATH"
+        cd docs
+        "$flutter_sdk/bin/dart" run jaspr_cli:jaspr serve
+      '';
       description = "Serve the documentation site locally.";
     };
     "docs:build" = {
-      exec = "dart run tool/build_docs.dart";
+      exec = "repo-dart run tool/build_docs.dart";
       description = "Build the static Jaspr documentation site.";
     };
     "package:check" = {
-      exec = "dart run melos exec --no-private --concurrency=1 --fail-fast -- dart pub publish --dry-run";
+      exec = "repo-dart run melos exec --no-private --concurrency=1 --fail-fast -- repo-dart pub publish --dry-run";
       description = "Validate all pub.dev package archives.";
     };
     "native:build" = {
-      exec = "dart run tool/build_native.dart";
+      exec = "repo-dart run tool/build_native.dart";
       description = "Build the pinned MediaPipe Tasks C runtime for the host.";
     };
   };

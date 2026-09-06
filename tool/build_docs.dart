@@ -3,10 +3,16 @@ import 'dart:io';
 const String _siteBase = '/mediapipe/';
 
 Future<void> main() async {
+  final String sdkBin = File(Platform.resolvedExecutable).parent.path;
+  final String pathSeparator = Platform.isWindows ? ';' : ':';
   final Process process = await Process.start(
     Platform.resolvedExecutable,
     const <String>['run', 'jaspr_cli:jaspr', 'build'],
     workingDirectory: 'docs',
+    environment: <String, String>{
+      ...Platform.environment,
+      'PATH': '$sdkBin$pathSeparator${Platform.environment['PATH'] ?? ''}',
+    },
     mode: ProcessStartMode.inheritStdio,
   );
   final int exitCode = await process.exitCode;

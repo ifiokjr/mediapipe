@@ -19,6 +19,8 @@ Future<void> main(List<String> arguments) async {
     '--lockfile_mode=update',
     '--experimental_google_legacy_api',
     '--repo_env=HERMETIC_PYTHON_VERSION=3.12',
+    '--features=-layering_check',
+    '--host_features=-layering_check',
     '-c',
     'opt',
     '--strip',

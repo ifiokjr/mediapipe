@@ -12,6 +12,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  mp_genai: ^0.0.0
   mp_text: ^0.0.0
 
 dev_dependencies:
