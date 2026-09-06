@@ -24,7 +24,13 @@ Future<void> main(List<String> arguments) async {
     final Uri? configured = input.userDefines.path('native_library_directory');
     if (configured != null) {
       final Directory configuredDirectory = Directory.fromUri(configured);
-      final Directory targetDirectory = Directory.fromUri(configured.resolve('$target/'));
+      // Track the configured root even when it does not exist yet. Otherwise a
+      // first build without local artifacts can cache an empty result after a
+      // later native build creates the target directory.
+      output.dependencies.add(configuredDirectory.uri);
+      final Directory targetDirectory = Directory.fromUri(
+        configuredDirectory.uri.resolve('$target/'),
+      );
       if (targetDirectory.existsSync()) {
         directory = targetDirectory;
       } else if (File.fromUri(configuredDirectory.uri.resolve(mainLibraryName)).existsSync()) {
