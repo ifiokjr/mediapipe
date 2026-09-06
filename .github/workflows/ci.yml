@@ -213,6 +213,36 @@ jobs:
         run: test:native
         shell: devenv shell bash -- -e {0}
 
+  native-android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install pinned Android NDK
+        run: sdkmanager "ndk;28.2.13676358"
+
+      - name: Build the Android ARM64 runtime
+        run: native:build --target android-arm64
+        shell: devenv shell bash -- -e {0}
+
+      - name: Verify native artifact manifest and ABI
+        run: |
+          set -euo pipefail
+          test -f .mp-sdk/android-arm64/manifest.json
+          jq -e '.mediaPipeVersion == "v1.0.0" and (.libraries | length > 1)' \
+            .mp-sdk/android-arm64/manifest.json
+          native:verify --target android-arm64
+        shell: devenv shell bash -- -e {0}
+
   security:
     runs-on: ubuntu-latest
     timeout-minutes: 5
