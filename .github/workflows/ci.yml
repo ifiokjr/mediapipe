@@ -44,13 +44,23 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
         run: |
           changed_path_args=()
           while IFS= read -r -d '' path; do
             changed_path_args+=(--changed-paths "$path")
           done < <(git diff --name-only -z "$BASE_SHA"...HEAD)
+
+          label_args=()
+          while IFS= read -r label; do
+            label_args+=(--label "$label")
+          done < <(jq -r '.[]' <<< "$PR_LABELS_JSON")
+
           if (( ${#changed_path_args[@]} > 0 )); then
-            monochange step affected-packages "${changed_path_args[@]}" --verify
+            monochange step affected-packages \
+              "${changed_path_args[@]}" \
+              "${label_args[@]}" \
+              --verify
           fi
 
       - name: Run unit tests
