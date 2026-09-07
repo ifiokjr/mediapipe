@@ -77,6 +77,9 @@ jobs:
         run: package:check
 
       - name: Verify release preview
+        # Generated release PRs contain the prepared release record after their
+        # source changesets have been consumed.
+        if: github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'release')
         run: monochange preview --format md
 
   windows:
