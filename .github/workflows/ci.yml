@@ -41,7 +41,8 @@ jobs:
         run: lint:all
 
       - name: Verify changeset coverage
-        if: github.event_name == 'pull_request'
+        # Generated release PRs consume their source changesets before CI runs.
+        if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'release')
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
