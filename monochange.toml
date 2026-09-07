@@ -102,6 +102,10 @@ versioned_files = [
 [changesets.affected]
 enabled = true
 required = true
+# Pull-request labels that skip verification entirely. Keep this limited to
+# automated release PRs so regular pull requests still prove package changes
+# are covered by attached changesets.
+# Default: []
 skip_labels = ["release"]
 comment_on_failure = true
 ignored_paths = [
