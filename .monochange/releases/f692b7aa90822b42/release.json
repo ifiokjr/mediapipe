@@ -1,0 +1,664 @@
+{
+  "schema_version": "0.4",
+  "kind": "monochange.releaseRecord",
+  "created_at": "2026-09-07T21:12:04Z",
+  "command": "release",
+  "version": "0.1.0",
+  "versions": {
+    "mp": "0.1.0"
+  },
+  "release_targets": [
+    {
+      "id": "mp",
+      "kind": "group",
+      "version": "0.1.0",
+      "version_format": "primary",
+      "tag": true,
+      "release": true,
+      "tag_name": "v0.1.0",
+      "members": [
+        "mp_core",
+        "mp_vision",
+        "mp_camera",
+        "mp_text",
+        "mp_audio",
+        "mp_genai"
+      ]
+    }
+  ],
+  "released_packages": [
+    "mp_audio",
+    "mp_camera",
+    "mp_core",
+    "mp_genai",
+    "mp_text",
+    "mp_vision"
+  ],
+  "changed_files": [
+    "CHANGELOG.md",
+    "docs/pubspec.yaml",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_audio/pubspec.yaml",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_camera/pubspec.yaml",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_core/pubspec.yaml",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_genai/pubspec.yaml",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_text/example/pubspec.yaml",
+    "packages/mp_text/pubspec.yaml",
+    "packages/mp_vision/CHANGELOG.md",
+    "packages/mp_vision/pubspec.yaml",
+    "pubspec.yaml"
+  ],
+  "package_publications": [
+    {
+      "package": "mp_audio",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.0",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_camera",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.0",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_core",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.0",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_genai",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.0",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_text",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.0",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_vision",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.0",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    }
+  ],
+  "updated_changelogs": [
+    "CHANGELOG.md",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_vision/CHANGELOG.md"
+  ],
+  "deleted_changesets": [
+    ".changeset/1788690491-mp-core.md",
+    ".changeset/1788806708-mp.md",
+    ".changeset/1788812780-mp.md"
+  ],
+  "changesets": [
+    {
+      "path": ".changeset/1788690491-mp-core.md",
+      "summary": "Add the initial six-package API workspace",
+      "details": "Defines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_camera",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_text",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_audio",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_genai",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "3bbab47b4110f9d91ec7abe759ec639399ebf6b4",
+            "short_sha": "3bbab47",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/3bbab47b4110f9d91ec7abe759ec639399ebf6b4",
+            "authored_at": "2026-09-06T13:01:24+01:00",
+            "committed_at": "2026-09-06T20:09:31+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "ifiokotung@gmail.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#1",
+            "title": "feat: establish Flutter MediaPipe workspace",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/1",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "726af17b773afa1177a47ef564a0f6f2f5599433",
+            "short_sha": "726af17",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/726af17b773afa1177a47ef564a0f6f2f5599433",
+            "authored_at": "2026-09-06T14:42:32+01:00",
+            "committed_at": "2026-09-06T20:09:31+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "ifiokotung@gmail.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#1",
+            "title": "feat: establish Flutter MediaPipe workspace",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/1",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/1788806708-mp.md",
+      "summary": "Update package changelogs in grouped releases",
+      "details": null,
+      "targets": [
+        {
+          "id": "mp",
+          "kind": "group",
+          "bump": "none",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "none"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "db2a5ee781867c037b4d6dd5af2813190a1f8d2a",
+            "short_sha": "db2a5ee",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/db2a5ee781867c037b4d6dd5af2813190a1f8d2a",
+            "authored_at": "2026-09-07T21:12:43+01:00",
+            "committed_at": "2026-09-07T21:12:43+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#7",
+            "title": "fix: generate package changelogs for releases",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/7",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "db2a5ee781867c037b4d6dd5af2813190a1f8d2a",
+            "short_sha": "db2a5ee",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/db2a5ee781867c037b4d6dd5af2813190a1f8d2a",
+            "authored_at": "2026-09-07T21:12:43+01:00",
+            "committed_at": "2026-09-07T21:12:43+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#7",
+            "title": "fix: generate package changelogs for releases",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/7",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/1788812780-mp.md",
+      "summary": "Skip source changeset previews on prepared release PRs.",
+      "details": null,
+      "targets": [
+        {
+          "id": "mp",
+          "kind": "group",
+          "bump": "none",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "none"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "48fae7dd82eb052cf4eabe8a210e85474bc206a4",
+            "short_sha": "48fae7d",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/48fae7dd82eb052cf4eabe8a210e85474bc206a4",
+            "authored_at": "2026-09-07T22:10:27+01:00",
+            "committed_at": "2026-09-07T22:10:27+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#8",
+            "title": "ci: skip release previews after preparation",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/8",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "48fae7dd82eb052cf4eabe8a210e85474bc206a4",
+            "short_sha": "48fae7d",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/48fae7dd82eb052cf4eabe8a210e85474bc206a4",
+            "authored_at": "2026-09-07T22:10:27+01:00",
+            "committed_at": "2026-09-07T22:10:27+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#8",
+            "title": "ci: skip release previews after preparation",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/8",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    }
+  ],
+  "changelogs": [
+    {
+      "owner_id": "mp",
+      "owner_kind": "group",
+      "path": "CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)",
+        "summary": [
+          "Grouped release for `mp`."
+        ],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Add the initial six-package API workspace\n_Packages:_ _mp_core_, _mp_vision_, _mp_camera_, _mp_text_, _mp_audio_, _mp_genai_\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+            ]
+          },
+          {
+            "title": "Other",
+            "collapsed": false,
+            "entries": [
+              "- **mp**: Update package changelogs in grouped releases",
+              "- **mp**: Skip source changeset previews on prepared release PRs."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)\n\nGrouped release for `mp`.\n### Features\n\n#### Add the initial six-package API workspace\n_Packages:_ _mp_core_, _mp_vision_, _mp_camera_, _mp_text_, _mp_audio_, _mp_genai_\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)\n\n### Other\n\n- **mp**: Update package changelogs in grouped releases\n- **mp**: Skip source changeset previews on prepared release PRs."
+    },
+    {
+      "owner_id": "mp_audio",
+      "owner_kind": "package",
+      "path": "packages/mp_audio/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)\n\n### Features\n\n#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+    },
+    {
+      "owner_id": "mp_camera",
+      "owner_kind": "package",
+      "path": "packages/mp_camera/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)\n\n### Features\n\n#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+    },
+    {
+      "owner_id": "mp_core",
+      "owner_kind": "package",
+      "path": "packages/mp_core/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)\n\n### Features\n\n#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+    },
+    {
+      "owner_id": "mp_genai",
+      "owner_kind": "package",
+      "path": "packages/mp_genai/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)\n\n### Features\n\n#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+    },
+    {
+      "owner_id": "mp_text",
+      "owner_kind": "package",
+      "path": "packages/mp_text/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)\n\n### Features\n\n#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+    },
+    {
+      "owner_id": "mp_vision",
+      "owner_kind": "package",
+      "path": "packages/mp_vision/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-07)\n\n### Features\n\n#### Add the initial six-package API workspace\n\nDefines shared task and result types; vision, text, audio, camera, and GenAI APIs;\nweb adapters; the classic native C bridge; mobile proofreading and summarization\nplugin bridges; tests; and API documentation. Platform support remains limited\nto the backends and real-model tests listed in the support matrix.\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #1](https://github.com/ifiokjr/mediapipe/pull/1)"
+    }
+  ],
+  "provider": {
+    "kind": "github",
+    "owner": "ifiokjr",
+    "repo": "mediapipe",
+    "host": null
+  }
+}
