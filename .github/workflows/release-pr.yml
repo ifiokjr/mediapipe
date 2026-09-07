@@ -79,23 +79,36 @@ jobs:
           fi
         shell: bash
 
-      - name: Configure GitHub authentication
+      - name: Require release PR token
+        if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_PR_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
+        run: |
+          if [ -z "$RELEASE_PR_TOKEN" ]; then
+            echo "::error::RELEASE_PR_TOKEN is not configured."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Configure GitHub authentication
+        if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
+        env:
+          # A repository-scoped PAT makes release-branch pushes trigger CI.
+          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
         run: gh auth setup-git
         shell: bash
 
       - name: Open or refresh the release PR
         if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
         run: monochange run release
         shell: devenv shell -- bash -e {0}
 
       - name: Add release PR attribution
         if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
         run: |
           set -euo pipefail
           pr_number="$(
