@@ -24,7 +24,7 @@ jobs:
         shell: devenv shell bash -- -e {0}
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -87,12 +87,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           persist-credentials: false
 
       - name: Install pinned Flutter SDK
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        uses: subosito/flutter-action@v2.23.0 # v2
         with:
           channel: stable
           flutter-version-file: .fvmrc
@@ -116,7 +116,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           persist-credentials: false
 
@@ -143,7 +143,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           persist-credentials: false
 
@@ -168,7 +168,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           persist-credentials: false
 
@@ -200,7 +200,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           persist-credentials: false
 
@@ -232,7 +232,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           persist-credentials: false
 
@@ -269,11 +269,11 @@ jobs:
       security-events: write
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@v6.1.0 # v6
         with:
           persist-credentials: false
       - name: Audit workflow permissions
-        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
+        uses: zizmorcore/zizmor-action@v0.6.4 # v0
         with:
           inputs: ".github/workflows/ .github/actions/"
           advanced-security: true
