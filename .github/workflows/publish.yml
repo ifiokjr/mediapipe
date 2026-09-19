@@ -79,7 +79,7 @@ jobs:
 
       - name: Check out release tag
         if: steps.release.outputs.present == 'true'
-        uses: actions/checkout@v6.1.0 # v6
+        uses: actions/checkout@v7.0.1 # v7
         with:
           ref: ${{ steps.release.outputs.tag }}
           fetch-depth: 0
@@ -163,7 +163,7 @@ jobs:
 
       - name: Upload MonoChange reports
         if: always() && steps.release.outputs.present == 'true'
-        uses: actions/upload-artifact@v4.6.2 # v4
+        uses: actions/upload-artifact@v7.0.1 # v7
         with:
           name: monochange-publish-${{ steps.release.outputs.tag }}
           path: |
