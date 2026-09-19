@@ -79,7 +79,7 @@ jobs:
 
       - name: Check out release tag
         if: steps.release.outputs.present == 'true'
-        uses: actions/checkout@v7.0.1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.release.outputs.tag }}
           fetch-depth: 0
@@ -105,7 +105,7 @@ jobs:
 
       - name: Set up Dart trusted publishing
         if: steps.release.outputs.present == 'true'
-        uses: dart-lang/setup-dart@v1.8.1 # v1
+        uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
 
       - name: Set up toolchains
         if: steps.release.outputs.present == 'true'
@@ -163,7 +163,7 @@ jobs:
 
       - name: Upload MonoChange reports
         if: always() && steps.release.outputs.present == 'true'
-        uses: actions/upload-artifact@v7.0.1 # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: monochange-publish-${{ steps.release.outputs.tag }}
           path: |
