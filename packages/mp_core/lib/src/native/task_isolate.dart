@@ -1,12 +1,37 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import '../errors.dart';
+
 /// Handles commands inside a dedicated native-task isolate.
 typedef NativeTaskWorkerHandler = FutureOr<Object?> Function(Object? command);
 
 /// Creates a command handler inside a dedicated native-task isolate.
 typedef NativeTaskWorkerFactory =
     FutureOr<NativeTaskWorkerHandler> Function(Object? initialMessage);
+
+/// Rewrites an unresolvable native symbol into an actionable failure.
+///
+/// When no MediaPipe runtime is bundled, `dart:ffi` fails with a bare
+/// `ArgumentError` naming an internal asset id. That message tells an
+/// application nothing about the remedy, so native task creation reports the
+/// missing artifact instead. Every other error is returned unchanged.
+Object nativeTaskFailure(Object error) {
+  final String description = error is Error ? '$error' : error.toString();
+  if (!description.contains('native function') ||
+      !description.contains('Attempted to fallback to process lookup')) {
+    return error;
+  }
+  return const MpException(
+    MpStatus.unavailable,
+    'No MediaPipe native runtime is linked into this build. Published packages '
+    'bundle a checksummed runtime per platform; a source checkout can point the '
+    'mp_core native asset hook at a local build with the '
+    '`native_library_directory` user define (for example `.mp-sdk`). The web '
+    'adapter needs no native runtime and is selected automatically for browser '
+    'builds.',
+  );
+}
 
 /// A request/response worker that keeps one native task on one isolate.
 ///
@@ -101,7 +126,7 @@ final class NativeTaskIsolate {
       responses.close();
       errors.close();
       exits.close();
-      Error.throwWithStackTrace(error, handshake.stackTrace ?? StackTrace.empty);
+      Error.throwWithStackTrace(nativeTaskFailure(error), handshake.stackTrace ?? StackTrace.empty);
     }
     final NativeTaskIsolate result = NativeTaskIsolate._(
       isolate,
@@ -181,7 +206,7 @@ final class NativeTaskIsolate {
 
 Object _remoteError(Object? message) {
   if (message case <Object?>[final Object error, final Object stackTrace]) {
-    return RemoteError(error.toString(), stackTrace.toString());
+    return nativeTaskFailure(RemoteError(error.toString(), stackTrace.toString()));
   }
   return StateError('Native task worker failed: $message');
 }
