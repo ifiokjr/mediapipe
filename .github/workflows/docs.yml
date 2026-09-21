@@ -43,6 +43,12 @@ jobs:
         run: docs:build
         shell: devenv shell bash -- -e {0}
 
+      - name: Verify documentation links
+        # The site serves every page at a real route under a deployment base
+        # path, so a relative link mistake is a 404 that nothing else catches.
+        run: docs:links
+        shell: devenv shell bash -- -e {0}
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

@@ -67,11 +67,17 @@ jobs:
       - name: Run unit tests
         run: test:unit
 
+      - name: Run examples against a real runtime
+        run: test:examples
+
       - name: Build browser examples and run browser integration
         run: test:web
 
       - name: Build documentation
         run: docs:build
+
+      - name: Verify documentation links
+        run: docs:links
 
       - name: Validate package archives
         run: package:check

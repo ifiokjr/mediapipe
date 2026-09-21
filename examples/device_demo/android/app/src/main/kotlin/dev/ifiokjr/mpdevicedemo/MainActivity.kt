@@ -1,4 +1,4 @@
-package dev.ifiokjr.mp_device_demo
+package dev.ifiokjr.mpdevicedemo
 
 import android.Manifest
 import android.content.pm.PackageManager
