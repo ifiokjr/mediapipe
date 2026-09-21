@@ -57,12 +57,25 @@ Future<void> _classifyClip(MpAssetCache cache, AudioData audio) async {
 
 Future<void> _classifyStream(MpAssetCache cache, AudioData audio) async {
   stdout.writeln('\n== Stream classification ==');
-  final AudioClassifier classifier = await AudioClassifier.create(
-    AudioClassifierOptions(
-      baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.audioClassifier)),
-      runningMode: AudioRunningMode.audioStream,
-    ),
-  );
+
+  // Native audio is clip-only today: MediaPipe's C audio task exposes an async
+  // callback that the SDK does not yet bridge, because copying callback-owned
+  // memory safely from a native worker thread is not implemented. The task
+  // reports that as `MpStatus.unimplemented` instead of silently running in
+  // clips mode, so an application can fall back deterministically.
+  final AudioClassifier classifier;
+  try {
+    classifier = await AudioClassifier.create(
+      AudioClassifierOptions(
+        baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.audioClassifier)),
+        runningMode: AudioRunningMode.audioStream,
+      ),
+    );
+  } on MpException catch (error) {
+    stdout.writeln('  ${error.status.name}: ${error.message}');
+    stdout.writeln('  Fall back to clip mode, or run the browser adapter for streaming.');
+    return;
+  }
 
   final StreamSubscription<AudioClassifierResult> subscription = classifier.results.listen((
     AudioClassifierResult result,
@@ -96,9 +109,6 @@ Future<void> _classifyStream(MpAssetCache cache, AudioData audio) async {
     }
     // Give the runtime a moment to publish the last windowed result.
     await Future<void>.delayed(const Duration(milliseconds: 200));
-  } on MpException catch (error) {
-    // Native audio is clip-only today. Report the contract instead of failing.
-    stdout.writeln('  unavailable on this platform: ${error.status.name}');
   } finally {
     await subscription.cancel();
     await classifier.close();
