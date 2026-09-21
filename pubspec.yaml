@@ -11,6 +11,7 @@ hooks:
       native_library_directory: .mp-sdk
 
 workspace:
+  - examples
   - packages/mp_audio
   - packages/mp_camera
   - packages/mp_core

@@ -1,0 +1,43 @@
+# :schema https://mdt.dev/schemas/mdt.schema.json
+#
+# Shared documentation blocks for the MP SDK. Providers live in `.templates/`,
+# consumers live in package READMEs, the root README, and the Jaspr docs site
+# content. Run `docs:update` after editing a provider and `docs:check` to verify
+# every consumer matches.
+
+[padding]
+before = 0
+after = 0
+
+[data]
+# Package metadata (names, descriptions, task lists) rendered into providers.
+packages = { path = "docs/data/packages.json", format = "json" }
+# Single source of truth for the upstream MediaPipe release this SDK binds to.
+versions = { path = "docs/data/versions.json", format = "json" }
+# Canonical URLs shared by READMEs, package docs, and the docs site.
+links = { path = "docs/data/links.json", format = "json" }
+
+[exclude]
+patterns = [
+  "AGENTS.md",
+  "docs/agents/**",
+  "**/.dart_tool/**",
+  "**/.fvm/**",
+  "**/build/**",
+  "**/coverage/**",
+  "**/Pods/**",
+  "**/.git/**",
+  "**/.mp-sdk/**",
+  ".devenv/**",
+  "expo-mediapipe/**",
+]
+# Keep mdt tags inside fenced code blocks illustrative rather than live. The
+# quickstart and contributing guides show tag syntax to document this toolchain.
+markdown_codeblocks = true
+
+# Keep mdt-written markdown converged with dprint's canonical formatting so that
+# `mdt check` stays green after `fix:format` runs. Without this, dprint rewrites
+# the generated blocks and the two tools fight on every commit.
+[[formatters]]
+command = "dprint fmt --stdin \"{{ filePath }}\""
+patterns = ["**/*.md", "**/*.t.md"]

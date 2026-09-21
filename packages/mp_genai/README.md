@@ -1,6 +1,10 @@
+<!-- {=packageHeader:"mp_genai"} -->
+
 # mp_genai
 
-Dart APIs for MediaPipe generative AI tasks.
+MediaPipe generative AI APIs for Flutter with Web and Android backends.
+
+<!-- {/packageHeader} -->
 
 ## API surface
 
@@ -13,6 +17,21 @@ Dart APIs for MediaPipe generative AI tasks.
 
 Model files are supplied by the application and are not included in this
 package.
+
+## Install
+
+<!-- {=packageInstall:"mp_genai"} -->
+
+Add the package:
+
+```yaml
+dependencies:
+  mp_genai: ^0.1.0
+```
+
+`MediaPipe generative AI APIs for Flutter with Web and Android backends.`
+
+<!-- {/packageInstall} -->
 
 ## LLM example
 
@@ -46,6 +65,9 @@ Every model, session, chat, pipeline, and generator owns platform resources.
 Call `close()` when it is no longer needed. Unsupported API/platform
 combinations throw an `MpException` with `MpStatus.unimplemented`.
 
+The example in [`example/`](example/) creates a session, streams chunks, and
+demonstrates cancellation.
+
 ## Current qualification
 
 The web LLM adapter is implemented. The Android plugin and its four task
@@ -57,7 +79,19 @@ MediaPipe's Android LLM Inference API is deprecated in favor of LiteRT-LM, and
 the Android image generator is experimental. These upstream statuses are kept
 out of the Dart type system but are relevant when choosing a backend.
 
-See the [GenAI API guide](https://ifiokjr.github.io/mediapipe/packages/genai/)
-and [platform matrix](https://ifiokjr.github.io/mediapipe/platforms/).
+See the [GenAI API guide]({{ links.docs }}packages/genai/) and
+[platform matrix]({{ links.docs }}platforms/).
 
-MP is independent software and is not affiliated with or endorsed by Google.
+<!-- {=packageFooter:"mp_genai"} -->
+
+See the [mp_genai documentation](https://ifiokjr.github.io/mediapipe/packages/genai/) for
+the full data contract and platform notes.
+
+<!-- {/packageFooter} -->
+
+<!-- {=independenceNotice} -->
+
+MP is independent software. MediaPipe is a trademark of Google LLC; this
+project is not affiliated with or endorsed by Google.
+
+<!-- {/independenceNotice} -->

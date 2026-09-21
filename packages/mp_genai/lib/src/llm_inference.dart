@@ -71,12 +71,27 @@ final class LlmInference implements MpTask {
   }
 
   /// Generates a response in a temporary, stateless session.
+  ///
+  /// The temporary session closes once [LlmGeneration.response] settles.
+  /// Consume that future at least once, even when you only read
+  /// [LlmGeneration.chunks]; the session stays open until it completes.
   Future<LlmGeneration> generateResponse(String prompt, {LlmSessionOptions? sessionOptions}) async {
     final LlmSession session = await createSession(options: sessionOptions);
-    await session.addQueryChunk(prompt);
-    final LlmGeneration generation = await session.generate();
-    unawaited(generation.response.whenComplete(session.close));
-    return generation;
+    try {
+      await session.addQueryChunk(prompt);
+      final LlmGeneration generation = await session.generate();
+      // Swallow the error on this branch so a caller that handles `response`
+      // does not also surface an unhandled zone error from the cleanup future.
+      unawaited(
+        generation.response
+            .then<void>((_) {}, onError: (Object _, StackTrace _) {})
+            .whenComplete(session.close),
+      );
+      return generation;
+    } on Object {
+      await session.close();
+      rethrow;
+    }
   }
 
   /// Counts the model tokens in [text].

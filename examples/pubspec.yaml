@@ -1,0 +1,31 @@
+name: mp_examples
+description: Runnable MediaPipe examples for the MP SDK.
+version: 0.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+resolution: workspace
+
+# Native assets are resolved for the package that owns the entry point, so the
+# examples declare the same local runtime directory as the workspace root. Point
+# this at a built `.mp-sdk` checkout to run the native examples without a
+# released artifact.
+hooks:
+  user_defines:
+    mp_core:
+      native_library_directory: .mp-sdk
+
+dependencies:
+  http: ^1.6.0
+  image: ^4.10.1
+  mp_audio: ^0.0.0
+  mp_core: ^0.0.0
+  mp_genai: ^0.0.0
+  mp_text: ^0.0.0
+  mp_vision: ^0.0.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.3

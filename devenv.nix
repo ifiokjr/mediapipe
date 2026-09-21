@@ -62,6 +62,7 @@ in
       jq
       ktlint
       llvm
+      extra.mdt
       extra.monochange
       nixfmt-rfc-style
       patchelf
@@ -130,6 +131,24 @@ in
       '';
       description = "Run strict Dart analysis.";
     };
+    "lint:docs" = {
+      exec = ''
+        set -euo pipefail
+        mkdir -p .mdt/cache
+        mdt check --verbose
+        repo-dart run tool/check_docs_data.dart
+      '';
+      description = "Verify shared documentation blocks and docs metadata.";
+    };
+    "docs:update" = {
+      exec = ''
+        set -euo pipefail
+        mkdir -p .mdt/cache
+        mdt update --verbose
+        dprint fmt "**/*.md" "**/*.t.md"
+      '';
+      description = "Sync every shared documentation block from its provider.";
+    };
     "lint:actions" = {
       exec = "actionlint .github/workflows/*.yml";
       description = "Validate GitHub Actions workflows.";
@@ -164,6 +183,7 @@ in
         set -euo pipefail
         lint:format
         lint:dart
+        lint:docs
         lint:kotlin
         lint:swift
         lint:actions
