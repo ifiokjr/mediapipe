@@ -29,7 +29,7 @@ Add the package:
 
 ```yaml
 dependencies:
-  mp_vision: ^0.1.0
+  { { name } }: ^0.1.0
 ```
 
 `Cross-platform MediaPipe vision tasks for Dart and Flutter.`

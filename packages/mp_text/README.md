@@ -30,7 +30,7 @@ Add the package:
 
 ```yaml
 dependencies:
-  mp_text: ^0.1.0
+  { { name } }: ^0.1.0
 ```
 
 `Cross-platform MediaPipe text tasks for Dart and Flutter.`

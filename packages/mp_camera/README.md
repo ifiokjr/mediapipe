@@ -25,7 +25,7 @@ Add the package:
 
 ```yaml
 dependencies:
-  mp_camera: ^0.1.0
+  { { name } }: ^0.1.0
 ```
 
 `Camera frame conversion and scheduling for MP vision tasks in Flutter.`

@@ -3,10 +3,26 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mp_camera/mp_camera.dart';
 import 'package:mp_core/mp_core.dart';
 import 'package:mp_vision/mp_vision.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+
+/// Requests the camera permission from the host activity. The `camera` plugin
+/// reports a denial as a generic initialization failure, so the demo asks first
+/// and can show an actionable message.
+const MethodChannel _permissions = MethodChannel('dev.ifiokjr.mp_device_demo/permissions');
+
+Future<bool> _ensureCameraPermission() async {
+  if (!Platform.isAndroid) return true;
+  try {
+    return await _permissions.invokeMethod<bool>('ensureCameraPermission') ?? false;
+  } on PlatformException catch (error) {
+    debugPrint('Permission request failed: $error');
+    return false;
+  }
+}
 
 /// Face detector model from MediaPipe's public asset bucket. The digest is
 /// verified before the bytes reach the runtime.
@@ -111,6 +127,10 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
       _detector = detector;
 
       _setStatus('Opening the camera…');
+      if (!await _ensureCameraPermission()) {
+        _setStatus('Camera permission was denied. Grant it and restart the demo.');
+        return;
+      }
       final List<CameraDescription> cameras = await availableCameras();
       if (cameras.isEmpty) {
         _setStatus('No camera is available on this device.');

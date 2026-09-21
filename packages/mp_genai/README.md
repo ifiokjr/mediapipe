@@ -26,7 +26,7 @@ Add the package:
 
 ```yaml
 dependencies:
-  mp_genai: ^0.1.0
+  { { name } }: ^0.1.0
 ```
 
 `MediaPipe generative AI APIs for Flutter with Web and Android backends.`

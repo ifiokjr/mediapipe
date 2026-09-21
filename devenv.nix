@@ -140,6 +140,10 @@ in
       '';
       description = "Verify shared documentation blocks and docs metadata.";
     };
+    "docs:links" = {
+      exec = "repo-dart run tool/check_docs_links.dart";
+      description = "Verify every link in the built documentation site resolves.";
+    };
     "docs:update" = {
       exec = ''
         set -euo pipefail
@@ -256,14 +260,38 @@ in
       '';
       description = "Run plugin and classic-runtime tests on an attached Android device.";
     };
+    "test:device-demo" = {
+      exec = ''
+        set -euo pipefail
+        device_id="''${SEEKER_DEVICE_ID:-SM02E4060324957}"
+        if [ ! -f "$DEVENV_ROOT/.mp-sdk/android-arm64/manifest.json" ]; then
+          echo "Build the Android runtime first: native:build --target android-arm64" >&2
+          exit 1
+        fi
+        cd examples/device_demo
+        repo-flutter run -d "$device_id"
+      '';
+      description = "Build and launch the live camera demo on an attached Android device.";
+    };
     "test:all" = {
       exec = ''
         set -euo pipefail
         test:unit
+        test:examples
         test:web
         docs:build
+        docs:links
       '';
-      description = "Run unit tests and build the documentation site.";
+      description = "Run unit and example tests, then build and validate the documentation site.";
+    };
+    "test:examples" = {
+      exec = ''
+        set -euo pipefail
+        for example in core_model_assets vision_face_detection text_language_detection text_tasks audio_classification; do
+          (cd examples/cli && repo-dart run "bin/''${example}.dart" >/dev/null)
+        done
+      '';
+      description = "Run every Dart example against a real MediaPipe runtime.";
     };
     "docs:serve" = {
       exec = ''

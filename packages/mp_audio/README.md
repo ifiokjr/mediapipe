@@ -16,7 +16,7 @@ Add the package:
 
 ```yaml
 dependencies:
-  mp_audio: ^0.1.0
+  { { name } }: ^0.1.0
 ```
 
 `Cross-platform MediaPipe audio tasks for Dart and Flutter.`
