@@ -67,9 +67,6 @@ jobs:
       - name: Run unit tests
         run: test:unit
 
-      - name: Run examples against a real runtime
-        run: test:examples
-
       - name: Build browser examples and run browser integration
         run: test:web
 
@@ -201,6 +198,12 @@ jobs:
         run: test:native
         shell: devenv shell bash -- -e {0}
 
+      - name: Run examples against the built runtime
+        # The examples download digest-pinned models and run real inference
+        # through the same C runtime this job just built.
+        run: test:examples
+        shell: devenv shell bash -- -e {0}
+
   native-linux:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -231,6 +234,12 @@ jobs:
 
       - name: Run native model integration
         run: test:native
+        shell: devenv shell bash -- -e {0}
+
+      - name: Run examples against the built runtime
+        # The examples download digest-pinned models and run real inference
+        # through the same C runtime this job just built.
+        run: test:examples
         shell: devenv shell bash -- -e {0}
 
   native-android:

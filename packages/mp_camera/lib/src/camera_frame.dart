@@ -36,6 +36,12 @@ final class MpCameraClock {
   final Stopwatch _stopwatch;
   int _lastTimestampMs = -1;
 
+  /// The most recently issued timestamp, or `null` before the first request.
+  ///
+  /// Useful for asserting monotonicity in tests and for reporting the latency
+  /// between a camera callback and the timestamp it was assigned.
+  int? get lastTimestampMs => _lastTimestampMs == -1 ? null : _lastTimestampMs;
+
   /// Returns a timestamp greater than the preceding value.
   ///
   /// Camera callbacks can arrive more than once in the same millisecond. MP
