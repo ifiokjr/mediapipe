@@ -75,6 +75,10 @@ final class FaceDetector extends _VisionTask<DetectionResult> {
       FaceDetector._(options, await (runtime ?? defaultVisionRuntime).createFaceDetector(options));
 
   /// Results emitted by [detectAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<DetectionResult>> get results => liveResults;
 
   /// Detects faces in an unrelated still [image].
@@ -111,6 +115,10 @@ final class FaceLandmarker extends _VisionTask<FaceLandmarkerResult> {
   );
 
   /// Results emitted by [detectAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<FaceLandmarkerResult>> get results => liveResults;
 
   /// Detects facial landmarks in an unrelated still [image].
@@ -149,6 +157,10 @@ final class GestureRecognizer extends _VisionTask<GestureRecognizerResult> {
   );
 
   /// Results emitted by [recognizeAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<GestureRecognizerResult>> get results => liveResults;
 
   /// Recognizes gestures in an unrelated still [image].
@@ -187,6 +199,10 @@ final class HandLandmarker extends _VisionTask<HandLandmarkerResult> {
   );
 
   /// Results emitted by [detectAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<HandLandmarkerResult>> get results => liveResults;
 
   /// Detects hand landmarks in an unrelated still [image].
@@ -225,6 +241,10 @@ final class HolisticLandmarker extends _VisionTask<HolisticLandmarkerResult> {
   );
 
   /// Results emitted by [detectAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<HolisticLandmarkerResult>> get results => liveResults;
 
   /// Detects holistic landmarks in an unrelated still [image].
@@ -263,6 +283,10 @@ final class ImageClassifier extends _VisionTask<ClassificationResult> {
   );
 
   /// Results emitted by [classifyAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<ClassificationResult>> get results => liveResults;
 
   /// Classifies an unrelated still [image].
@@ -301,6 +325,10 @@ final class ImageEmbedder extends _VisionTask<EmbeddingResult> {
   );
 
   /// Results emitted by [embedAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<EmbeddingResult>> get results => liveResults;
 
   /// Extracts embeddings from an unrelated still [image].
@@ -337,6 +365,10 @@ final class ImageSegmenter extends _VisionTask<ImageSegmenterResult> {
   );
 
   /// Results emitted by [segmentAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<ImageSegmenterResult>> get results => liveResults;
 
   /// Segments an unrelated still [image].
@@ -410,6 +442,10 @@ final class ObjectDetector extends _VisionTask<DetectionResult> {
   );
 
   /// Results emitted by [detectAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<DetectionResult>> get results => liveResults;
 
   /// Detects objects in an unrelated still [image].
@@ -446,6 +482,10 @@ final class PoseLandmarker extends _VisionTask<PoseLandmarkerResult> {
   );
 
   /// Results emitted by [detectAsync].
+  ///
+  /// Subscribe before submitting the first frame. The stream is broadcast with
+  /// no replay buffer, so a result that is emitted while no listener is attached
+  /// is dropped rather than retained.
   Stream<VisionLiveResult<PoseLandmarkerResult>> get results => liveResults;
 
   /// Detects pose landmarks in an unrelated still [image].

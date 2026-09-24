@@ -1,0 +1,34 @@
+name: mp_device_demo
+description: Live camera and device-motion demo for the MP MediaPipe SDK.
+version: 0.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+resolution: workspace
+
+# The demo resolves the native MediaPipe runtime from a locally built `.mp-sdk`
+# directory so it can run on a device before release artifacts exist.
+hooks:
+  user_defines:
+    mp_core:
+      native_library_directory: .mp-sdk
+
+dependencies:
+  camera: ^0.12.1
+  flutter:
+    sdk: flutter
+  mp_camera: ^0.0.0
+  mp_core: ^0.0.0
+  mp_vision: ^0.0.0
+  sensors_plus: ^7.1.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

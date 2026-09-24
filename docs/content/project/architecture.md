@@ -21,6 +21,20 @@ MediaPipe’s aggregate C target contains all classic vision, text, and audio ta
 
 The committed bindings are reviewed like source. CI regenerates them and fails on drift. Native results are copied into immutable Dart values and closed in the same operation.
 
+Pinned upstream versions:
+
+<!-- {=upstreamVersions} -->
+
+| Upstream component        | Pinned version |
+| ------------------------- | -------------- |
+| MediaPipe Tasks C library | `v1.0.0`       |
+| `@mediapipe/tasks-vision` | `1.0.1`        |
+| `@mediapipe/tasks-text`   | `1.0.1`        |
+| `@mediapipe/tasks-audio`  | `1.0.1`        |
+| `@mediapipe/tasks-genai`  | `0.10.29`      |
+
+<!-- {/upstreamVersions} -->
+
 ## Web runtime
 
 Conditional exports keep `dart:js_interop` out of native compilation and `dart:io`/FFI out of web compilation. Web adapters import exact upstream ESM versions, convert public inputs, and normalize JavaScript results into the same immutable types.

@@ -172,7 +172,10 @@ abstract base class _MobileLlmTask implements MpTask {
   Future<T> runExclusive<T>(Future<T> Function() operation) {
     ensureAvailable();
     _busy = true;
-    final Future<T> result = operation().whenComplete(() => _busy = false);
+    // `Future.sync` turns a synchronous throw inside [operation] into a rejected
+    // future so `whenComplete` always clears `_busy`. Calling `operation()`
+    // directly would skip the cleanup and strand this task as permanently busy.
+    final Future<T> result = Future<T>.sync(operation).whenComplete(() => _busy = false);
     _activeOperation = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
   }

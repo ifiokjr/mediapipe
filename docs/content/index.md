@@ -3,7 +3,12 @@ title: Overview
 description: Packages, public APIs, runtime backends, and current platform support.
 ---
 
-> MP is an independent community SDK. It is not an official Google product and is not affiliated with or endorsed by Google.
+> <!-- {=independenceNotice} -->
+
+MP is independent software. MediaPipe is a trademark of Google LLC; this
+project is not affiliated with or endorsed by Google.
+
+<!-- {/independenceNotice} -->
 
 ## Package layout
 
@@ -11,14 +16,18 @@ The workspace contains six public packages. Depend on the package for the task f
 
 <PackageGrid/>
 
-| If you need                                                                             | Add         |
-| --------------------------------------------------------------------------------------- | ----------- |
-| Shared model, image, audio, result, or error types                                      | `mp_core`   |
-| Camera image conversion and frame scheduling                                            | `mp_camera` |
-| Detection, landmarks, classification, embedding, or segmentation for images             | `mp_vision` |
-| Language detection, text classification, text embedding, proofreading, or summarization | `mp_text`   |
-| Audio classification                                                                    | `mp_audio`  |
-| LLM inference, function calling, RAG, or image generation                               | `mp_genai`  |
+<!-- {=packageTableDocs} -->
+
+| Package                        | Purpose                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| [`mp_core`](packages/core)     | Models, inputs, result containers, lifecycle, native assets, and web support                                                   |
+| [`mp_vision`](packages/vision) | The 11 vision tasks in the current MediaPipe Solutions guide, with image, video, and live-stream entry points where applicable |
+| [`mp_camera`](packages/camera) | Flutter camera conversion, orientation metadata, and latest-frame scheduling                                                   |
+| [`mp_text`](packages/text)     | Language detection, classification, embedding, proofreading, and summarization                                                 |
+| [`mp_audio`](packages/audio)   | Audio-clip and streaming classification                                                                                        |
+| [`mp_genai`](packages/genai)   | LLM inference, Android function calling, RAG, and image generation                                                             |
+
+<!-- {/packageTableDocs} -->
 
 ## Common API shape
 
@@ -47,12 +56,16 @@ Task constructors accept an optional runtime, so unit tests can inject a fake wi
 
 The classic task packages expose the public MediaPipe Tasks families available through the upstream C and web SDKs:
 
+<!-- {=taskSurfaceTable} -->
+
 | Package     | Tasks                                                                                                                                                                |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mp_vision` | Image classification and embedding, object and face detection, image and interactive segmentation, gesture recognition, and hand, pose, face, and holistic landmarks |
 | `mp_text`   | Language detection, text classification, text embedding, text proofreading, text summarization                                                                       |
 | `mp_audio`  | Audio classification for clips and timestamped frames                                                                                                                |
 | `mp_genai`  | LLM sessions and streaming; Android function calling, RAG, and diffusion image generation                                                                            |
+
+<!-- {/taskSurfaceTable} -->
 
 ## Runtime boundaries
 

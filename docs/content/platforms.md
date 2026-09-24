@@ -18,6 +18,15 @@ The goal is one Dart API across Flutter’s supported platforms. “Supported”
 
 This table is intentionally conservative. A platform becomes supported only after artifact packaging and a real-model integration test are green.
 
+**Current release status:** web adapters are implemented and verified with real
+models in continuous integration. Native desktop and Android classic tasks are
+implemented and verified in CI and on a device, but published packages do not
+yet bundle a native runtime — the artifact catalog is filled by the Native
+artifacts workflow, which must run before a release claims desktop support.
+Until then, native builds resolve the runtime from a local `.mp-sdk` build via
+the `native_library_directory` user define. A build without a runtime reports
+`MpStatus.unavailable` with the remedy in the message.
+
 ## Web
 
 The web runtimes load pinned official ESM releases from jsDelivr. Model URLs with a SHA-256 digest are fetched and verified before their bytes enter MediaPipe. Vision live-stream calls are serialized over the official video API because the JavaScript Tasks surface exposes image and video modes. Audio streaming similarly classifies independent timestamped chunks.
