@@ -35,6 +35,7 @@ final class WebTextRuntime implements TextRuntime {
       'forTextTasks',
       <JSAny?>[assets.wasmRoot.toString().toJS],
     );
+
     return (fileset: await promise.toDart, module: module);
   }
 
@@ -48,6 +49,7 @@ final class WebTextRuntime implements TextRuntime {
     );
     try {
       return await promise.toDart;
+
     } on Object catch (error) {
       throw MpException(
         MpStatus.internal,
@@ -134,9 +136,11 @@ final class _WebLanguageDetector extends _WebTextTask implements LanguageDetecto
     final JSAny? raw = callWebMethod<JSAny?>(task, 'detect', <JSAny?>[text.toJS]);
     final Map<Object?, Object?> result = webDartify(raw)! as Map<Object?, Object?>;
     final List<Object?> languages = result['languages']! as List<Object?>;
+
     return LanguageDetectorResult(
       languages.map((Object? value) {
         final Map<Object?, Object?> prediction = value! as Map<Object?, Object?>;
+
         return LanguagePrediction(
           languageCode: prediction['languageCode']! as String,
           probability: (prediction['probability']! as num).toDouble(),
@@ -153,6 +157,7 @@ final class _WebTextClassifier extends _WebTextTask implements TextClassifierBac
   Future<ClassificationResult> classify(String text) async {
     ensureOpen();
     final JSAny? raw = callWebMethod<JSAny?>(task, 'classify', <JSAny?>[text.toJS]);
+
     return webClassificationResult(webDartify(raw)! as Map<Object?, Object?>);
   }
 }
@@ -164,6 +169,7 @@ final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend
   Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) async {
     ensureOpen();
     final List<JSAny?> arguments = <JSAny?>[text.toJS];
+
     if (formatContext != null) {
       arguments.add(
         webJsify(<String, Object?>{
@@ -185,9 +191,11 @@ final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend
         }),
       );
     }
+
     final JSAny? raw = callWebMethod<JSAny?>(task, 'embed', arguments);
     final Map<Object?, Object?> result = webDartify(raw)! as Map<Object?, Object?>;
     final List<Object?> embeddings = result['embeddings']! as List<Object?>;
+
     return EmbeddingResult(
       timestampMs: webOptionalInt(result['timestampMs']),
       embeddings: embeddings.map((Object? value) {
@@ -201,6 +209,7 @@ final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend
             headName: headName,
           );
         }
+
         final Object? quantized = embedding['quantizedEmbedding'];
         final Uint8List values = switch (quantized) {
           final Uint8List bytes => bytes,
@@ -209,6 +218,7 @@ final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend
           ),
           _ => throw const MpException(MpStatus.internal, 'MediaPipe returned an empty embedding.'),
         };
+
         return Embedding.quantized(values, headIndex: headIndex, headName: headName);
       }),
     );

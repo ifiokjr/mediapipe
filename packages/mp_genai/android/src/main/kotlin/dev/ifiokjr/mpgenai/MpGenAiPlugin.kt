@@ -432,6 +432,7 @@ class MpGenAiPlugin :
         executor.execute {
             try {
                 val generator =
+
                     if (conditions == null) {
                         ImageGenerator.createFromOptions(applicationContext, options.build())
                     } else {
@@ -441,6 +442,7 @@ class MpGenAiPlugin :
                             conditions,
                         )
                     }
+
                 val handle = nextHandle.getAndIncrement()
                 imageGenerators[handle] = generator
                 result.successOnMain(handle)
@@ -466,6 +468,7 @@ class MpGenAiPlugin :
         executor.execute {
             try {
                 val output =
+
                     if (conditionType == null || ownedImage == null) {
                         generator.generate(prompt, iterations, seed)
                     } else {
@@ -477,6 +480,7 @@ class MpGenAiPlugin :
                             seed,
                         )
                     }
+
                 result.successOnMain(output.toDartResult())
             } catch (error: Throwable) {
                 result.errorOnMain(error)
@@ -512,6 +516,7 @@ class MpGenAiPlugin :
                         seed,
                     )
                 }
+
                 result.successOnMain(null)
             } catch (error: Throwable) {
                 result.errorOnMain(error)
@@ -589,12 +594,14 @@ class MpGenAiPlugin :
                 .setAddPromptTemplate(call.requiredBoolean("addPromptTemplate"))
                 .build()
         val formatter: ModelFormatter =
+
             when (call.requiredString("formatter")) {
                 "gemma" -> GemmaFormatter(formatterOptions)
                 "llama" -> LlamaFormatter(formatterOptions)
                 "hammer" -> HammerFormatter(formatterOptions)
                 else -> throw IllegalArgumentException("Unknown function-calling formatter")
             }
+
         val systemInstruction = call.argument<Map<String, Any?>>("systemInstruction")?.toContent()
         val tools =
             call
@@ -609,6 +616,7 @@ class MpGenAiPlugin :
                 val initializedBackend = LlmInferenceBackend(inference, sessionOptions, formatter)
                 backend = initializedBackend
                 val model =
+
                     when {
                         tools.isNotEmpty() -> {
                             GenerativeModel(
@@ -626,6 +634,7 @@ class MpGenAiPlugin :
                             GenerativeModel(initializedBackend)
                         }
                     }
+
                 val handle = nextHandle.getAndIncrement()
                 functionModels[handle] = FunctionModelHolder(model, initializedBackend)
                 result.successOnMain(handle)
@@ -635,6 +644,7 @@ class MpGenAiPlugin :
                 } else {
                     runCatching { backend.close() }
                 }
+
                 result.errorOnMain(error)
             }
         }
@@ -1059,11 +1069,13 @@ class MpGenAiPlugin :
         error: Throwable,
     ) {
         val code =
+
             if (error is java.util.concurrent.CancellationException) {
                 "cancelled"
             } else {
                 "internal"
             }
+
         emit(
             mapOf(
                 "kind" to "error",
@@ -1080,36 +1092,42 @@ class MpGenAiPlugin :
 
     private fun MethodCall.requiredEngine(): LlmInference {
         val handle = requiredLong("handle")
+
         return engines[handle]
             ?: throw IllegalArgumentException("Unknown LlmInference handle: $handle")
     }
 
     private fun MethodCall.requiredSession(): LlmInferenceSession {
         val handle = requiredLong("handle")
+
         return sessions[handle]
             ?: throw IllegalArgumentException("Unknown LlmSession handle: $handle")
     }
 
     private fun MethodCall.requiredImageGenerator(): ImageGenerator {
         val handle = requiredLong("handle")
+
         return imageGenerators[handle]
             ?: throw IllegalArgumentException("Unknown ImageGenerator handle: $handle")
     }
 
     private fun MethodCall.requiredFunctionModel(): FunctionModelHolder {
         val handle = requiredLong("handle")
+
         return functionModels[handle]
             ?: throw IllegalArgumentException("Unknown GenerativeModel handle: $handle")
     }
 
     private fun MethodCall.requiredFunctionChat(): FunctionChatHolder {
         val handle = requiredLong("handle")
+
         return functionChats[handle]
             ?: throw IllegalArgumentException("Unknown FunctionCallingChat handle: $handle")
     }
 
     private fun MethodCall.requiredRagPipeline(): RagPipelineHolder {
         val handle = requiredLong("handle")
+
         return ragPipelines[handle]
             ?: throw IllegalArgumentException("Unknown RagPipeline handle: $handle")
     }
@@ -1118,6 +1136,8 @@ class MpGenAiPlugin :
         val modelPath = requiredString("modelPath")
         val tokenizerPath = optionalStringValue("tokenizerPath")
         val useGpu = requiredBoolean("useGpu")
+
+
         return when (requiredString("kind")) {
             "gecko" -> {
                 GeckoEmbeddingModel(modelPath, Optional.ofNullable(tokenizerPath), useGpu)
@@ -1138,6 +1158,7 @@ class MpGenAiPlugin :
     }
 
     private fun Map<String, Any?>.toVectorStore(): VectorStore<String> =
+
         when (requiredString("kind")) {
             "memory" -> {
                 DefaultVectorStore()
@@ -1152,6 +1173,7 @@ class MpGenAiPlugin :
                 val rawColumns =
                     this["columns"] as? List<Map<String, Any?>>
                         ?: throw IllegalArgumentException("vectorStore.columns must be a list")
+
                 if (tableName == null && textColumnName == null && embeddingsColumnName == null) {
                     SqliteVectorStore(dimensions, databasePath)
                 } else {
@@ -1235,17 +1257,20 @@ class MpGenAiPlugin :
                 .setPreferredBackend(preferredBackend())
         val visionEncoder = optionalString("visionEncoderPath")
         val visionAdapter = optionalString("visionAdapterPath")
+
         if (visionEncoder != null || visionAdapter != null) {
             val vision = VisionModelOptions.builder()
             visionEncoder?.let(vision::setEncoderPath)
             visionAdapter?.let(vision::setAdapterPath)
             options.setVisionModelOptions(vision.build())
         }
+
         optionalInt("maxAudioSequenceLength")?.let { maxLength ->
             options.setAudioModelOptions(
                 AudioModelOptions.builder().setMaxAudioSequenceLength(maxLength).build(),
             )
         }
+
         return options.build()
     }
 
@@ -1253,6 +1278,7 @@ class MpGenAiPlugin :
         val face = argument<Map<String, Any?>>("faceCondition")
         val edge = argument<Map<String, Any?>>("edgeCondition")
         val depth = argument<Map<String, Any?>>("depthCondition")
+
         if (face == null && edge == null && depth == null) return null
         val builder = ImageGenerator.ConditionOptions.builder()
         face?.let { values ->
@@ -1289,6 +1315,7 @@ class MpGenAiPlugin :
                     .build(),
             )
         }
+
         return builder.build()
     }
 
@@ -1299,6 +1326,7 @@ class MpGenAiPlugin :
         requiredString("conditionType").toConditionType()
 
     private fun String.toConditionType(): ImageGenerator.ConditionOptions.ConditionType =
+
         when (this) {
             "face" -> ImageGenerator.ConditionOptions.ConditionType.FACE
             "edge" -> ImageGenerator.ConditionOptions.ConditionType.EDGE
@@ -1314,6 +1342,7 @@ class MpGenAiPlugin :
             ?: throw IllegalArgumentException("image must be a map")
 
     private fun MethodCall.preferredBackend(): LlmInference.Backend =
+
         when (requiredString("preferredBackend")) {
             "defaultBackend" -> LlmInference.Backend.DEFAULT
             "cpu" -> LlmInference.Backend.CPU
@@ -1331,6 +1360,7 @@ class MpGenAiPlugin :
                 .setRandomSeed(requiredInt("randomSeed"))
         optionalString("loraPath")?.let(builder::setLoraPath)
         argument<Number>("constraintHandle")?.toLong()?.let(builder::setConstraintHandle)
+
         if (hasArgument("includeTokenCostCalculator")) {
             builder.setGraphOptions(
                 GraphOptions
@@ -1341,6 +1371,7 @@ class MpGenAiPlugin :
                     .build(),
             )
         }
+
         argument<Map<String, Any?>>("promptTemplates")?.let { values ->
             builder.setPromptTemplates(
                 PromptTemplates
@@ -1354,6 +1385,7 @@ class MpGenAiPlugin :
                     .build(),
             )
         }
+
         return builder.build()
     }
 
@@ -1424,6 +1456,7 @@ class MpGenAiPlugin :
                 requiredInt("height"),
                 requiredString("format"),
             )
+
         return OwnedMpImage(BitmapImageBuilder(bitmap).build(), bitmap)
     }
 
@@ -1433,11 +1466,13 @@ class MpGenAiPlugin :
                 ?: throw IllegalArgumentException("content.parts must be a list")
         val builder = Content.newBuilder().setRole(requiredString("role"))
         parts.forEach { builder.addParts(it.toPart()) }
+
         return builder.build()
     }
 
     private fun Map<String, Any?>.toPart(): Part {
         val builder = Part.newBuilder()
+
         when (requiredString("kind")) {
             "text" -> {
                 builder.setText(requiredString("text"))
@@ -1467,6 +1502,7 @@ class MpGenAiPlugin :
                 throw IllegalArgumentException("Unknown function content part")
             }
         }
+
         return builder.build()
     }
 
@@ -1474,6 +1510,7 @@ class MpGenAiPlugin :
         val declarations =
             this["declarations"] as? List<Map<String, Any?>>
                 ?: throw IllegalArgumentException("tool.declarations must be a list")
+
         return Tool
             .newBuilder()
             .addAllFunctionDeclarations(declarations.map { it.toDeclaration() })
@@ -1488,6 +1525,7 @@ class MpGenAiPlugin :
                 .setDescription(requiredString("description"))
         (this["parameters"] as? Map<String, Any?>)?.let { builder.setParameters(it.toSchema()) }
         (this["response"] as? Map<String, Any?>)?.let { builder.setResponse(it.toSchema()) }
+
         return builder.build()
     }
 
@@ -1516,10 +1554,12 @@ class MpGenAiPlugin :
             this["anyOf"] as? List<Map<String, Any?>>
                 ?: throw IllegalArgumentException("schema.anyOf must be a list")
         builder.addAllAnyOf(anyOf.map { it.toSchema() })
+
         return builder.build()
     }
 
     private fun String.toSchemaType(): Type =
+
         when (this) {
             "string" -> Type.STRING
             "number" -> Type.NUMBER
@@ -1533,6 +1573,7 @@ class MpGenAiPlugin :
 
     private fun Map<String, Any?>.toConstraintOptions(): ConstraintOptions {
         val builder = ConstraintOptions.newBuilder()
+
         when (requiredString("kind")) {
             "toolCallOnly" -> {
                 builder.setToolCallOnly(
@@ -1566,6 +1607,7 @@ class MpGenAiPlugin :
                 throw IllegalArgumentException("Unknown function-calling constraint")
             }
         }
+
         return builder.build()
     }
 
@@ -1579,6 +1621,7 @@ class MpGenAiPlugin :
         )
 
     private fun Part.toDartPart(): Map<String, Any?> =
+
         when (dataCase) {
             Part.DataCase.TEXT -> {
                 mapOf("kind" to "text", "text" to text)
@@ -1628,11 +1671,13 @@ class MpGenAiPlugin :
     private fun Map<String, Any?>.toStruct(): Struct {
         val builder = Struct.newBuilder()
         forEach { (name, value) -> builder.putFields(name, value.toProtoValue()) }
+
         return builder.build()
     }
 
     private fun Any?.toProtoValue(): Value {
         val builder = Value.newBuilder()
+
         when (this) {
             null -> {
                 builder.setNullValue(NullValue.NULL_VALUE)
@@ -1673,6 +1718,7 @@ class MpGenAiPlugin :
                 throw IllegalArgumentException("Value is not JSON-compatible")
             }
         }
+
         return builder.build()
     }
 
@@ -1680,6 +1726,7 @@ class MpGenAiPlugin :
         fieldsMap.mapValues { it.value.toDartValue() }
 
     private fun Value.toDartValue(): Any? =
+
         when (kindCase) {
             Value.KindCase.NULL_VALUE -> null
             Value.KindCase.BOOL_VALUE -> boolValue
@@ -1701,6 +1748,7 @@ class MpGenAiPlugin :
     }
 
     private fun Throwable.platformCode(): String =
+
         when (this) {
             is IllegalArgumentException -> "invalid_argument"
             is IllegalStateException -> "failed_precondition"
@@ -1718,20 +1766,24 @@ class MpGenAiPlugin :
     ): Bitmap {
         require(width > 0 && height > 0) { "Image dimensions must be positive" }
         val channels =
+
             when (format) {
                 "gray8" -> 1
                 "srgb" -> 3
                 "srgba" -> 4
                 else -> throw IllegalArgumentException("Unsupported Android image format: $format")
             }
+
         require(size == width * height * channels) { "Image data has an invalid length" }
         val pixels = IntArray(width * height)
+
         for (index in pixels.indices) {
             val offset = index * channels
             val red: Int
             val green: Int
             val blue: Int
             val alpha: Int
+
             if (channels == 1) {
                 red = this[offset].toInt() and 0xff
                 green = red
@@ -1743,8 +1795,10 @@ class MpGenAiPlugin :
                 blue = this[offset + 2].toInt() and 0xff
                 alpha = if (channels == 4) this[offset + 3].toInt() and 0xff else 0xff
             }
+
             pixels[index] = (alpha shl 24) or (red shl 16) or (green shl 8) or blue
         }
+
         return Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
     }
 
@@ -1753,6 +1807,7 @@ class MpGenAiPlugin :
         val pixels = IntArray(bitmap.width * bitmap.height)
         bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
         val data = ByteArray(pixels.size * 4)
+
         for (index in pixels.indices) {
             val pixel = pixels[index]
             val offset = index * 4
@@ -1761,12 +1816,14 @@ class MpGenAiPlugin :
             data[offset + 2] = (pixel and 0xff).toByte()
             data[offset + 3] = ((pixel ushr 24) and 0xff).toByte()
         }
+
         return mapOf("width" to bitmap.width, "height" to bitmap.height, "data" to data)
     }
 
     private fun ImageGeneratorResult.toDartResult(): Map<String, Any?> {
         val generated = generatedImage()
         val condition = conditionImage().orElse(null)
+
         return try {
             mapOf(
                 "generatedImage" to generated.toDartImage(),

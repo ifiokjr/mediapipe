@@ -39,6 +39,7 @@ final class WebVisionRuntime implements VisionRuntime {
       'forVisionTasks',
       <JSAny?>[assets.wasmRoot.toString().toJS],
     );
+
     return (fileset: await promise.toDart, module: module);
   }
 
@@ -52,6 +53,7 @@ final class WebVisionRuntime implements VisionRuntime {
     );
     try {
       return await promise.toDart;
+
     } on Object catch (error) {
       throw MpException(
         MpStatus.internal,
@@ -218,6 +220,7 @@ final class WebVisionRuntime implements VisionRuntime {
     InteractiveSegmenterOptions options,
   ) async {
     final Map<String, Object?> baseOptions = await resolveWebBaseOptions(options.baseOptions);
+
     return _WebInteractiveSegmenter(
       createSplit: () =>
           _create('InteractiveSegmenter', <String, Object?>{'baseOptions': baseOptions}),
@@ -293,7 +296,9 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
   Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) {
     _ensureOpen();
     final List<JSAny?> arguments = <JSAny?>[webImageData(image)];
+
     if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
+
     return Future<T>.value(convert(callWebMethod<JSAny?>(_task, imageMethod, arguments)));
   }
 
@@ -305,7 +310,9 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
   ) {
     _ensureOpen();
     final List<JSAny?> arguments = <JSAny?>[webImageData(image), timestampMs.toJS];
+
     if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
+
     return Future<T>.value(convert(callWebMethod<JSAny?>(_task, videoMethod, arguments)));
   }
 
@@ -316,6 +323,7 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
     ImageProcessingOptions? processingOptions,
   ) {
     _ensureOpen();
+
     return _pending = _pending
         .then((_) async {
           final T result = await processVideo(image, timestampMs, processingOptions);
@@ -361,6 +369,8 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
     if (_isClosed) {
       throw const MpException(MpStatus.failedPrecondition, 'The interactive segmenter is closed.');
     }
+
+
     return switch (prompt) {
       StrokePrompt(:final strokes) => _segmentStrokes(image, strokes),
       KeypointPrompt() || ScribblePrompt() => _segmentLegacy(image, prompt, processingOptions),
@@ -380,6 +390,7 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
                   BrushMode.negative => 2,
                   BrushMode.lasso => 3,
                 },
+
                 'point': stroke.points
                     .map((PromptPoint point) => <String, double>{'x': point.x, 'y': point.y})
                     .toList(),
@@ -389,6 +400,7 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
             .toList(),
       ),
     ]);
+
     return webSingleConfidenceMask(mask);
   }
 
@@ -398,6 +410,7 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
     ImageProcessingOptions? processingOptions,
   ) async {
     final JSObject task = await (_legacy ??= createLegacy());
+
     final Map<String, Object?> roi = switch (prompt) {
       KeypointPrompt(:final point) => <String, Object?>{
         'keypoint': <String, double>{'x': point.x, 'y': point.y},
@@ -409,8 +422,11 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
       },
       StrokePrompt() => throw StateError('Signed strokes use the split segmenter.'),
     };
+
     final List<JSAny?> arguments = <JSAny?>[webImageData(image), webJsify(roi)];
+
     if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
+
     return webImageSegmenterResult(callWebMethod<JSAny?>(task, 'segment', arguments));
   }
 
@@ -420,6 +436,7 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
     _isClosed = true;
     final Future<JSObject>? split = _split;
     final Future<JSObject>? legacy = _legacy;
+
     if (split != null) callWebMethod<JSAny?>(await split, 'close');
     if (legacy != null) callWebMethod<JSAny?>(await legacy, 'close');
   }
@@ -427,6 +444,7 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
 
 Map<String, Object?> _processingOptions(ImageProcessingOptions options) => <String, Object?>{
   'rotationDegrees': options.rotationDegrees,
+
   if (options.regionOfInterest case final NormalizedRect roi)
     'regionOfInterest': <String, double>{
       'left': roi.left,

@@ -22,6 +22,7 @@ final class MpCameraFrameConverter {
     if (timestampMs < 0) {
       throw ArgumentError.value(timestampMs, 'timestampMs', 'must not be negative');
     }
+
     if (rotationDegrees % 90 != 0) {
       throw ArgumentError.value(rotationDegrees, 'rotationDegrees', 'must be a multiple of 90');
     }
@@ -51,15 +52,19 @@ final class MpCameraFrameConverter {
     final Plane plane = image.planes.single;
     final int rowStride = plane.bytesPerRow;
     final int minimumRowStride = image.width * 4;
+
     if (rowStride < minimumRowStride) {
       throw StateError('BGRA row stride $rowStride is smaller than $minimumRowStride.');
     }
+
     _requireBufferLength(plane, minimumLength: rowStride * image.height, format: 'BGRA8888');
 
     final Uint8List rgba = Uint8List(image.width * image.height * 4);
     int destination = 0;
+
     for (int y = 0; y < image.height; y += 1) {
       int source = y * rowStride;
+
       for (int x = 0; x < image.width; x += 1) {
         final int blue = plane.bytes[source];
         final int green = plane.bytes[source + 1];
@@ -73,6 +78,7 @@ final class MpCameraFrameConverter {
         destination += 4;
       }
     }
+
     return MpImage.uint8(
       width: image.width,
       height: image.height,
@@ -83,14 +89,18 @@ final class MpCameraFrameConverter {
 
   static MpImage _fromNv21(CameraImage image) {
     _requirePlaneCount(image, 1);
+
     if (image.width.isOdd || image.height.isOdd) {
       throw StateError('NV21 dimensions must be even, got ${image.width}x${image.height}.');
     }
+
     final Plane plane = image.planes.single;
     final int rowStride = plane.bytesPerRow;
+
     if (rowStride < image.width) {
       throw StateError('NV21 row stride $rowStride is smaller than ${image.width}.');
     }
+
     final int yPlaneLength = rowStride * image.height;
     final int chromaRows = image.height ~/ 2;
     _requireBufferLength(
@@ -101,9 +111,11 @@ final class MpCameraFrameConverter {
 
     final Uint8List rgb = Uint8List(image.width * image.height * 3);
     int destination = 0;
+
     for (int y = 0; y < image.height; y += 1) {
       final int yRow = y * rowStride;
       final int uvRow = yPlaneLength + (y ~/ 2) * rowStride;
+
       for (int x = 0; x < image.width; x += 1) {
         final int uv = uvRow + (x & ~1);
         _writeYuvPixel(
@@ -116,6 +128,7 @@ final class MpCameraFrameConverter {
         destination += 3;
       }
     }
+
     return MpImage.uint8(
       width: image.width,
       height: image.height,
@@ -126,9 +139,11 @@ final class MpCameraFrameConverter {
 
   static MpImage _fromYuv420(CameraImage image) {
     _requirePlaneCount(image, 3);
+
     if (image.width.isOdd || image.height.isOdd) {
       throw StateError('YUV420 dimensions must be even, got ${image.width}x${image.height}.');
     }
+
     final Plane yPlane = image.planes[0];
     final Plane uPlane = image.planes[1];
     final Plane vPlane = image.planes[2];
@@ -159,10 +174,12 @@ final class MpCameraFrameConverter {
 
     final Uint8List rgb = Uint8List(image.width * image.height * 3);
     int destination = 0;
+
     for (int y = 0; y < image.height; y += 1) {
       final int yRow = y * yPlane.bytesPerRow;
       final int uvRow = (y ~/ 2) * uPlane.bytesPerRow;
       final int vRow = (y ~/ 2) * vPlane.bytesPerRow;
+
       for (int x = 0; x < image.width; x += 1) {
         _writeYuvPixel(
           rgb,
@@ -174,6 +191,7 @@ final class MpCameraFrameConverter {
         destination += 3;
       }
     }
+
     return MpImage.uint8(
       width: image.width,
       height: image.height,
@@ -234,12 +252,15 @@ final class MpCameraFrameConverter {
     if (pixelStride <= 0) {
       throw StateError('$name plane pixel stride must be greater than zero.');
     }
+
     final int minimumRowLength = (width - 1) * pixelStride + 1;
+
     if (plane.bytesPerRow < minimumRowLength) {
       throw StateError(
         '$name plane row stride ${plane.bytesPerRow} is smaller than $minimumRowLength.',
       );
     }
+
     final int minimumLength = (height - 1) * plane.bytesPerRow + minimumRowLength;
     _requireBufferLength(plane, minimumLength: minimumLength, format: '$name YUV420');
   }

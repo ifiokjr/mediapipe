@@ -22,6 +22,7 @@ final class _NativeAudioRuntime implements AudioRuntime {
         task: 'AudioClassifier',
       );
     }
+
     final AudioClassifierOptions resolved = AudioClassifierOptions(
       baseOptions: BaseOptions(
         modelAsset: await native.resolveNativeModelAsset(options.baseOptions.modelAsset),
@@ -31,6 +32,7 @@ final class _NativeAudioRuntime implements AudioRuntime {
       classifierOptions: options.classifierOptions,
       runningMode: options.runningMode,
     );
+
     return _NativeAudioClassifier(
       await native.NativeTaskIsolate.spawn(
         factory: _createAudioWorker,
@@ -79,6 +81,7 @@ final class _NativeAudioClassifier implements AudioClassifierBackend {
   Future<T> _run<T>(Future<T> Function() action) {
     final Future<T> operation = _tail.then((_) => action());
     _tail = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+
     return operation;
   }
 }
@@ -91,11 +94,14 @@ final class _AudioClose {
 
 native.NativeTaskWorkerHandler _createAudioWorker(Object? initialMessage) {
   final int address = _createAudioClassifier(initialMessage! as AudioClassifierOptions);
+
   return (Object? command) {
     if (command is _AudioClose) {
       _closeAudioClassifier(address);
+
       return null;
     }
+
     return _classifyAudio(address, command! as AudioData);
   };
 }
@@ -114,6 +120,7 @@ int _createAudioClassifier(AudioClassifierOptions options) {
         .allocator<native.MpAudioClassifierPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(native.MpAudioClassifierCreate(nativeOptions, output, error), error);
+
     return output.value.address;
   } finally {
     scope.release();
@@ -146,6 +153,7 @@ AudioClassifierResult _classifyAudio(int address, AudioData audio) {
       error,
     );
     ownsResult = true;
+
     return AudioClassifierResult(
       List<ClassificationResult>.generate(
         result.ref.results_count,

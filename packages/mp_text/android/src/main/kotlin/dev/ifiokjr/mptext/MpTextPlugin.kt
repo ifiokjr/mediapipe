@@ -185,11 +185,13 @@ class MpTextPlugin :
         val modelPath = call.requiredString("modelPath")
         val maxTokens = call.optionalInt("maxTokens")
         val mode =
+
             when (call.requiredString("mode")) {
                 "tldr" -> TextSummarizer.TextSummarizerOptions.Mode.TLDR
                 "keyPoints" -> TextSummarizer.TextSummarizerOptions.Mode.KEYPOINTS
                 else -> throw IllegalArgumentException("Unknown TextSummarizer mode")
             }
+
         executor.execute {
             try {
                 val options =

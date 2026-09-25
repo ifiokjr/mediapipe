@@ -90,6 +90,7 @@ final class _FakeAudioClassifier implements AudioClassifierBackend {
   @override
   Future<AudioClassifierResult> classify(AudioData audio) async {
     classifyCount++;
+
     return AudioClassifierResult(<ClassificationResult>[
       ClassificationResult(classifications: const <Classifications>[], timestampMs: 12),
     ]);

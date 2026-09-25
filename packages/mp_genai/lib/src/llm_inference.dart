@@ -60,6 +60,7 @@ final class LlmInference implements MpTask {
   Future<LlmSession> createSession({LlmSessionOptions? options}) async {
     _lifecycle.ensureOpen();
     final LlmSessionOptions resolved = options ?? LlmSessionOptions();
+
     if (resolved.topK > this.options.maxTopK) {
       throw ArgumentError.value(
         resolved.topK,
@@ -67,6 +68,7 @@ final class LlmInference implements MpTask {
         'must not exceed the engine maxTopK (${this.options.maxTopK})',
       );
     }
+
     return LlmSession._(resolved, await _backend.createSession(resolved));
   }
 
@@ -87,7 +89,9 @@ final class LlmInference implements MpTask {
             .then<void>((_) {}, onError: (Object _, StackTrace _) {})
             .whenComplete(session.close),
       );
+
       return generation;
+
     } on Object {
       await session.close();
       rethrow;
@@ -97,6 +101,7 @@ final class LlmInference implements MpTask {
   /// Counts the model tokens in [text].
   Future<int> sizeInTokens(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.sizeInTokens(text);
   }
 
@@ -124,49 +129,59 @@ final class LlmSession implements MpTask {
   /// Adds a text [chunk] to the context.
   Future<void> addQueryChunk(String chunk) {
     _lifecycle.ensureOpen();
+
     return _backend.addQueryChunk(chunk);
   }
 
   /// Adds an [image] to the context.
   Future<void> addImage(MpImage image) {
     _lifecycle.ensureOpen();
+
     return _backend.addImage(image);
   }
 
   /// Adds mono WAV [bytes] to the context.
   Future<void> addAudio(Uint8List bytes) {
     _lifecycle.ensureOpen();
+
     if (bytes.isEmpty) throw ArgumentError.value(bytes, 'bytes', 'must not be empty');
+
     return _backend.addAudio(Uint8List.fromList(bytes));
   }
 
   /// Starts generating a response from the accumulated context.
   Future<LlmGeneration> generate() {
     _lifecycle.ensureOpen();
+
     return _backend.generate();
   }
 
   /// Counts the model tokens in [text].
   Future<int> sizeInTokens(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.sizeInTokens(text);
   }
 
   /// Clones the current session context.
   Future<LlmSession> clone() async {
     _lifecycle.ensureOpen();
+
     return LlmSession._(_options, await _backend.clone());
   }
 
   /// Updates mutable sampling [options].
   Future<void> updateOptions(LlmSessionOptions options) async {
     _lifecycle.ensureOpen();
+
     if (_options.loraAsset != options.loraAsset) {
       throw ArgumentError('loraAsset cannot change after session creation.');
     }
+
     if (_options.graphOptions != options.graphOptions) {
       throw ArgumentError('graphOptions cannot change after session creation.');
     }
+
     await _backend.updateOptions(options);
     _options = options;
   }

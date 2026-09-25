@@ -79,6 +79,7 @@ void main(List<String> arguments) {
         failures.add('/$pageRoute: "$href" resolves to /$target, which was not built.');
         continue;
       }
+
       linkedRoutes.add(target);
 
       // Crossing pages should land on the page, not on a section of it. A route
@@ -100,13 +101,16 @@ void main(List<String> arguments) {
       'docs links are consistent: ${routes.length} routes, '
       '${assets.length} assets, base path $basePath.',
     );
+
     return;
   }
 
   stderr.writeln('docs link check failed:');
+
   for (final String failure in failures) {
     stderr.writeln('  - $failure');
   }
+
   exitCode = 1;
 }
 
@@ -114,10 +118,13 @@ void main(List<String> arguments) {
 /// providers use, so the three cannot drift.
 String _basePath(Directory root) {
   final File file = File('${root.path}/docs/data/links.json');
+
   if (!file.existsSync()) return '/';
   final Object? decoded = jsonDecode(file.readAsStringSync());
+
   if (decoded is! Map<String, Object?> || decoded['docs'] is! String) return '/';
   final String path = Uri.parse(decoded['docs']! as String).path;
+
   if (path.isEmpty || path == '/') return '/';
   return path.endsWith('/') ? path : '$path/';
 }
@@ -129,16 +136,20 @@ bool _withinBase(String path, String basePath) =>
 /// Normalizes a route fragment, dropping any `index.html` suffix.
 String _routeFromPath(String path) {
   var route = path;
+
   while (route.startsWith('/')) {
     route = route.substring(1);
   }
+
   while (route.endsWith('/')) {
     route = route.substring(0, route.length - 1);
   }
+
   if (route == 'index.html') return '';
   if (route.endsWith('/index.html')) {
     return route.substring(0, route.length - '/index.html'.length);
   }
+
   return route;
 }
 
@@ -146,44 +157,53 @@ String _routeFromPath(String path) {
 /// against the base path, not against the current page.
 String _resolveAgainstBase(String href) {
   final List<String> segments = <String>[];
+
   for (final String part in href.split('/')) {
     switch (part) {
       case '' || '.':
         continue;
+
       case '..':
         if (segments.isNotEmpty) segments.removeLast();
       default:
         segments.add(part);
     }
   }
+
   return segments.join('/');
 }
 
 Set<String> _builtRoutes(Directory output) {
   final Set<String> routes = <String>{};
+
   for (final File file in output.listSync(recursive: true).whereType<File>()) {
     if (!file.path.endsWith('.html')) continue;
     routes.add(_routeFor(file, output));
   }
+
   return routes;
 }
 
 /// Static files that a page may link directly (favicons, images, robots.txt).
 Set<String> _builtAssets(Directory output) {
   final Set<String> assets = <String>{};
+
   for (final File file in output.listSync(recursive: true).whereType<File>()) {
     if (file.path.endsWith('.html')) continue;
     assets.add(_routeFor(file, output));
   }
+
   return assets;
 }
 
 String _routeFor(File file, Directory output) {
   final String relative = file.path.substring(output.path.length + 1);
+
   if (relative == 'index.html') return '';
   if (relative.endsWith('/index.html')) {
     return relative.substring(0, relative.length - '/index.html'.length);
   }
+
   return relative;
 }
 
@@ -191,11 +211,14 @@ String _routeFor(File file, Directory output) {
 /// fails to render is still reported.
 Set<String> _contentRoutes(Directory content) {
   final Set<String> routes = <String>{};
+
   for (final File file in content.listSync(recursive: true).whereType<File>()) {
     if (!file.path.endsWith('.md')) continue;
     final String relative = file.path.substring(content.path.length + 1);
+
     if (relative.startsWith('_')) continue;
     final String withoutExtension = relative.substring(0, relative.length - 3);
+
     if (withoutExtension == 'index') {
       routes.add('');
     } else if (withoutExtension.endsWith('/index')) {
@@ -204,5 +227,6 @@ Set<String> _contentRoutes(Directory content) {
       routes.add(withoutExtension);
     }
   }
+
   return routes;
 }

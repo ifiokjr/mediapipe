@@ -129,6 +129,7 @@ final class MpAssetCache {
   /// Creates a cache under the system temporary directory, or `MP_EXAMPLE_CACHE`.
   factory MpAssetCache.defaults() {
     final String? override = Platform.environment['MP_EXAMPLE_CACHE'];
+
     if (override != null && override.isNotEmpty) return MpAssetCache(Directory(override));
     return MpAssetCache(Directory.systemTemp.createTempSync('mp_examples_'));
   }
@@ -144,22 +145,26 @@ final class MpAssetCache {
   /// fails with the expected and actual hashes instead of a task-creation error.
   Future<Uint8List> bytes(MpExampleAsset asset, {http.Client? client}) async {
     final Uint8List? cached = _memory[asset.url];
+
     if (cached != null) return cached;
 
     final File file = File('${directory.path}/${asset.name}');
     final Uint8List result;
+
     if (file.existsSync()) {
       result = file.readAsBytesSync();
     } else {
       final http.Client httpClient = client ?? http.Client();
       try {
         final http.Response response = await httpClient.get(Uri.parse(asset.url));
+
         if (response.statusCode != 200) {
           throw MpException(
             MpStatus.unavailable,
             'Could not download ${asset.name}: HTTP ${response.statusCode}.',
           );
         }
+
         result = response.bodyBytes;
         directory.createSync(recursive: true);
         file.writeAsBytesSync(result, flush: true);
@@ -167,7 +172,9 @@ final class MpAssetCache {
         if (client == null) httpClient.close();
       }
     }
+
     _memory[asset.url] = result;
+
     return result;
   }
 
@@ -177,6 +184,7 @@ final class MpAssetCache {
   /// needs to hand over the bytes.
   Future<ModelAsset> model(MpExampleAsset asset, {http.Client? client}) async {
     final Uint8List data = await bytes(asset, client: client);
+
     return ModelAsset.bytes(data, name: asset.name);
   }
 }
@@ -188,9 +196,11 @@ final class MpAssetCache {
 /// [height] to resize; classifier models usually require a fixed input size.
 MpImage mpImageFromBytes(Uint8List bytes, {int? width, int? height}) {
   img.Image? decoded = img.decodeImage(bytes);
+
   if (decoded == null) {
     throw const MpException(MpStatus.invalidArgument, 'The example image could not be decoded.');
   }
+
   if (width != null && height != null && (decoded.width != width || decoded.height != height)) {
     decoded = img.copyResize(
       decoded,
@@ -199,7 +209,9 @@ MpImage mpImageFromBytes(Uint8List bytes, {int? width, int? height}) {
       interpolation: img.Interpolation.linear,
     );
   }
+
   final img.Image rgb = decoded.numChannels == 3 ? decoded : decoded.convert(numChannels: 3);
+
   return MpImage.uint8(
     width: rgb.width,
     height: rgb.height,
@@ -234,6 +246,7 @@ AudioData mpAudioFromWav(Uint8List bytes) {
       offset + 8,
     ).getUint32(0, Endian.little);
     final int body = offset + 8;
+
     if (chunkId == 'fmt ' && body + 16 <= bytes.length) {
       channelCount = ByteData.sublistView(bytes, body + 2, body + 4).getUint16(0, Endian.little);
       sampleRate = ByteData.sublistView(bytes, body + 4, body + 8).getUint32(0, Endian.little);
@@ -242,12 +255,14 @@ AudioData mpAudioFromWav(Uint8List bytes) {
       final int end = (body + chunkSize).clamp(body, bytes.length);
       samples = Uint8List.sublistView(bytes, body, end);
     }
+
     offset = body + chunkSize + (chunkSize.isOdd ? 1 : 0);
   }
 
   if (samples == null) {
     throw const MpException(MpStatus.invalidArgument, 'The example audio has no data chunk.');
   }
+
   if (bitsPerSample != 16) {
     throw MpException(
       MpStatus.unimplemented,
@@ -256,11 +271,13 @@ AudioData mpAudioFromWav(Uint8List bytes) {
   }
 
   final Float32List mono = Float32List(samples.length ~/ 2 ~/ channelCount);
+
   for (var frame = 0; frame < mono.length; frame++) {
     final int byteOffset = frame * channelCount * 2;
     mono[frame] =
         ByteData.sublistView(samples, byteOffset, byteOffset + 2).getInt16(0, Endian.little) /
         32768.0;
   }
+
   return AudioData(samples: mono, sampleRateHz: sampleRate.toDouble(), channelCount: 1);
 }

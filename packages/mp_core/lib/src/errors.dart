@@ -84,6 +84,7 @@ final class MpException implements Exception {
   String toString() {
     final String prefix = task == null ? 'MpException' : 'MpException($task)';
     final String causeSuffix = cause == null ? '' : ' Cause: $cause';
+
     return '$prefix: ${status.name}: $message$causeSuffix';
   }
 }

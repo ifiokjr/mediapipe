@@ -25,6 +25,7 @@ final class WebTaskAssets {
 Future<JSObject> importWebTaskModule(Uri moduleUri) async {
   try {
     return await importModule(moduleUri.toString().toJS).toDart;
+
   } on Object catch (error) {
     throw MpException(
       MpStatus.unavailable,
@@ -44,9 +45,11 @@ R callWebMethod<R extends JSAny?>(
 /// Gets a required JavaScript object property.
 JSObject requireWebObject(JSObject receiver, String property) {
   final JSAny? value = receiver[property];
+
   if (value.isUndefinedOrNull || !value.isA<JSObject>()) {
     throw MpException(MpStatus.internal, 'The MediaPipe web runtime did not expose `$property`.');
   }
+
   return value as JSObject;
 }
 
@@ -59,11 +62,14 @@ Object? webDartify(JSAny? value) => value.dartify();
 /// Maps common model options to the MediaPipe Tasks web API.
 Map<String, Object?> webBaseOptions(BaseOptions options) {
   final Map<String, Object?> baseOptions = <String, Object?>{};
+
   switch (options.modelAsset) {
     case ModelAssetPath(path: final String path):
       baseOptions['modelAssetPath'] = path;
+
     case ModelAssetUri(uri: final Uri uri):
       baseOptions['modelAssetPath'] = uri.toString();
+
     case ModelAssetBytes(bytes: final Uint8List bytes):
       baseOptions['modelAssetBuffer'] = Uint8List.fromList(bytes);
   }
@@ -76,6 +82,7 @@ Map<String, Object?> webBaseOptions(BaseOptions options) {
       '${options.delegate.name} is not available in the MediaPipe web runtime.',
     ),
   };
+
   return baseOptions;
 }
 
@@ -87,12 +94,14 @@ Future<Map<String, Object?>> resolveWebBaseOptions(BaseOptions options) async {
   ) when expected != null) {
     final Uint8List bytes = await _downloadWebBytes(uri);
     final String actual = sha256.convert(bytes).toString();
+
     if (actual != expected) {
       throw MpException(
         MpStatus.dataLoss,
         'Model checksum mismatch for $uri: expected $expected, received $actual.',
       );
     }
+
     return webBaseOptions(
       BaseOptions(
         modelAsset: ModelAsset.bytes(bytes, name: uri.pathSegments.last),
@@ -101,6 +110,7 @@ Future<Map<String, Object?>> resolveWebBaseOptions(BaseOptions options) async {
       ),
     );
   }
+
   return webBaseOptions(options);
 }
 
@@ -112,18 +122,23 @@ Future<Uint8List> _downloadWebBytes(Uri uri) async {
     );
     final JSObject response = await responsePromise.toDart;
     final JSAny? ok = response['ok'];
+
     if (ok == null || !ok.isA<JSBoolean>() || !(ok as JSBoolean).toDart) {
       final Object? status = webDartify(response['status']);
       throw MpException(MpStatus.unavailable, 'Model download failed with HTTP status $status.');
     }
+
     final JSPromise<JSArrayBuffer> bufferPromise = callWebMethod<JSPromise<JSArrayBuffer>>(
       response,
       'arrayBuffer',
     );
     final JSArrayBuffer buffer = await bufferPromise.toDart;
+
     return Uint8List.view(buffer.toDart);
+
   } on MpException {
     rethrow;
+
   } on Object catch (error) {
     throw MpException(
       MpStatus.unavailable,
@@ -161,16 +176,19 @@ int? webOptionalInt(Object? value) => switch (value) {
 /// Converts a JSON-like MediaPipe web classification result.
 ClassificationResult webClassificationResult(Map<Object?, Object?> result) {
   final List<Object?> heads = result['classifications']! as List<Object?>;
+
   return ClassificationResult(
     timestampMs: webOptionalInt(result['timestampMs']),
     classifications: heads.map((Object? value) {
       final Map<Object?, Object?> head = value! as Map<Object?, Object?>;
       final List<Object?> categories = head['categories']! as List<Object?>;
+
       return Classifications(
         headIndex: (head['headIndex']! as num).toInt(),
         headName: webEmptyToNull(head['headName'] as String?),
         categories: categories.map((Object? categoryValue) {
           final Map<Object?, Object?> category = categoryValue! as Map<Object?, Object?>;
+
           return Category(
             index: (category['index']! as num).toInt(),
             score: (category['score']! as num).toDouble(),
@@ -192,21 +210,28 @@ String? webEmptyToNull(String? value) => value == null || value.isEmpty ? null :
 /// deterministically converted to that representation at this boundary.
 JSObject webImageData(MpImage image) {
   final Uint8ClampedList rgba = Uint8ClampedList(image.width * image.height * 4);
+
   for (int pixel = 0; pixel < image.width * image.height; pixel += 1) {
     final int output = pixel * 4;
+
     switch (image) {
       case MpImageUint8(:final format, :final data):
         _writeUint8Pixel(rgba, output, data, pixel * format.channels, format);
+
       case MpImageUint16(:final format, :final data):
         _writeUint16Pixel(rgba, output, data, pixel * format.channels, format);
+
       case MpImageFloat32(:final format, :final data):
         _writeFloatPixel(rgba, output, data, pixel * format.channels, format);
     }
   }
+
   final JSAny? constructor = globalContext['ImageData'];
+
   if (constructor == null || !constructor.isA<JSFunction>()) {
     throw const MpException(MpStatus.unavailable, 'This browser does not expose ImageData.');
   }
+
   return (constructor as JSFunction).callAsConstructor<JSObject>(
     rgba.toJS,
     image.width.toJS,
@@ -225,14 +250,17 @@ void _writeUint8Pixel(
     case MpImageFormat.srgb:
       output.setRange(outputOffset, outputOffset + 3, input, inputOffset);
       output[outputOffset + 3] = 255;
+
     case MpImageFormat.srgba:
       output.setRange(outputOffset, outputOffset + 4, input, inputOffset);
+
     case MpImageFormat.gray8:
       final int value = input[inputOffset];
       output[outputOffset] = value;
       output[outputOffset + 1] = value;
       output[outputOffset + 2] = value;
       output[outputOffset + 3] = 255;
+
     case MpImageFormat.gray16 ||
         MpImageFormat.srgb48 ||
         MpImageFormat.srgba64 ||
@@ -251,6 +279,7 @@ void _writeUint16Pixel(
   MpImageFormat format,
 ) {
   int byte(int channel) => (input[inputOffset + channel] / 257).round();
+
   switch (format) {
     case MpImageFormat.gray16:
       final int value = byte(0);
@@ -258,16 +287,19 @@ void _writeUint16Pixel(
       output[outputOffset + 1] = value;
       output[outputOffset + 2] = value;
       output[outputOffset + 3] = 255;
+
     case MpImageFormat.srgb48:
       output[outputOffset] = byte(0);
       output[outputOffset + 1] = byte(1);
       output[outputOffset + 2] = byte(2);
       output[outputOffset + 3] = 255;
+
     case MpImageFormat.srgba64:
       output[outputOffset] = byte(0);
       output[outputOffset + 1] = byte(1);
       output[outputOffset + 2] = byte(2);
       output[outputOffset + 3] = byte(3);
+
     case MpImageFormat.srgb ||
         MpImageFormat.srgba ||
         MpImageFormat.gray8 ||
@@ -286,6 +318,7 @@ void _writeFloatPixel(
   MpImageFormat format,
 ) {
   int byte(int channel) => (input[inputOffset + channel].clamp(0, 1) * 255).round();
+
   switch (format) {
     case MpImageFormat.float32x1:
       final int value = byte(0);
@@ -293,16 +326,19 @@ void _writeFloatPixel(
       output[outputOffset + 1] = value;
       output[outputOffset + 2] = value;
       output[outputOffset + 3] = 255;
+
     case MpImageFormat.float32x2:
       output[outputOffset] = byte(0);
       output[outputOffset + 1] = byte(1);
       output[outputOffset + 2] = 0;
       output[outputOffset + 3] = 255;
+
     case MpImageFormat.float32x4:
       output[outputOffset] = byte(0);
       output[outputOffset + 1] = byte(1);
       output[outputOffset + 2] = byte(2);
       output[outputOffset + 3] = byte(3);
+
     case MpImageFormat.srgb ||
         MpImageFormat.srgba ||
         MpImageFormat.gray8 ||

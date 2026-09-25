@@ -18,8 +18,10 @@ Future<bool> _ensureCameraPermission() async {
   if (!Platform.isAndroid) return true;
   try {
     return await _permissions.invokeMethod<bool>('ensureCameraPermission') ?? false;
+
   } on PlatformException catch (error) {
     debugPrint('Permission request failed: $error');
+
     return false;
   }
 }
@@ -102,6 +104,7 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
 
     final CameraController? controller = _controller;
     _controller = null;
+
     if (controller != null) {
       if (controller.value.isStreamingImages) await controller.stopImageStream();
       await controller.dispose();
@@ -127,15 +130,21 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
       _detector = detector;
 
       _setStatus('Opening the camera…');
+
       if (!await _ensureCameraPermission()) {
         _setStatus('Camera permission was denied. Grant it and restart the demo.');
+
         return;
       }
+
       final List<CameraDescription> cameras = await availableCameras();
+
       if (cameras.isEmpty) {
         _setStatus('No camera is available on this device.');
+
         return;
       }
+
       _lens = cameras.first.lensDirection;
       final CameraController controller = CameraController(
         cameras.first,
@@ -164,6 +173,7 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
       _clock = MpCameraClock();
       await controller.startImageStream(_onFrame);
       _setStatus('Streaming. Move the device to see orientation change.');
+
     } on Object catch (error, stackTrace) {
       _setStatus('Failed to start: $error');
       debugPrint('$stackTrace');
@@ -187,6 +197,7 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
   /// Maps the gravity vector onto a human-readable device orientation.
   String _describeTilt(AccelerometerEvent event) {
     const double threshold = 5.0;
+
     if (event.y.abs() > threshold) return event.y > 0 ? 'portrait' : 'portrait upside-down';
     if (event.x.abs() > threshold) return event.x > 0 ? 'landscape left' : 'landscape right';
     return 'flat';
@@ -197,6 +208,7 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
   void _onFrame(CameraImage cameraImage) {
     final CameraController? controller = _controller;
     final LatestFrameScheduler<MpCameraFrame>? scheduler = _scheduler;
+
     if (controller == null || scheduler == null) return;
 
     try {
@@ -211,6 +223,7 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
           mirroredPreview: MpCameraRotation.isPreviewMirrored(controller.description),
         ),
       );
+
     } on Object catch (error) {
       // One malformed frame must not tear down the stream.
       debugPrint('Frame conversion failed: $error');

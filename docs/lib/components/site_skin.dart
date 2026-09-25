@@ -198,6 +198,7 @@ class PackageGrid extends StatelessComponent {
         'LLM inference plus Android function calling, RAG, and image generation.',
       ),
     ];
+
     return div(classes: 'mp-package-grid', [
       for (final (String name, String href, String description) in packages)
         a(classes: 'mp-package', href: href, [

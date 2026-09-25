@@ -69,19 +69,25 @@ final class FunctionSchema {
     if (type == FunctionSchemaType.array && items == null) {
       throw ArgumentError.value(items, 'items', 'is required for array schemas');
     }
+
     if (minItems != null && minItems! < 0) {
       throw ArgumentError.value(minItems, 'minItems', 'must not be negative');
     }
+
     if (maxItems != null && maxItems! < 0) {
       throw ArgumentError.value(maxItems, 'maxItems', 'must not be negative');
     }
+
     if (minItems != null && maxItems != null && minItems! > maxItems!) {
       throw ArgumentError.value(maxItems, 'maxItems', 'must not be below minItems');
     }
+
     if (minimum != null && maximum != null && minimum! > maximum!) {
       throw ArgumentError.value(maximum, 'maximum', 'must not be below minimum');
     }
+
     final Set<String> names = properties.keys.toSet();
+
     if (!names.containsAll(this.requiredProperties)) {
       throw ArgumentError.value(
         this.requiredProperties,
@@ -89,6 +95,7 @@ final class FunctionSchema {
         'must refer to declared properties',
       );
     }
+
     if (!names.containsAll(this.propertyOrdering)) {
       throw ArgumentError.value(
         this.propertyOrdering,
@@ -182,7 +189,9 @@ final class FunctionTool {
     if (this.declarations.isEmpty) {
       throw ArgumentError.value(this.declarations, 'declarations', 'must not be empty');
     }
+
     final Set<String> names = <String>{};
+
     for (final FunctionDeclaration declaration in this.declarations) {
       if (!names.add(declaration.name)) {
         throw ArgumentError.value(
@@ -438,13 +447,16 @@ final class GenerativeModel implements MpTask {
   Future<GenerateContentResponse> generateContent(Iterable<GenAiContent> contents) {
     _lifecycle.ensureOpen();
     final List<GenAiContent> input = List<GenAiContent>.unmodifiable(contents);
+
     if (input.isEmpty) throw ArgumentError.value(input, 'contents', 'must not be empty');
+
     return _backend.generateContent(input);
   }
 
   /// Starts a stateful chat session.
   Future<FunctionCallingChat> startChat() async {
     _lifecycle.ensureOpen();
+
     return FunctionCallingChat._(await _backend.startChat());
   }
 
@@ -468,6 +480,7 @@ final class FunctionCallingChat implements MpTask {
   /// Sends structured [content].
   Future<GenerateContentResponse> sendMessage(GenAiContent content) {
     _lifecycle.ensureOpen();
+
     return _backend.sendMessage(content);
   }
 
@@ -478,36 +491,42 @@ final class FunctionCallingChat implements MpTask {
   /// Removes and returns the most recent request-response exchange.
   Future<ChatRewindResult> rewind() {
     _lifecycle.ensureOpen();
+
     return _backend.rewind();
   }
 
   /// Returns a snapshot of the conversation history.
   Future<List<GenAiContent>> history() {
     _lifecycle.ensureOpen();
+
     return _backend.history();
   }
 
   /// Returns the most recent content entry.
   Future<GenAiContent> last() {
     _lifecycle.ensureOpen();
+
     return _backend.last();
   }
 
   /// Clones this conversation and its current history.
   Future<FunctionCallingChat> clone() async {
     _lifecycle.ensureOpen();
+
     return FunctionCallingChat._(await _backend.clone());
   }
 
   /// Enables constrained decoding for subsequent responses.
   Future<void> enableConstraint(FunctionCallingConstraint constraint) {
     _lifecycle.ensureOpen();
+
     return _backend.enableConstraint(constraint);
   }
 
   /// Disables constrained decoding.
   Future<void> disableConstraint() {
     _lifecycle.ensureOpen();
+
     return _backend.disableConstraint();
   }
 

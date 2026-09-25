@@ -297,6 +297,7 @@ final class Float32ListEquality implements Equality<Float32List?> {
     for (var i = 0; i < first.length; i++) {
       if (first[i] != second[i]) return false;
     }
+
     return true;
   }
 
@@ -304,9 +305,11 @@ final class Float32ListEquality implements Equality<Float32List?> {
   int hash(Float32List? list) {
     if (list == null) return 0;
     int result = list.length;
+
     for (final double value in list.take(8)) {
       result = Object.hash(result, value);
     }
+
     return result;
   }
 

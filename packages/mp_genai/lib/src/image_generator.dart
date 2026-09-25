@@ -62,12 +62,15 @@ final class EdgeConditionOptions {
     if (!threshold1.isFinite || threshold1 < 0) {
       throw ArgumentError.value(threshold1, 'threshold1', 'must be finite and non-negative');
     }
+
     if (!threshold2.isFinite || threshold2 < 0) {
       throw ArgumentError.value(threshold2, 'threshold2', 'must be finite and non-negative');
     }
+
     if (threshold2 < threshold1) {
       throw ArgumentError.value(threshold2, 'threshold2', 'must not be below threshold1');
     }
+
     if (apertureSize != 3 && apertureSize != 5 && apertureSize != 7) {
       throw ArgumentError.value(apertureSize, 'apertureSize', 'must be 3, 5, or 7');
     }
@@ -214,6 +217,7 @@ final class ImageGenerator implements MpTask {
   }) {
     _lifecycle.ensureOpen();
     _validateGenerationInput(prompt, iterations);
+
     return _backend.generate(prompt, iterations: iterations, seed: seed, condition: condition);
   }
 
@@ -226,18 +230,21 @@ final class ImageGenerator implements MpTask {
   }) {
     _lifecycle.ensureOpen();
     _validateGenerationInput(prompt, iterations);
+
     return _backend.setInputs(prompt, iterations: iterations, seed: seed, condition: condition);
   }
 
   /// Executes the next iteration after [setInputs].
   Future<ImageGeneratorResult?> execute({bool showResult = true}) {
     _lifecycle.ensureOpen();
+
     return _backend.execute(showResult: showResult);
   }
 
   /// Creates a face, edge, or depth condition image without generating output.
   Future<MpImage> createConditionImage(MpImage image, ImageGeneratorConditionType type) {
     _lifecycle.ensureOpen();
+
     return _backend.createConditionImage(image, type);
   }
 
@@ -252,6 +259,7 @@ void _validateGenerationInput(String prompt, int iterations) {
   if (prompt.trim().isEmpty) {
     throw ArgumentError.value(prompt, 'prompt', 'must not be empty');
   }
+
   if (iterations <= 0) {
     throw ArgumentError.value(iterations, 'iterations', 'must be positive');
   }

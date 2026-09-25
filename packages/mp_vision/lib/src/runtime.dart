@@ -3,6 +3,7 @@ import 'package:mp_core/mp_core.dart';
 import 'options.dart';
 import 'results.dart';
 import 'runtime_stub.dart'
+
     if (dart.library.io) 'runtime_native.dart'
     if (dart.library.js_interop) 'runtime_web.dart'
     as platform;

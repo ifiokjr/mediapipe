@@ -9,6 +9,7 @@ void main() {
     final Map<String, String> environment = await resolveMacOsToolchainEnvironment(
       commandRunner: (String executable, List<String> arguments) async {
         commands.add(<String>[executable, ...arguments].join(' '));
+
         return switch ((executable, arguments)) {
           ('xcode-select', ['--print-path']) => '/Applications/Xcode.app/Developer',
           _ => throw StateError('Unexpected command: $executable $arguments'),

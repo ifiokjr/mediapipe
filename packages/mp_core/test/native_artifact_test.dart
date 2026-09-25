@@ -91,9 +91,11 @@ void main() {
 
 List<int> _archiveBytes(Map<String, List<int>> files) {
   final Archive archive = Archive();
+
   for (final MapEntry<String, List<int>> entry in files.entries) {
     archive.add(ArchiveFile.bytes(entry.key, entry.value));
   }
+
   return ZipEncoder().encodeBytes(archive, modified: DateTime.utc(1980));
 }
 
@@ -106,5 +108,6 @@ Future<HttpServer> _serve(List<int> responseBytes) async {
       ..add(responseBytes);
     await request.response.close();
   });
+
   return server;
 }

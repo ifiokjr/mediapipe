@@ -120,6 +120,7 @@ final class Embedding {
   /// Creates a floating-point embedding.
   factory Embedding.float(Float32List values, {required int headIndex, String? headName}) {
     if (values.isEmpty) throw ArgumentError.value(values, 'values', 'must not be empty');
+
     return Embedding._(
       type: EmbeddingType.float,
       headIndex: headIndex,
@@ -132,6 +133,7 @@ final class Embedding {
   /// Creates a scalar-quantized embedding.
   factory Embedding.quantized(Uint8List values, {required int headIndex, String? headName}) {
     if (values.isEmpty) throw ArgumentError.value(values, 'values', 'must not be empty');
+
     return Embedding._(
       type: EmbeddingType.quantized,
       headIndex: headIndex,
@@ -208,6 +210,7 @@ double cosineSimilarity(Embedding first, Embedding second) {
   if (first.type != second.type) {
     throw ArgumentError('Embeddings must have the same representation.');
   }
+
   if (first.length != second.length) {
     throw ArgumentError('Embeddings must have the same number of dimensions.');
   }
@@ -219,6 +222,7 @@ double cosineSimilarity(Embedding first, Embedding second) {
   double secondMagnitude = 0;
   final Iterator<num> firstIterator = firstValues.iterator;
   final Iterator<num> secondIterator = secondValues.iterator;
+
   while (firstIterator.moveNext() && secondIterator.moveNext()) {
     final double firstValue = firstIterator.current.toDouble();
     final double secondValue = secondIterator.current.toDouble();
@@ -226,9 +230,11 @@ double cosineSimilarity(Embedding first, Embedding second) {
     firstMagnitude += firstValue * firstValue;
     secondMagnitude += secondValue * secondValue;
   }
+
   if (firstMagnitude == 0 || secondMagnitude == 0) {
     throw ArgumentError('Cosine similarity is undefined for a zero vector.');
   }
+
   return dot / (math.sqrt(firstMagnitude) * math.sqrt(secondMagnitude));
 }
 
@@ -465,6 +471,7 @@ final class MpMatrix {
     if (columns <= 0) {
       throw ArgumentError.value(columns, 'columns', 'must be greater than zero');
     }
+
     if (values.length != rows * columns) {
       throw ArgumentError.value(values.length, 'values.length', 'must equal rows * columns');
     }
@@ -483,6 +490,7 @@ final class MpMatrix {
   double at(int row, int column) {
     RangeError.checkValueInInterval(row, 0, rows - 1, 'row');
     RangeError.checkValueInInterval(column, 0, columns - 1, 'column');
+
     return values[row * columns + column];
   }
 

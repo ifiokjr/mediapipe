@@ -84,6 +84,7 @@ final class WebGenAiRuntime implements GenAiRuntime {
     );
     try {
       return _WebLlmInference(await taskPromise.toDart);
+
     } on Object catch (error) {
       throw MpException(
         MpStatus.internal,
@@ -97,11 +98,13 @@ final class WebGenAiRuntime implements GenAiRuntime {
 
 Future<Map<String, Object?>> _llmBaseOptions(LlmInferenceOptions options) async {
   final Map<String, Object?> result = await resolveWebBaseOptions(options.baseOptions);
+
   result['delegate'] = switch (options.preferredBackend) {
     LlmBackend.defaultBackend => result['delegate'],
     LlmBackend.cpu => 'CPU',
     LlmBackend.gpu => 'GPU',
   };
+
   return result;
 }
 
@@ -125,6 +128,7 @@ final class _WebLlmInference implements LlmInferenceBackend {
   Future<LlmSessionBackend> createSession(LlmSessionOptions options) async {
     _ensureOpen();
     _validateWebSessionOptions(options);
+
     return _WebLlmSession(this, options);
   }
 
@@ -133,9 +137,11 @@ final class _WebLlmInference implements LlmInferenceBackend {
     _ensureOpen();
     final JSAny? result = callWebMethod<JSAny?>(_task, 'sizeInTokens', <JSAny?>[text.toJS]);
     final int? count = webOptionalInt(webDartify(result));
+
     if (count == null) {
       throw const MpException(MpStatus.internal, 'MediaPipe could not count the input tokens.');
     }
+
     return count;
   }
 
@@ -272,20 +278,26 @@ final class _WebLlmSession implements LlmSessionBackend {
   @override
   Future<LlmGeneration> generate() async {
     _ensureOpen();
+
     if (_prompt.isEmpty) {
       throw const MpException(MpStatus.invalidArgument, 'The LLM prompt is empty.');
     }
+
     final List<Object> prompt = List<Object>.of(_prompt);
+
     if (_options.promptTemplates case final PromptTemplates templates) {
       final String suffix = '${templates.modelPrefix}${templates.modelSuffix}';
+
       if (suffix.isNotEmpty) prompt.add(suffix);
     }
+
     return _engine.generate(prompt, _options);
   }
 
   @override
   Future<int> sizeInTokens(String text) {
     _ensureOpen();
+
     return _engine.sizeInTokens(text);
   }
 
@@ -294,6 +306,7 @@ final class _WebLlmSession implements LlmSessionBackend {
     _ensureOpen();
     final _WebLlmSession clone = _WebLlmSession(_engine, _options);
     clone._prompt.addAll(_prompt);
+
     return clone;
   }
 
@@ -318,6 +331,7 @@ void _validateWebSessionOptions(LlmSessionOptions options) {
       'The MediaPipe web LLM runtime does not expose nucleus sampling.',
     );
   }
+
   if (options.constraintHandle != null) {
     throw const MpException(
       MpStatus.unimplemented,
@@ -334,9 +348,11 @@ JSAny? _modelAssetValue(ModelAsset asset) => switch (asset) {
 
 ({Float32List samples, double sampleRateHz}) _decodeWav(Uint8List bytes) {
   final ByteData data = ByteData.sublistView(bytes);
+
   if (bytes.length < 44 || _ascii(bytes, 0, 4) != 'RIFF' || _ascii(bytes, 8, 4) != 'WAVE') {
     throw const MpException(MpStatus.invalidArgument, 'Audio prompts must be RIFF/WAVE data.');
   }
+
   int offset = 12;
   int? format;
   int? channels;
@@ -344,10 +360,12 @@ JSAny? _modelAssetValue(ModelAsset asset) => switch (asset) {
   int? bitsPerSample;
   int? audioOffset;
   int? audioLength;
+
   while (offset + 8 <= bytes.length) {
     final String id = _ascii(bytes, offset, 4);
     final int length = data.getUint32(offset + 4, Endian.little);
     final int payload = offset + 8;
+
     if (payload + length > bytes.length) break;
     if (id == 'fmt ' && length >= 16) {
       format = data.getUint16(payload, Endian.little);
@@ -358,6 +376,7 @@ JSAny? _modelAssetValue(ModelAsset asset) => switch (asset) {
       audioOffset = payload;
       audioLength = length;
     }
+
     offset = payload + length + (length.isOdd ? 1 : 0);
   }
   if (format == null ||
@@ -370,19 +389,25 @@ JSAny? _modelAssetValue(ModelAsset asset) => switch (asset) {
     throw const MpException(MpStatus.invalidArgument, 'The WAVE file is missing audio metadata.');
   }
   final int bytesPerSample = bitsPerSample ~/ 8;
+
   if (bytesPerSample == 0 || audioLength % (bytesPerSample * channels) != 0) {
     throw const MpException(MpStatus.invalidArgument, 'The WAVE sample layout is invalid.');
   }
+
   final int frameCount = audioLength ~/ (bytesPerSample * channels);
   final Float32List samples = Float32List(frameCount);
+
   for (int frame = 0; frame < frameCount; frame += 1) {
     double sum = 0;
+
     for (int channel = 0; channel < channels; channel += 1) {
       final int sampleOffset = audioOffset + ((frame * channels + channel) * bytesPerSample);
       sum += _wavSample(data, sampleOffset, format, bitsPerSample);
     }
+
     samples[frame] = sum / channels;
   }
+
   return (samples: samples, sampleRateHz: sampleRate.toDouble());
 }
 
@@ -391,6 +416,8 @@ double _wavSample(ByteData data, int offset, int format, int bitsPerSample) {
   if (format != 1) {
     throw MpException(MpStatus.unimplemented, 'WAVE format $format is not supported.');
   }
+
+
   return switch (bitsPerSample) {
     8 => (data.getUint8(offset) - 128) / 128,
     16 => data.getInt16(offset, Endian.little) / 32768,
@@ -406,7 +433,9 @@ double _wavSample(ByteData data, int offset, int format, int bitsPerSample) {
 int _int24(ByteData data, int offset) {
   int value =
       data.getUint8(offset) | (data.getUint8(offset + 1) << 8) | (data.getUint8(offset + 2) << 16);
+
   if ((value & 0x800000) != 0) value |= ~0xffffff;
+
   return value;
 }
 

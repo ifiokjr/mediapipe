@@ -8,6 +8,7 @@ Future<void> main() async {
   final Directory upstream = Directory.fromUri(
     repositoryRoot.uri.resolve('.dart_tool/upstream/mediapipe/'),
   );
+
   if (!upstream.existsSync()) {
     upstream.parent.createSync(recursive: true);
     await _run('git', <String>[
@@ -25,6 +26,7 @@ Future<void> main() async {
     '--tags',
     '--exact-match',
   ], workingDirectory: upstream.path)).trim();
+
   if (revision != _mediaPipeVersion) {
     throw StateError('Expected MediaPipe $_mediaPipeVersion, found $revision.');
   }
@@ -47,15 +49,18 @@ void _createCCompatibleHeaders(Directory repositoryRoot, Directory upstream) {
   final Directory destination = Directory.fromUri(
     generatedRoot.uri.resolve('include/mediapipe/tasks/c/'),
   );
+
   if (generatedRoot.existsSync()) {
     generatedRoot.deleteSync(recursive: true);
   }
+
   destination.createSync(recursive: true);
 
   for (final FileSystemEntity entity in source.listSync(recursive: true)) {
     if (entity is! File || !entity.path.endsWith('.h')) {
       continue;
     }
+
     final String relativePath = entity.path.substring(source.path.length);
     final File output = File.fromUri(destination.uri.resolve(relativePath));
     output.parent.createSync(recursive: true);
@@ -91,9 +96,11 @@ String _makeCCompatible(String source) {
       .split('\n')
       .map((String line) {
         final Match? match = defaultValue.firstMatch(line);
+
         return match == null ? line : '${match.group(1)};';
       })
       .join('\n');
+
   return _addCTypedefs(output.replaceAll('MpRunningMode::', ''));
 }
 
@@ -101,28 +108,35 @@ String _addCTypedefs(String source) {
   final List<String> output = <String>[];
   String? activeType;
   final RegExp declaration = RegExp(r'^(struct|enum) (Mp[A-Za-z0-9_]+) \{$');
+
   for (final String line in source.split('\n')) {
     final Match? match = declaration.firstMatch(line);
+
     if (match != null) {
       activeType = match.group(2);
       output.add('typedef ${match.group(1)} $activeType {');
       continue;
     }
+
     if (activeType != null && line == '};') {
       output.add('} $activeType;');
       activeType = null;
       continue;
     }
+
     output.add(line);
   }
+
   if (activeType != null) {
     throw FormatException('Unclosed declaration for $activeType.');
   }
+
   return output.join('\n');
 }
 
 Directory _findRepositoryRoot() {
   Directory current = Directory.current.absolute;
+
   while (current.parent.path != current.path) {
     if (File.fromUri(current.uri.resolve('pubspec.yaml')).existsSync() &&
         Directory.fromUri(current.uri.resolve('packages/mp_core/')).existsSync()) {
@@ -130,6 +144,7 @@ Directory _findRepositoryRoot() {
     }
     current = current.parent;
   }
+
   throw StateError('Could not find the MP workspace root.');
 }
 
@@ -145,8 +160,10 @@ Future<String> _run(
   );
   stdout.write(result.stdout);
   stderr.write(result.stderr);
+
   if (result.exitCode != 0) {
     throw ProcessException(executable, arguments, 'Command failed', result.exitCode);
   }
+
   return result.stdout as String;
 }

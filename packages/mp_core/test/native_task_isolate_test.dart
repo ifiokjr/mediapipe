@@ -72,9 +72,11 @@ void main() {
 
 NativeTaskWorkerHandler _counterFactory(Object? initialMessage) {
   var value = initialMessage! as int;
+
   return (Object? command) {
     if (command == 'exit') Isolate.exit();
     if (command is! int) throw ArgumentError.value(command, 'command');
+
     return value += command;
   };
 }

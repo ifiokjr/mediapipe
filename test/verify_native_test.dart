@@ -68,6 +68,7 @@ Uint8List _elf({required int elfClass, required int machine, required int alignm
   bytes[5] = 1;
   final ByteData data = ByteData.sublistView(bytes);
   data.setUint16(18, machine, Endian.little);
+
   if (elfClass == 1) {
     data
       ..setUint32(28, 64, Endian.little)
@@ -83,5 +84,6 @@ Uint8List _elf({required int elfClass, required int machine, required int alignm
       ..setUint32(64, 1, Endian.little)
       ..setUint64(112, alignment, Endian.little);
   }
+
   return bytes;
 }

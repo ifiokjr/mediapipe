@@ -51,6 +51,7 @@ final class MpCameraClock {
     final int elapsed = _stopwatch.elapsedMilliseconds;
     final int next = elapsed > _lastTimestampMs ? elapsed : _lastTimestampMs + 1;
     _lastTimestampMs = next;
+
     return next;
   }
 }

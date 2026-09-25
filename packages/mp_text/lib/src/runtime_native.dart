@@ -6,6 +6,7 @@ import 'package:mp_core/native.dart' as native;
 
 import 'language_detector.dart';
 import 'platform_channel_stub.dart'
+
     if (dart.library.ui) 'platform_channel_flutter.dart'
     as platform_channel;
 import 'runtime.dart';
@@ -26,6 +27,7 @@ final class _NativeTextRuntime implements TextRuntime {
       baseOptions: await _resolveBaseOptions(options.baseOptions),
       classifierOptions: options.classifierOptions,
     );
+
     return _NativeLanguageDetector(
       await _spawnTextWorker(_TextTaskKind.languageDetector, resolved),
     );
@@ -37,6 +39,7 @@ final class _NativeTextRuntime implements TextRuntime {
       baseOptions: await _resolveBaseOptions(options.baseOptions),
       classifierOptions: options.classifierOptions,
     );
+
     return _NativeTextClassifier(await _spawnTextWorker(_TextTaskKind.textClassifier, resolved));
   }
 
@@ -46,6 +49,7 @@ final class _NativeTextRuntime implements TextRuntime {
       baseOptions: await _resolveBaseOptions(options.baseOptions),
       embedderOptions: options.embedderOptions,
     );
+
     return _NativeTextEmbedder(await _spawnTextWorker(_TextTaskKind.textEmbedder, resolved));
   }
 
@@ -160,6 +164,7 @@ Future<native.NativeTaskIsolate> _spawnTextWorker(_TextTaskKind kind, Object opt
 
 native.NativeTaskWorkerHandler _createTextWorker(Object? initialMessage) {
   final _TextWorkerInit initialization = initialMessage! as _TextWorkerInit;
+
   final int address = switch (initialization.kind) {
     _TextTaskKind.languageDetector => _createLanguageDetector(
       initialization.options as LanguageDetectorOptions,
@@ -171,21 +176,27 @@ native.NativeTaskWorkerHandler _createTextWorker(Object? initialMessage) {
       initialization.options as TextEmbedderOptions,
     ),
   };
+
   return (Object? command) {
     if (command is _TextClose) {
       switch (initialization.kind) {
         case _TextTaskKind.languageDetector:
           _closeLanguageDetector(address);
           return null;
+
         case _TextTaskKind.textClassifier:
           _closeTextClassifier(address);
           return null;
+
         case _TextTaskKind.textEmbedder:
           _closeTextEmbedder(address);
           return null;
       }
     }
+
     final _TextRequest request = command! as _TextRequest;
+
+
     return switch (initialization.kind) {
       _TextTaskKind.languageDetector => _detectLanguage(address, request.text),
       _TextTaskKind.textClassifier => _classifyText(address, request.text),
@@ -200,6 +211,7 @@ final class _SerialQueue {
   Future<T> run<T>(Future<T> Function() action) {
     final Future<T> operation = _tail.then((_) => action());
     _tail = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+
     return operation;
   }
 }
@@ -222,6 +234,7 @@ int _createLanguageDetector(LanguageDetectorOptions options) {
         .allocator<native.MpLanguageDetectorPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(native.MpLanguageDetectorCreate(nativeOptions, output, error), error);
+
     return output.value.address;
   } finally {
     scope.release();
@@ -245,9 +258,11 @@ LanguageDetectorResult _detectLanguage(int address, String text) {
       error,
     );
     ownsResult = true;
+
     return LanguageDetectorResult(
       List<LanguagePrediction>.generate(result.ref.predictions_count, (int index) {
         final native.MpLanguageDetectorPrediction prediction = result.ref.predictions[index];
+
         return LanguagePrediction(
           languageCode: native.nativeString(prediction.language_code) ?? '',
           probability: prediction.probability,
@@ -288,6 +303,7 @@ int _createTextClassifier(TextClassifierOptions options) {
         .allocator<native.MpTextClassifierPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(native.MpTextClassifierCreate(nativeOptions, output, error), error);
+
     return output.value.address;
   } finally {
     scope.release();
@@ -311,6 +327,7 @@ ClassificationResult _classifyText(int address, String text) {
       error,
     );
     ownsResult = true;
+
     return native.classificationResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpTextClassifierCloseResult(result);
@@ -346,6 +363,7 @@ int _createTextEmbedder(TextEmbedderOptions options) {
         .allocator<native.MpTextEmbedderPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(native.MpTextEmbedderCreate(nativeOptions, output, error), error);
+
     return output.value.address;
   } finally {
     scope.release();
@@ -367,6 +385,7 @@ EmbeddingResult _embedText(int address, String text, TextEmbedderFormatContext? 
         role: _embeddingRole(value.role),
       ),
     };
+
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       native.MpTextEmbedderEmbed(
@@ -379,6 +398,7 @@ EmbeddingResult _embedText(int address, String text, TextEmbedderFormatContext? 
       error,
     );
     ownsResult = true;
+
     return native.embeddingResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpTextEmbedderCloseResult(result);

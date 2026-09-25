@@ -89,11 +89,14 @@ Future<void> main(List<String> arguments) async {
 
 Directory _nearestExistingDirectory(Directory directory) {
   Directory candidate = directory;
+
   while (!candidate.existsSync()) {
     final Directory parent = candidate.parent;
+
     if (parent.path == candidate.path) return parent;
     candidate = parent;
   }
+
   return candidate;
 }
 

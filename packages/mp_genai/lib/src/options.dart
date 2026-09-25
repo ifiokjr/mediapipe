@@ -66,6 +66,7 @@ final class LlmInferenceOptions {
     if (maxNumImages < 0) {
       throw ArgumentError.value(maxNumImages, 'maxNumImages', 'must not be negative');
     }
+
     if (this.supportedLoraRanks.any((int rank) => rank <= 0)) {
       throw ArgumentError.value(
         this.supportedLoraRanks,
@@ -73,9 +74,11 @@ final class LlmInferenceOptions {
         'must contain only positive ranks',
       );
     }
+
     if (maxNumImages > 0 && visionModelOptions == null) {
       throw ArgumentError.value(maxNumImages, 'maxNumImages', 'requires visionModelOptions');
     }
+
     if (supportAudio && audioModelOptions == null) {
       throw ArgumentError.value(supportAudio, 'supportAudio', 'requires audioModelOptions');
     }
@@ -186,12 +189,15 @@ final class LlmSessionOptions {
     if (!topP.isFinite || topP <= 0 || topP > 1) {
       throw ArgumentError.value(topP, 'topP', 'must be finite and in the range (0, 1]');
     }
+
     if (!temperature.isFinite || temperature < 0) {
       throw ArgumentError.value(temperature, 'temperature', 'must be finite and non-negative');
     }
+
     if (constraintHandle != null && constraintHandle! <= 0) {
       throw ArgumentError.value(constraintHandle, 'constraintHandle', 'must be positive');
     }
+
     if (numResponses <= 0) {
       throw ArgumentError.value(numResponses, 'numResponses', 'must be positive');
     }

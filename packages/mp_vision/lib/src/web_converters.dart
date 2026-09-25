@@ -11,10 +11,12 @@ import 'results.dart';
 DetectionResult webDetectionResult(JSAny? value) {
   final Map<Object?, Object?> result = _map(value);
   final List<Object?> detections = result['detections']! as List<Object?>;
+
   return DetectionResult(
     detections: detections.map((Object? detectionValue) {
       final Map<Object?, Object?> detection = detectionValue! as Map<Object?, Object?>;
       final Map<Object?, Object?>? box = detection['boundingBox'] as Map<Object?, Object?>?;
+
       return Detection(
         categories: _categories(detection['categories']),
         boundingBox: BoundingBox(
@@ -25,6 +27,7 @@ DetectionResult webDetectionResult(JSAny? value) {
         ),
         keypoints: _list(detection['keypoints']).map((Object? keypointValue) {
           final Map<Object?, Object?> keypoint = keypointValue! as Map<Object?, Object?>;
+
           return NormalizedKeypoint(
             x: (keypoint['x']! as num).toDouble(),
             y: (keypoint['y']! as num).toDouble(),
@@ -40,6 +43,7 @@ DetectionResult webDetectionResult(JSAny? value) {
 /// Converts a web face-landmarker result.
 FaceLandmarkerResult webFaceLandmarkerResult(JSAny? value) {
   final Map<Object?, Object?> result = _map(value);
+
   return FaceLandmarkerResult(
     faceLandmarks: _normalizedLandmarkGroups(result['faceLandmarks']),
     faceBlendshapes: _classifications(result['faceBlendshapes']),
@@ -47,6 +51,7 @@ FaceLandmarkerResult webFaceLandmarkerResult(JSAny? value) {
       Object? matrixValue,
     ) {
       final Map<Object?, Object?> matrix = matrixValue! as Map<Object?, Object?>;
+
       return MpMatrix(
         rows: (matrix['rows']! as num).toInt(),
         columns: (matrix['columns']! as num).toInt(),
@@ -61,6 +66,7 @@ FaceLandmarkerResult webFaceLandmarkerResult(JSAny? value) {
 /// Converts a web gesture-recognizer result.
 GestureRecognizerResult webGestureRecognizerResult(JSAny? value) {
   final Map<Object?, Object?> result = _map(value);
+
   return GestureRecognizerResult(
     gestures: _categoryGroups(result['gestures']),
     handedness: _categoryGroups(result['handedness'] ?? result['handednesses']),
@@ -72,6 +78,7 @@ GestureRecognizerResult webGestureRecognizerResult(JSAny? value) {
 /// Converts a web hand-landmarker result.
 HandLandmarkerResult webHandLandmarkerResult(JSAny? value) {
   final Map<Object?, Object?> result = _map(value);
+
   return HandLandmarkerResult(
     handedness: _categoryGroups(result['handedness'] ?? result['handednesses']),
     landmarks: _normalizedLandmarkGroups(result['landmarks']),
@@ -83,6 +90,7 @@ HandLandmarkerResult webHandLandmarkerResult(JSAny? value) {
 HolisticLandmarkerResult webHolisticLandmarkerResult(JSAny? value) {
   final JSObject result = value! as JSObject;
   final List<JSObject> masks = _objectArray(result['poseSegmentationMasks']);
+
   return HolisticLandmarkerResult(
     faceLandmarks: _normalizedLandmarkGroups(_property(result, 'faceLandmarks')),
     faceBlendshapes: _classifications(_property(result, 'faceBlendshapes')),
@@ -99,6 +107,7 @@ HolisticLandmarkerResult webHolisticLandmarkerResult(JSAny? value) {
 /// Converts a web embedding result.
 EmbeddingResult webEmbeddingResult(JSAny? value) {
   final Map<Object?, Object?> result = _map(value);
+
   return EmbeddingResult(
     timestampMs: webOptionalInt(result['timestampMs']),
     embeddings: _list(result['embeddings']).map((Object? embeddingValue) {
@@ -119,6 +128,7 @@ EmbeddingResult webEmbeddingResult(JSAny? value) {
         ),
         _ => throw const MpException(MpStatus.internal, 'MediaPipe returned an empty embedding.'),
       };
+
       return Embedding.quantized(quantized, headIndex: headIndex, headName: headName);
     }),
   );
@@ -131,6 +141,7 @@ ImageSegmenterResult webImageSegmenterResult(JSAny? value) {
     final List<JSObject> confidenceMasks = _objectArray(result['confidenceMasks']);
     final JSAny? categoryMask = result['categoryMask'];
     final Object? scores = _property(result, 'qualityScores');
+
     return ImageSegmenterResult(
       confidenceMasks: confidenceMasks.map(_copyFloatMask),
       categoryMask: categoryMask.isUndefinedOrNull
@@ -179,6 +190,7 @@ List<Object?> _list(Object? value) => value == null ? const <Object?>[] : value 
 
 Category _category(Object? value) {
   final Map<Object?, Object?> category = value! as Map<Object?, Object?>;
+
   return Category(
     index: (category['index']! as num).toInt(),
     score: (category['score']! as num).toDouble(),
@@ -193,6 +205,7 @@ List<List<Category>> _categoryGroups(Object? value) => _list(value).map(_categor
 
 Classifications _classification(Object? value) {
   final Map<Object?, Object?> classification = value! as Map<Object?, Object?>;
+
   return Classifications(
     categories: _categories(classification['categories']),
     headIndex: (classification['headIndex']! as num).toInt(),
@@ -204,6 +217,7 @@ List<Classifications> _classifications(Object? value) => _list(value).map(_class
 
 NormalizedLandmark _normalizedLandmark(Object? value) {
   final Map<Object?, Object?> landmark = value! as Map<Object?, Object?>;
+
   return NormalizedLandmark(
     x: (landmark['x']! as num).toDouble(),
     y: (landmark['y']! as num).toDouble(),
@@ -219,6 +233,7 @@ List<List<NormalizedLandmark>> _normalizedLandmarkGroups(Object? value) =>
 
 Landmark _landmark(Object? value) {
   final Map<Object?, Object?> landmark = value! as Map<Object?, Object?>;
+
   return Landmark(
     x: (landmark['x']! as num).toDouble(),
     y: (landmark['y']! as num).toDouble(),
@@ -235,6 +250,7 @@ List<List<Landmark>> _landmarkGroups(Object? value) =>
 List<JSObject> _objectArray(JSAny? value) {
   if (value.isUndefinedOrNull) return const <JSObject>[];
   final List<JSAny?> values = (value! as JSArray<JSAny?>).toDart;
+
   return values.map((JSAny? item) => item! as JSObject).toList();
 }
 
@@ -242,6 +258,7 @@ int _objectInt(JSObject object, String property) => (webDartify(object[property]
 
 MpImage _copyFloatMask(JSObject mask) {
   final JSFloat32Array values = callWebMethod<JSFloat32Array>(mask, 'getAsFloat32Array');
+
   return MpImage.float32(
     width: _objectInt(mask, 'width'),
     height: _objectInt(mask, 'height'),
@@ -252,6 +269,7 @@ MpImage _copyFloatMask(JSObject mask) {
 
 MpImage _copyUint8Mask(JSObject mask) {
   final JSUint8Array values = callWebMethod<JSUint8Array>(mask, 'getAsUint8Array');
+
   return MpImage.uint8(
     width: _objectInt(mask, 'width'),
     height: _objectInt(mask, 'height'),

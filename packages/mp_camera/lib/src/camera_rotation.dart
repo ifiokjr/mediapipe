@@ -24,9 +24,12 @@ final class MpCameraRotation {
   }) {
     final TargetPlatform target = platform ?? defaultTargetPlatform;
     final int sensor = _normalize(camera.sensorOrientation);
+
     if (target != TargetPlatform.android) return sensor;
 
     final int device = _deviceDegrees[orientation]!;
+
+
     return switch (camera.lensDirection) {
       CameraLensDirection.front => _normalize(sensor + device),
       CameraLensDirection.back || CameraLensDirection.external => _normalize(sensor - device),

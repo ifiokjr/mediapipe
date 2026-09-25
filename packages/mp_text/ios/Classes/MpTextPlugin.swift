@@ -47,16 +47,20 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     let modelPath = try arguments.requiredString("modelPath")
     let maxTokens = arguments.optionalInt("maxTokens")
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do {
         let options = TextProofreaderOptions()
         options.baseOptions.modelAssetPath = modelPath
+
         if let maxTokens { options.maxTokens = maxTokens }
         let proofreader = try TextProofreader(options: options)
         let handle = withLock {
           let handle = self.nextHandle
           self.nextHandle += 1
           self.proofreaders[handle] = proofreader
+
           return handle
         }
         complete(result, value: handle)
@@ -68,10 +72,14 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     let arguments = try call.argumentsMap()
     let handle = try arguments.requiredInt64("handle")
     let text = try arguments.requiredString("text")
+
     guard let proofreader = withLock({ proofreaders[handle] }) else {
       throw PluginError.invalidArgument("Unknown TextProofreader handle: \(handle)")
     }
+
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do {
         let output = try proofreader.proofread(text: text)
@@ -86,23 +94,33 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     let handle = try arguments.requiredInt64("handle")
     let text = try arguments.requiredString("text")
     let requestId = try arguments.requiredString("requestId")
+
     guard let proofreader = withLock({ proofreaders[handle] }) else {
       throw PluginError.invalidArgument("Unknown TextProofreader handle: \(handle)")
     }
+
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do {
         try proofreader.proofreadStreaming(text: text) { [weak self] output, error in
+
+
           guard let self else { return }
           if let error {
             emitError(requestId: requestId, error: error)
+
             return
           }
+
+
           guard let output else { return }
           emit([
             "kind": "data", "requestId": requestId, "text": output.chunk, "isDone": output.done,
             "corrections": output.corrections?.map(correctionMap) as Any,
           ])
+
           if output.done { emitDone(requestId: requestId) }
         }
         complete(result, value: nil)
@@ -112,10 +130,14 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
   private func closeProofreader(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
     let handle = try call.argumentsMap().requiredInt64("handle")
+
     guard let proofreader = withLock({ proofreaders.removeValue(forKey: handle) }) else {
       throw PluginError.invalidArgument("Unknown TextProofreader handle: \(handle)")
     }
+
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do {
         try proofreader.close()
@@ -135,17 +157,21 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     default: throw PluginError.invalidArgument("Unknown TextSummarizer mode")
     }
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do {
         let options = TextSummarizerOptions()
         options.baseOptions.modelAssetPath = modelPath
         options.mode = mode
+
         if let maxTokens { options.maxTokens = maxTokens }
         let summarizer = try TextSummarizer(options: options)
         let handle = withLock {
           let handle = self.nextHandle
           self.nextHandle += 1
           self.summarizers[handle] = summarizer
+
           return handle
         }
         complete(result, value: handle)
@@ -157,10 +183,14 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     let arguments = try call.argumentsMap()
     let handle = try arguments.requiredInt64("handle")
     let text = try arguments.requiredString("text")
+
     guard let summarizer = withLock({ summarizers[handle] }) else {
       throw PluginError.invalidArgument("Unknown TextSummarizer handle: \(handle)")
     }
+
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do { complete(result, value: ["summary": try summarizer.summarize(text: text).summary]) } catch {
         complete(result, error: error)
@@ -174,20 +204,30 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     let handle = try arguments.requiredInt64("handle")
     let text = try arguments.requiredString("text")
     let requestId = try arguments.requiredString("requestId")
+
     guard let summarizer = withLock({ summarizers[handle] }) else {
       throw PluginError.invalidArgument("Unknown TextSummarizer handle: \(handle)")
     }
+
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do {
         try summarizer.summarizeStreaming(text: text) { [weak self] output, error in
+
+
           guard let self else { return }
           if let error {
             emitError(requestId: requestId, error: error)
+
             return
           }
+
+
           guard let output else { return }
           emit(["kind": "data", "requestId": requestId, "text": output.chunk, "isDone": output.done])
+
           if output.done { emitDone(requestId: requestId) }
         }
         complete(result, value: nil)
@@ -197,10 +237,14 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
   private func closeSummarizer(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
     let handle = try call.argumentsMap().requiredInt64("handle")
+
     guard let summarizer = withLock({ summarizers.removeValue(forKey: handle) }) else {
       throw PluginError.invalidArgument("Unknown TextSummarizer handle: \(handle)")
     }
+
     worker.async { [weak self] in
+
+
       guard let self else { return }
       do {
         try summarizer.close()
@@ -211,11 +255,13 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
   public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
     withLock { eventSink = events }
+
     return nil
   }
 
   public func onCancel(withArguments arguments: Any?) -> FlutterError? {
     withLock { eventSink = nil }
+
     return nil
   }
 
@@ -227,6 +273,7 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
       proofreaders.removeAll()
       summarizers.removeAll()
       eventSink = nil
+
       return tasks
     }
     worker.async {
@@ -243,6 +290,8 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
   private func emit(_ event: [String: Any]) {
     DispatchQueue.main.async { [weak self] in
+
+
       guard let self else { return }
       let sink = withLock { self.eventSink }
       sink?(event)
@@ -273,12 +322,14 @@ public final class MpTextPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     case .deletion: type = "deletion"
     @unknown default: type = "unknown"
     }
+
     return ["type": type, "text": correction.text]
   }
 
   private func withLock<T>(_ operation: () -> T) -> T {
     lock.lock()
     defer { lock.unlock() }
+
     return operation()
   }
 }
@@ -296,6 +347,7 @@ private enum PluginError: LocalizedError {
 extension FlutterMethodCall {
   fileprivate func argumentsMap() throws -> [String: Any] {
     guard let value = arguments as? [String: Any] else { throw PluginError.invalidArgument("Arguments must be a map") }
+
     return value
   }
 }
@@ -305,11 +357,13 @@ extension Dictionary where Key == String, Value == Any {
     guard let value = self[key] as? String, !value.isEmpty else {
       throw PluginError.invalidArgument("\(key) must be a non-empty string")
     }
+
     return value
   }
 
   fileprivate func requiredInt64(_ key: String) throws -> Int64 {
     guard let value = self[key] as? NSNumber else { throw PluginError.invalidArgument("\(key) must be an integer") }
+
     return value.int64Value
   }
 

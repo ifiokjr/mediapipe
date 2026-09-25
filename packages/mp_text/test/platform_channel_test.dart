@@ -31,6 +31,7 @@ void main() {
         case 'proofreader.create':
           materializedModelPath = arguments['modelPath']! as String;
           expect(File(materializedModelPath!).existsSync(), isTrue);
+
           return 7;
         case 'proofreader.proofread':
           return <String, Object?>{
@@ -56,8 +57,10 @@ void main() {
                   'kind': 'done',
                   'requestId': requestId,
                 });
+
                 return;
               }
+
               await _sendEvent(messenger, <String, Object?>{
                 'kind': 'data',
                 'requestId': requestId,
@@ -80,6 +83,7 @@ void main() {
               });
             }),
           );
+
           return null;
         case 'proofreader.close':
           return null;
@@ -90,6 +94,7 @@ void main() {
         case 'summarizer.close':
           return null;
       }
+
       throw PlatformException(code: 'unimplemented', message: call.method);
     });
   });
@@ -182,6 +187,7 @@ void main() {
         failNext = false;
         throw PlatformException(code: 'invalid_argument', message: 'bad input');
       }
+
       return <String, Object?>{'text': 'Corrected text.', 'corrections': <Object?>[]};
     });
     addTearDown(() {

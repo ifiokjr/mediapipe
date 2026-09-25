@@ -35,14 +35,18 @@ final class NativeArtifactCatalog {
       if (!RegExp(r'^v\d+\.\d+\.\d+$').hasMatch(mediaPipeVersion)) {
         throw FormatException('Invalid MediaPipe version: $mediaPipeVersion.');
       }
+
       final Map<String, NativeArtifact> artifacts = <String, NativeArtifact>{};
+
       for (final MapEntry<String, Object?> entry in artifactValues.entries) {
         if (entry.value case {'url': final String url, 'sha256': final String checksum}) {
           _requireDigest(checksum, 'artifact ${entry.key}');
           final Uri uri = Uri.parse(url);
+
           if (!uri.isScheme('https')) {
             throw FormatException('Artifact ${entry.key} must use HTTPS.');
           }
+
           artifacts[entry.key] = NativeArtifact(
             mediaPipeVersion: mediaPipeVersion,
             target: entry.key,
@@ -51,10 +55,13 @@ final class NativeArtifactCatalog {
           );
           continue;
         }
+
         throw FormatException('Invalid artifact entry for ${entry.key}.');
       }
+
       return NativeArtifactCatalog(mediaPipeVersion: mediaPipeVersion, artifacts: artifacts);
     }
+
     throw const FormatException('Invalid native artifact catalog.');
   }
 }
@@ -68,6 +75,7 @@ Future<Directory> resolveNativeArtifact({
     sharedOutputDirectory.resolve('mp_core/${artifact.target}-${artifact.sha256}/'),
   );
   final File ready = File.fromUri(cache.uri.resolve('.ready'));
+
   if (ready.existsSync()) return cache;
 
   if (cache.existsSync()) cache.deleteSync(recursive: true);
@@ -80,6 +88,7 @@ Future<Directory> resolveNativeArtifact({
     final HttpClientRequest request = await httpClient.getUrl(artifact.uri);
     request.headers.set(HttpHeaders.userAgentHeader, 'mp_core native asset hook');
     final HttpClientResponse response = await request.close();
+
     if (response.statusCode != HttpStatus.ok) {
       await response.drain<void>();
       throw HttpException(
@@ -87,21 +96,25 @@ Future<Directory> resolveNativeArtifact({
         uri: artifact.uri,
       );
     }
+
     await response.pipe(temporary.openWrite());
     final String actualDigest = await sha256
         .bind(temporary.openRead())
         .first
         .then((Digest digest) => digest.toString());
+
     if (actualDigest != artifact.sha256) {
       throw StateError(
         'Native artifact checksum mismatch for ${artifact.target}: '
         'expected ${artifact.sha256}, received $actualDigest.',
       );
     }
+
     await temporary.rename(archiveFile.path);
     await _extractArchive(archiveFile, cache);
     await _verifyManifest(cache, artifact.target, artifact.mediaPipeVersion);
     ready.writeAsStringSync('${artifact.sha256}\n');
+
     return cache;
   } catch (_) {
     if (cache.existsSync()) cache.deleteSync(recursive: true);
@@ -115,10 +128,12 @@ Future<void> _extractArchive(File source, Directory destination) async {
   final InputFileStream input = InputFileStream(source.path);
   try {
     final Archive archive = ZipDecoder().decodeStream(input);
+
     for (final ArchiveFile entry in archive) {
       if (!entry.isFile || entry.isSymbolicLink || !_isSafeFlatName(entry.name)) {
         throw FormatException('Unsafe native artifact entry: ${entry.name}');
       }
+
       final OutputFileStream output = OutputFileStream(
         destination.uri.resolve(entry.name).toFilePath(),
       );
@@ -139,9 +154,11 @@ Future<void> _verifyManifest(
   String expectedMediaPipeVersion,
 ) async {
   final File manifestFile = File.fromUri(directory.uri.resolve('manifest.json'));
+
   if (!manifestFile.existsSync()) {
     throw const FormatException('Native artifact does not contain manifest.json.');
   }
+
   final Object? decoded = jsonDecode(await manifestFile.readAsString());
   if (decoded case {
     'mediaPipeVersion': final String mediaPipeVersion,
@@ -153,30 +170,38 @@ Future<void> _verifyManifest(
         'Expected MediaPipe $expectedMediaPipeVersion, received $mediaPipeVersion.',
       );
     }
+
     if (target != expectedTarget) {
       throw FormatException('Expected native target $expectedTarget, received $target.');
     }
+
     if (libraryValues.isEmpty) {
       throw const FormatException('Native artifact manifest has no libraries.');
     }
+
     for (final MapEntry<String, Object?> entry in libraryValues.entries) {
       if (!_isSafeFlatName(entry.key) || entry.value is! String) {
         throw FormatException('Invalid native library manifest entry: ${entry.key}.');
       }
+
       final String expectedDigest = entry.value! as String;
       _requireDigest(expectedDigest, entry.key);
       final File library = File.fromUri(directory.uri.resolve(entry.key));
+
       if (!library.existsSync()) {
         throw FormatException('Native artifact is missing ${entry.key}.');
       }
+
       final String actualDigest = await sha256
           .bind(library.openRead())
           .first
           .then((Digest digest) => digest.toString());
+
       if (actualDigest != expectedDigest) {
         throw StateError('Native library checksum mismatch for ${entry.key}.');
       }
     }
+
     final Set<String> extractedFiles = directory
         .listSync()
         .whereType<File>()
@@ -187,8 +212,10 @@ Future<void> _verifyManifest(
         !extractedFiles.containsAll(libraryValues.keys)) {
       throw const FormatException('Native artifact contains undeclared files.');
     }
+
     return;
   }
+
   throw const FormatException('Invalid native artifact manifest.');
 }
 

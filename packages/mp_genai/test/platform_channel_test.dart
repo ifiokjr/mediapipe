@@ -29,6 +29,7 @@ void main() {
         case 'llm.create':
           materializedModelPath = arguments['modelPath']! as String;
           expect(File(materializedModelPath!).existsSync(), isTrue);
+
           return 1;
         case 'llm.createSession':
           return 2;
@@ -56,6 +57,7 @@ void main() {
               });
             }),
           );
+
           return null;
         case 'llm.closeSession':
         case 'llm.close':
@@ -110,6 +112,7 @@ void main() {
         case 'rag.close':
           return null;
       }
+
       throw PlatformException(code: 'unimplemented', message: call.method);
     });
   });
@@ -303,6 +306,7 @@ LlmInferenceOptions _inferenceOptions(File model) =>
 File _temporaryFile(String prefix, String name) {
   final Directory directory = Directory.systemTemp.createTempSync(prefix);
   addTearDown(() => directory.deleteSync(recursive: true));
+
   return File('${directory.path}${Platform.pathSeparator}$name')..writeAsBytesSync(<int>[1]);
 }
 

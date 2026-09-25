@@ -192,6 +192,7 @@ final class _FakeSessionBackend implements LlmSessionBackend {
         LlmGenerationChunk(text: ' there', isDone: true),
       ],
     );
+
     return LlmGeneration(
       chunks: chunks,
       response: Future<String>.value('Hi there'),
@@ -210,6 +211,7 @@ final class _FakeSessionBackend implements LlmSessionBackend {
     clone.queries.addAll(queries);
     clone.images.addAll(images);
     clone.audio.addAll(audio.map(Uint8List.fromList));
+
     return clone;
   }
 

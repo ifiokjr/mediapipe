@@ -104,18 +104,21 @@ final class _FakeRagBackend implements RagPipelineBackend {
   @override
   Future<bool> record(RagDocument document) async {
     documents.add(document);
+
     return true;
   }
 
   @override
   Future<bool> recordAll(List<RagDocument> documents) async {
     this.documents.addAll(documents);
+
     return true;
   }
 
   @override
   Future<List<RagRetrievalEntity>> retrieve(String query, RagRetrievalOptions options) async {
     lastOptions = options;
+
     return <RagRetrievalEntity>[
       RagRetrievalEntity(
         text: documents.first.text,
@@ -128,12 +131,14 @@ final class _FakeRagBackend implements RagPipelineBackend {
   @override
   Future<String> generate(String query, RagRetrievalOptions options) async {
     lastOptions = options;
+
     return 'Observed locally.';
   }
 
   @override
   Stream<RagGenerationChunk> generateStreaming(String query, RagRetrievalOptions options) {
     lastOptions = options;
+
     return Stream<RagGenerationChunk>.fromIterable(const <RagGenerationChunk>[
       RagGenerationChunk(text: 'Observed ', isDone: false),
       RagGenerationChunk(text: 'locally.', isDone: true),

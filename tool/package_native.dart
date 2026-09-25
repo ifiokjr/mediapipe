@@ -15,9 +15,11 @@ Future<void> main(List<String> arguments) async {
   final Directory root = _findRepositoryRoot();
   final Directory source = Directory.fromUri(root.uri.resolve('.mp-sdk/$target/'));
   final File manifestFile = File.fromUri(source.uri.resolve('manifest.json'));
+
   if (!manifestFile.existsSync()) {
     throw StateError('No native manifest found for $target. Run native:build first.');
   }
+
   final Object? decoded = jsonDecode(await manifestFile.readAsString());
   if (decoded case {
     'mediaPipeVersion': final String mediaPipeVersion,
@@ -27,23 +29,30 @@ Future<void> main(List<String> arguments) async {
     if (manifestTarget != target) {
       throw StateError('Manifest target $manifestTarget does not match $target.');
     }
+
     if (libraryValues.isEmpty) {
       throw const FormatException('Native artifact manifest has no libraries.');
     }
+
     final List<String> libraryNames = libraryValues.keys.toList(growable: false)..sort();
     final Archive archive = Archive();
+
     for (final String name in libraryNames) {
       if (!_isSafeFlatName(name) || libraryValues[name] is! String) {
         throw FormatException('Invalid native library manifest entry: $name.');
       }
+
       final File library = File.fromUri(source.uri.resolve(name));
       final List<int> bytes = await library.readAsBytes();
       final String digest = sha256.convert(bytes).toString();
+
       if (digest != libraryValues[name]) {
         throw StateError('Native library checksum mismatch for $name.');
       }
+
       archive.add(ArchiveFile.bytes(name, bytes)..mode = 0x1ed);
     }
+
     archive.add(ArchiveFile.bytes('manifest.json', await manifestFile.readAsBytes())..mode = 0x1a4);
 
     final List<int> zip = ZipEncoder().encodeBytes(archive, modified: DateTime.utc(1980));
@@ -64,16 +73,20 @@ Future<void> main(List<String> arguments) async {
         'sha256': checksum,
       }),
     );
+
     return;
   }
+
   throw const FormatException('Invalid native artifact manifest.');
 }
 
 String _readOption(List<String> arguments, String name) {
   final int index = arguments.indexOf(name);
+
   if (index == -1 || index + 1 >= arguments.length) {
     throw FormatException('Missing required option $name.');
   }
+
   return arguments[index + 1];
 }
 
@@ -82,6 +95,7 @@ bool _isSafeFlatName(String name) =>
 
 Directory _findRepositoryRoot() {
   Directory current = Directory.current.absolute;
+
   while (current.parent.path != current.path) {
     if (File.fromUri(current.uri.resolve('pubspec.yaml')).existsSync() &&
         Directory.fromUri(current.uri.resolve('packages/mp_core/')).existsSync()) {
@@ -89,5 +103,6 @@ Directory _findRepositoryRoot() {
     }
     current = current.parent;
   }
+
   throw StateError('Could not find the MP workspace root.');
 }

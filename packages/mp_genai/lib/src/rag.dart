@@ -102,6 +102,7 @@ final class RagSqliteColumn {
     if (sqlType.trim().isEmpty) {
       throw ArgumentError.value(sqlType, 'sqlType', 'must not be empty');
     }
+
     if (autoIncrement && keyType != RagSqliteKeyType.primary) {
       throw ArgumentError.value(autoIncrement, 'autoIncrement', 'requires a primary key');
     }
@@ -138,13 +139,17 @@ final class SqliteVectorStoreOptions extends RagVectorStoreOptions {
     if (embeddingDimensions <= 0) {
       throw ArgumentError.value(embeddingDimensions, 'embeddingDimensions', 'must be positive');
     }
+
     if (databasePath.trim().isEmpty) {
       throw ArgumentError.value(databasePath, 'databasePath', 'must not be empty');
     }
+
     final List<String?> names = <String?>[tableName, textColumnName, embeddingsColumnName];
+
     if (names.any((String? value) => value != null && value.trim().isEmpty)) {
       throw ArgumentError('SQLite table and column names must not be empty.');
     }
+
     final bool hasCustomSchema = names.any((String? value) => value != null) || columns.isNotEmpty;
     if (hasCustomSchema &&
         (tableName == null ||
@@ -157,6 +162,7 @@ final class SqliteVectorStoreOptions extends RagVectorStoreOptions {
       );
     }
     final Set<String> columnNames = <String>{};
+
     for (final RagSqliteColumn column in this.columns) {
       if (!columnNames.add(column.name)) {
         throw ArgumentError.value(column.name, 'columns', 'contains a duplicate name');
@@ -338,6 +344,7 @@ final class RagPipeline implements MpTask {
   /// Embeds and records one document.
   Future<bool> record(RagDocument document) {
     _lifecycle.ensureOpen();
+
     return _backend.record(document);
   }
 
@@ -345,7 +352,9 @@ final class RagPipeline implements MpTask {
   Future<bool> recordAll(Iterable<RagDocument> documents) {
     _lifecycle.ensureOpen();
     final List<RagDocument> batch = List<RagDocument>.unmodifiable(documents);
+
     if (batch.isEmpty) throw ArgumentError.value(batch, 'documents', 'must not be empty');
+
     return _backend.recordAll(batch);
   }
 
@@ -353,6 +362,7 @@ final class RagPipeline implements MpTask {
   Future<List<RagRetrievalEntity>> retrieve(String query, {RagRetrievalOptions? options}) {
     _lifecycle.ensureOpen();
     _checkQuery(query);
+
     return _backend.retrieve(query, options ?? RagRetrievalOptions());
   }
 
@@ -360,6 +370,7 @@ final class RagPipeline implements MpTask {
   Future<String> generate(String query, {RagRetrievalOptions? options}) {
     _lifecycle.ensureOpen();
     _checkQuery(query);
+
     return _backend.generate(query, options ?? RagRetrievalOptions());
   }
 
@@ -367,6 +378,7 @@ final class RagPipeline implements MpTask {
   Stream<RagGenerationChunk> generateStreaming(String query, {RagRetrievalOptions? options}) {
     _lifecycle.ensureOpen();
     _checkQuery(query);
+
     return _backend.generateStreaming(query, options ?? RagRetrievalOptions());
   }
 

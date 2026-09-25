@@ -103,6 +103,7 @@ in
     };
     "repo-swift-format" = {
       exec =
+
         if pkgs.stdenv.isDarwin then ''exec xcrun swift-format "$@"'' else ''exec swift-format "$@"'';
       description = "Run swift-format from Xcode or the pinned Nix package.";
     };

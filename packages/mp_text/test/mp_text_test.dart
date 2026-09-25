@@ -164,6 +164,7 @@ final class _FakeTextRuntime implements TextRuntime {
   @override
   Future<TextSummarizerBackend> createTextSummarizer(TextSummarizerOptions options) async {
     summarizerOptions = options;
+
     return summarizer;
   }
 }
@@ -184,6 +185,7 @@ final class _FakeLanguageDetector extends _FakeTask implements LanguageDetectorB
   @override
   Future<LanguageDetectorResult> detect(String text) async {
     inputs.add(text);
+
     return LanguageDetectorResult(const <LanguagePrediction>[
       LanguagePrediction(languageCode: 'en', probability: 0.9),
     ]);
@@ -196,6 +198,7 @@ final class _FakeTextClassifier extends _FakeTask implements TextClassifierBacke
   @override
   Future<ClassificationResult> classify(String text) async {
     inputs.add(text);
+
     return ClassificationResult(
       classifications: <Classifications>[
         Classifications(
@@ -213,6 +216,7 @@ final class _FakeTextEmbedder extends _FakeTask implements TextEmbedderBackend {
   @override
   Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) async {
     this.formatContext = formatContext;
+
     return EmbeddingResult(
       embeddings: <Embedding>[
         Embedding.float(Float32List.fromList(<double>[1, 2]), headIndex: 0),

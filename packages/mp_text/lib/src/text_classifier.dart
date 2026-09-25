@@ -41,6 +41,7 @@ final class TextClassifier implements MpTask {
   /// Classifies [text].
   Future<ClassificationResult> classify(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.classify(text);
   }
 

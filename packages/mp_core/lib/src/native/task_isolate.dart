@@ -22,6 +22,7 @@ Object nativeTaskFailure(Object error) {
       !description.contains('Attempted to fallback to process lookup')) {
     return error;
   }
+
   return const MpException(
     MpStatus.unavailable,
     'No MediaPipe native runtime is linked into this build. Published packages '
@@ -74,8 +75,10 @@ final class NativeTaskIsolate {
     responseSubscription = responses.listen((Object? message) {
       if (message case final _NativeTaskReady value) {
         if (!ready.isCompleted) ready.complete(value);
+
         return;
       }
+
       worker?._handleResponse(message);
     });
     final StreamSubscription<Object?> errorSubscription = errors.listen((Object? message) {
@@ -108,6 +111,7 @@ final class NativeTaskIsolate {
     late final _NativeTaskReady handshake;
     try {
       handshake = await ready.future;
+
     } on Object {
       isolate.kill(priority: Isolate.immediate);
       await responseSubscription.cancel();
@@ -118,6 +122,7 @@ final class NativeTaskIsolate {
       exits.close();
       rethrow;
     }
+
     if (handshake.error case final Object error) {
       isolate.kill(priority: Isolate.immediate);
       await responseSubscription.cancel();
@@ -128,6 +133,7 @@ final class NativeTaskIsolate {
       exits.close();
       Error.throwWithStackTrace(nativeTaskFailure(error), handshake.stackTrace ?? StackTrace.empty);
     }
+
     final NativeTaskIsolate result = NativeTaskIsolate._(
       isolate,
       responses,
@@ -137,9 +143,11 @@ final class NativeTaskIsolate {
       handshake.commands!,
     );
     worker = result;
+
     if (earlyTermination case final Object error) {
       result._handleTermination(error);
     }
+
     return result;
   }
 
@@ -151,6 +159,7 @@ final class NativeTaskIsolate {
     final Completer<Object?> completer = Completer<Object?>();
     _pending[requestId] = completer;
     _commands.send(_NativeTaskRequest(requestId, command));
+
     return completer.future.then((Object? value) => value as T);
   }
 
@@ -160,19 +169,24 @@ final class NativeTaskIsolate {
     if (_pending.isNotEmpty) {
       throw StateError('Cannot dispose a native task worker with pending requests.');
     }
+
     _disposed = true;
     await _releaseResources(kill: true);
   }
 
   Future<void> _releaseResources({required bool kill}) async {
     await _responseSubscription.cancel();
+
     for (final StreamSubscription<Object?> subscription in _lifecycleSubscriptions) {
       await subscription.cancel();
     }
+
     _responses.close();
+
     for (final ReceivePort port in _lifecyclePorts) {
       port.close();
     }
+
     if (kill) _isolate.kill(priority: Isolate.immediate);
   }
 
@@ -181,10 +195,14 @@ final class NativeTaskIsolate {
       for (final Completer<Object?> pending in _pending.values) {
         pending.completeError(StateError('Native task worker returned an invalid response.'));
       }
+
       _pending.clear();
+
       return;
     }
+
     final Completer<Object?>? completer = _pending.remove(message.requestId);
+
     if (completer == null) return;
     if (message.error case final Object error) {
       completer.completeError(error, message.stackTrace);
@@ -196,9 +214,11 @@ final class NativeTaskIsolate {
   void _handleTermination(Object error) {
     if (_disposed) return;
     _disposed = true;
+
     for (final Completer<Object?> pending in _pending.values) {
       pending.completeError(error);
     }
+
     _pending.clear();
     unawaited(_releaseResources(kill: false));
   }
@@ -208,6 +228,7 @@ Object _remoteError(Object? message) {
   if (message case <Object?>[final Object error, final Object stackTrace]) {
     return nativeTaskFailure(RemoteError(error.toString(), stackTrace.toString()));
   }
+
   return StateError('Native task worker failed: $message');
 }
 
@@ -248,17 +269,21 @@ Future<void> _runNativeTaskWorker(_NativeTaskBootstrap bootstrap) async {
   late final NativeTaskWorkerHandler handler;
   try {
     handler = await bootstrap.factory(bootstrap.initialMessage);
+
   } on Object catch (error, stackTrace) {
     bootstrap.responses.send(_NativeTaskReady(error: error, stackTrace: stackTrace));
     commands.close();
+
     return;
   }
   bootstrap.responses.send(_NativeTaskReady(commands: commands.sendPort));
+
   await for (final Object? message in commands) {
     if (message is! _NativeTaskRequest) continue;
     try {
       final Object? result = await handler(message.command);
       bootstrap.responses.send(_NativeTaskResponse(requestId: message.requestId, result: result));
+
     } on Object catch (error, stackTrace) {
       bootstrap.responses.send(
         _NativeTaskResponse(requestId: message.requestId, error: error, stackTrace: stackTrace),

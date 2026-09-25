@@ -19,12 +19,14 @@ abstract base class _VisionTask<T> implements MpTask {
 
   Stream<VisionLiveResult<T>> get liveResults {
     _lifecycle.ensureOpen();
+
     return _backend.results;
   }
 
   Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) {
     _lifecycle.ensureOpen();
     _requireMode(VisionRunningMode.image, 'image processing');
+
     return _backend.processImage(image, processingOptions);
   }
 
@@ -36,6 +38,7 @@ abstract base class _VisionTask<T> implements MpTask {
     _lifecycle.ensureOpen();
     _requireMode(VisionRunningMode.video, 'video processing');
     _timestamps.add(timestampMs);
+
     return _backend.processVideo(image, timestampMs, processingOptions);
   }
 
@@ -47,6 +50,7 @@ abstract base class _VisionTask<T> implements MpTask {
     _lifecycle.ensureOpen();
     _requireMode(VisionRunningMode.liveStream, 'live-stream processing');
     _timestamps.add(timestampMs);
+
     return _backend.processLive(image, timestampMs, processingOptions);
   }
 
@@ -417,6 +421,7 @@ final class InteractiveSegmenter implements MpTask {
     ImageProcessingOptions? processingOptions,
   }) {
     _lifecycle.ensureOpen();
+
     return _backend.segment(image, prompt, processingOptions);
   }
 
