@@ -1,5 +1,22 @@
 {
   "schemaVersion": 1,
   "mediaPipeVersion": "v1.0.0",
-  "artifacts": {}
+  "artifacts": {
+    "android-arm64": {
+      "url": "https://github.com/ifiokjr/mediapipe/releases/download/native-v1.0.0-1/mediapipe-v1.0.0-android-arm64.zip",
+      "sha256": "0a2ad71545e6908f9cf30c429d03dd4152d4495d4b860e0202a90fec9fae0fa6"
+    },
+    "android-x64": {
+      "url": "https://github.com/ifiokjr/mediapipe/releases/download/native-v1.0.0-1/mediapipe-v1.0.0-android-x64.zip",
+      "sha256": "8636c0278a318a263e0848eeb9fab3a66bf3c657edfa721a3e469dc88531abed"
+    },
+    "linux-x64": {
+      "url": "https://github.com/ifiokjr/mediapipe/releases/download/native-v1.0.0-1/mediapipe-v1.0.0-linux-x64.zip",
+      "sha256": "4dc233fed2d307daf7ab4d220c081bfb588c4fd794fbf0f05ebe82ef84865917"
+    },
+    "macos-arm64": {
+      "url": "https://github.com/ifiokjr/mediapipe/releases/download/native-v1.0.0-1/mediapipe-v1.0.0-macos-arm64.zip",
+      "sha256": "49c24e9f0f32c9028cfa77da271453fb16d9bd3ad6c8d7d86a471567dfaf3c5a"
+    }
+  }
 }
