@@ -8,7 +8,10 @@ import 'native_artifact.dart';
 /// Bundles the MediaPipe Tasks C libraries for a native target.
 ///
 /// Source checkouts can set `hooks.user_defines.mp_core` /
-/// `native_library_directory` to test a local build. Published packages resolve
+/// `native_library_directory` to test a local build. An explicit directory is
+/// authoritative: when it holds no runtime for the target, the hook bundles
+/// nothing rather than reaching for a published archive, so a local build stays
+/// hermetic and offline. Published packages, which set no user define, resolve
 /// the target from `native_artifacts.json`, download the immutable release
 /// archive into the hook's shared cache, and verify both the archive and each
 /// library before bundling them.
@@ -37,6 +40,7 @@ Future<void> main(List<String> arguments) async {
       } else if (File.fromUri(configuredDirectory.uri.resolve(mainLibraryName)).existsSync()) {
         directory = configuredDirectory;
       }
+      if (directory == null) return;
     }
 
     if (directory == null) {
