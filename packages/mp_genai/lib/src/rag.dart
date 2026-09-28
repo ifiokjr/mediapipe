@@ -213,6 +213,12 @@ final class RagPipelineOptions {
   final LlmInferenceOptions inferenceOptions;
 
   /// Java-format prompt template consumed by MediaPipe's `PromptBuilder`.
+  ///
+  /// The template must contain exactly one `%s` placeholder for the retrieved
+  /// context, followed by one `%s` for the user query, in that order — for
+  /// example `"Context:\n%s\n\nQuestion: %s\nAnswer:"`. The Android plugin
+  /// passes the template straight to `PromptBuilder`, so any additional or
+  /// missing placeholder fails at generation time rather than here.
   final String promptTemplate;
 
   /// LLM sampling options.
@@ -300,10 +306,12 @@ final class RagGenerationChunk {
   /// Creates a generation chunk.
   const RagGenerationChunk({required this.text, required this.isDone});
 
-  /// Partial response text reported by the MediaPipe progress callback.
+  /// Newly decoded text since the preceding chunk.
   ///
-  /// Consumers must not assume that this value is either a delta or the full
-  /// response; that behavior is defined by the selected upstream model backend.
+  /// The Android plugin accumulates the full response internally and forwards
+  /// only the new fragment on each progress callback, matching
+  /// [LlmGenerationChunk.text]. Concatenating every chunk's `text` reproduces
+  /// the complete response.
   final String text;
 
   /// Whether generation is complete.

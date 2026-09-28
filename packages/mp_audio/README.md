@@ -1,7 +1,27 @@
+<!-- {=packageHeader:"mp_audio"} -->
+
 # mp_audio
 
-Typed MediaPipe audio classification for independent clips and timestamped live
-audio in Dart and Flutter.
+Cross-platform MediaPipe audio tasks for Dart and Flutter.
+
+<!-- {/packageHeader} -->
+
+Typed audio classification for independent clips and timestamped live audio.
+
+## Install
+
+<!-- {=packageInstall:"mp_audio"} -->
+
+Add the package:
+
+```yaml
+dependencies:
+  { { name } }: ^0.1.0
+```
+
+`Cross-platform MediaPipe audio tasks for Dart and Flutter.`
+
+<!-- {/packageInstall} -->
 
 ## Usage
 
@@ -36,7 +56,38 @@ Streaming mode uses strictly increasing millisecond timestamps and exposes
 results as a Dart stream. The runtime copies caller-owned sample buffers before
 crossing a native or browser boundary.
 
-See the [audio guide](https://ifiokjr.github.io/mediapipe/packages/audio/) for
-running modes and the current platform contract.
+The example in [`example/`](example/) classifies a synthesized clip and a
+timestamped frame sequence, so it runs without microphone hardware.
 
-MP is independent software and is not affiliated with or endorsed by Google.
+## Current platform contract
+
+Native audio supports clips only; stream mode returns `MpStatus.unimplemented`
+until the callback-copy bridge lands. The browser adapter classifies each chunk
+as an independent clip and adjusts its timestamp.
+
+## Failure contract
+
+<!-- {=unsupportedContract} -->
+
+Unsupported API and platform combinations fail explicitly with
+`MpException(MpStatus.unimplemented, …)` rather than silently returning empty
+results. Check `MpStatus` before treating a failure as a model or input problem.
+
+<!-- {/unsupportedContract} -->
+
+See the [audio guide]({{ links.docs }}packages/audio/) for running modes and
+the current platform contract.
+
+<!-- {=packageFooter:"mp_audio"} -->
+
+See the [mp_audio documentation](https://ifiokjr.github.io/mediapipe/packages/audio/) for
+the full data contract and platform notes.
+
+<!-- {/packageFooter} -->
+
+<!-- {=independenceNotice} -->
+
+MP is independent software. MediaPipe is a trademark of Google LLC; this
+project is not affiliated with or endorsed by Google.
+
+<!-- {/independenceNotice} -->

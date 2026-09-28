@@ -15,7 +15,11 @@ final class VisionLiveResult<T> {
   /// Task output.
   final T result;
 
-  /// A safe copy of the input image associated with the output.
+  /// The input image the output was computed from.
+  ///
+  /// Images are immutable and reference counted by the task, so this is the
+  /// original instance rather than a copy. Never mutate its underlying buffer
+  /// while the result is in use.
   final MpImage input;
 
   /// Input timestamp in milliseconds.

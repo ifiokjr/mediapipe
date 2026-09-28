@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -160,6 +161,35 @@ void main() {
         'llm.close',
       ]),
     );
+  });
+
+  test('a rejected image input does not strand the session as busy', () async {
+    final LlmInference inference = await LlmInference.create(
+      LlmInferenceOptions(
+        baseOptions: BaseOptions(
+          modelAsset: ModelAsset.bytes(Uint8List.fromList(<int>[1, 2, 3]), name: 'model.task'),
+        ),
+      ),
+      runtime: const MobileGenAiRuntime(),
+    );
+    final LlmSession session = await inference.createSession();
+
+    // Android image input is 8-bit only, so a float image is rejected before any
+    // platform call. That rejection happens synchronously inside the guarded
+    // operation, which must still release the session for later use.
+    await expectLater(
+      session.addImage(
+        MpImage.float32(width: 2, height: 2, format: MpImageFormat.float32x1, data: Float32List(4)),
+      ),
+      throwsA(isA<MpException>()),
+    );
+
+    await session.addQueryChunk('Describe the frame.');
+    final LlmGeneration generation = await session.generate();
+    expect(await generation.response, 'local response');
+
+    await session.close();
+    await inference.close();
   });
 
   test('function-calling bridge maps tools and structured responses', () async {

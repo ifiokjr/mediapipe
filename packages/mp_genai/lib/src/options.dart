@@ -216,6 +216,12 @@ final class LlmSessionOptions {
   final LlmGraphOptions? graphOptions;
 
   /// Optional native constrained-decoding handle.
+  ///
+  /// A raw handle acquired from the GenAI Android runtime through
+  /// `LlmSession.createConstraintHandle` on the platform side. The web runtime
+  /// rejects sessions that supply one with `MpStatus.unimplemented`. Application
+  /// code rarely needs this; prefer `GenerativeModel` constraints, which wrap the
+  /// same runtime capability with a typed API.
   final int? constraintHandle;
 
   /// Optional role-specific prompt wrappers.

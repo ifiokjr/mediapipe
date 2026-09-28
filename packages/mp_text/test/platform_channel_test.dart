@@ -166,6 +166,37 @@ void main() {
     expect(chunks.last.corrections.last.type, TextCorrectionType.insertion);
   });
 
+  test('a failed operation does not strand the task as busy', () async {
+    final Directory directory = Directory.systemTemp.createTempSync('mp_text_test_');
+    final File model = File('${directory.path}${Platform.pathSeparator}proofread.litertlm')
+      ..writeAsBytesSync(<int>[1]);
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final TextProofreader proofreader = await TextProofreader.create(
+      TextProofreaderOptions(baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path))),
+    );
+
+    var failNext = true;
+    messenger.setMockMethodCallHandler(_methods, (MethodCall call) async {
+      calls.add(call);
+      if (call.method == 'proofreader.proofread' && failNext) {
+        failNext = false;
+        throw PlatformException(code: 'invalid_argument', message: 'bad input');
+      }
+      return <String, Object?>{'text': 'Corrected text.', 'corrections': <Object?>[]};
+    });
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(_methods, (MethodCall call) async => null);
+    });
+
+    await expectLater(proofreader.proofread('Text'), throwsA(isA<MpException>()));
+    // The failure must release the busy flag; otherwise every later call is
+    // rejected with failedPrecondition for the rest of the task's life.
+    final TextProofreaderResult result = await proofreader.proofread('Text');
+    expect(result.text, 'Corrected text.');
+
+    await proofreader.close();
+  });
+
   test('stream conversion errors do not release the native operation early', () async {
     sendMalformedStream = true;
     allowStreamDone = Completer<void>();

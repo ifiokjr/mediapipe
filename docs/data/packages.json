@@ -1,0 +1,44 @@
+{
+  "mp_core": {
+    "description": "Shared types, model configuration, and runtime primitives for MP tasks.",
+    "purpose": "Models, inputs, result containers, lifecycle, native assets, and web support",
+    "path": "packages/mp_core",
+    "docs": "packages/core",
+    "tasks": "Model assets, image and audio containers, result types, errors, and task lifecycle"
+  },
+  "mp_vision": {
+    "description": "Cross-platform MediaPipe vision tasks for Dart and Flutter.",
+    "purpose": "The 11 vision tasks in the current MediaPipe Solutions guide, with image, video, and live-stream entry points where applicable",
+    "path": "packages/mp_vision",
+    "docs": "packages/vision",
+    "tasks": "Image classification and embedding, object and face detection, image and interactive segmentation, gesture recognition, and hand, pose, face, and holistic landmarks"
+  },
+  "mp_camera": {
+    "description": "Camera frame conversion and scheduling for MP vision tasks in Flutter.",
+    "purpose": "Flutter camera conversion, orientation metadata, and latest-frame scheduling",
+    "path": "packages/mp_camera",
+    "docs": "packages/camera",
+    "tasks": "BGRA8888, NV21, and YUV420 frame conversion, rotation resolution, and latest-frame backpressure"
+  },
+  "mp_text": {
+    "description": "Cross-platform MediaPipe text tasks for Dart and Flutter.",
+    "purpose": "Language detection, classification, embedding, proofreading, and summarization",
+    "path": "packages/mp_text",
+    "docs": "packages/text",
+    "tasks": "Language detection, text classification, text embedding, text proofreading, and text summarization"
+  },
+  "mp_audio": {
+    "description": "Cross-platform MediaPipe audio tasks for Dart and Flutter.",
+    "purpose": "Audio-clip and streaming classification",
+    "path": "packages/mp_audio",
+    "docs": "packages/audio",
+    "tasks": "Audio classification for clips and timestamped frames"
+  },
+  "mp_genai": {
+    "description": "MediaPipe generative AI APIs for Flutter with Web and Android backends.",
+    "purpose": "LLM inference, Android function calling, RAG, and image generation",
+    "path": "packages/mp_genai",
+    "docs": "packages/genai",
+    "tasks": "LLM sessions and streaming; Android function calling, RAG, and diffusion image generation"
+  }
+}

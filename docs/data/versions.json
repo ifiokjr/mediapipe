@@ -1,0 +1,9 @@
+{
+  "mediaPipe": "v1.0.0",
+  "tasksVision": "1.0.1",
+  "tasksText": "1.0.1",
+  "tasksAudio": "1.0.1",
+  "tasksGenai": "0.10.29",
+  "sdk": "0.0.0",
+  "firstRelease": "0.1.0"
+}

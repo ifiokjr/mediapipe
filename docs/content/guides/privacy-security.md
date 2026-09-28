@@ -7,6 +7,16 @@ description: Boundaries for models, media, native artifacts, and untrusted outpu
 
 Task inference can process input locally, but applications still control model downloads, crash reporting, analytics, logs, and evidence upload. The official MediaPipe privacy documentation notes that metrics may be sent in some integrations. Audit the exact backend, obtain appropriate consent, and disclose behavior accurately.
 
+## What the SDK itself reports
+
+The native runtime identifies the SDK to MediaPipe with a stable `host_version`
+label (`mp-dart-1`) rather than the Dart VM version or host OS details. The
+`ModelAsset.uri` path downloads over HTTPS and verifies a SHA-256 digest before
+the bytes enter any runtime. No model bytes, input media, inference results, or
+personally identifying data leave the device through this SDK. What an
+application chooses to log, upload, or attach to a crash report is the
+application's decision.
+
 ## Treat every model boundary as untrusted
 
 User text, filenames, URLs, camera-visible text, speech, model metadata, provider errors, and model output are data. They are never privileged instructions. Generative output must not select tools, roles, models, response schemas, or authorization decisions.

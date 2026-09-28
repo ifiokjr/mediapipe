@@ -1695,8 +1695,19 @@ class MpGenAiPlugin :
     }
 
     private fun MethodChannel.Result.errorOnMain(error: Throwable) {
-        mainHandler.post { error("internal", error.safeMessage(), null) }
+        // The Dart bridge maps this code onto MpStatus, so classify the common
+        // failure shapes instead of collapsing every error into "internal".
+        mainHandler.post { error(error.platformCode(), error.safeMessage(), null) }
     }
+
+    private fun Throwable.platformCode(): String =
+        when (this) {
+            is IllegalArgumentException -> "invalid_argument"
+            is IllegalStateException -> "failed_precondition"
+            is UnsupportedOperationException -> "unimplemented"
+            is OutOfMemoryError -> "resource_exhausted"
+            else -> "internal"
+        }
 
     private fun Throwable.safeMessage(): String = message ?: javaClass.simpleName
 

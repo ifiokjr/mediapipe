@@ -80,6 +80,10 @@ final class AudioClassifier implements MpTask {
   bool get isClosed => _lifecycle.isClosed;
 
   /// Asynchronous results for [AudioRunningMode.audioStream].
+  ///
+  /// Subscribe before submitting the first chunk. The stream is broadcast with
+  /// no replay buffer, so a window emitted while no listener is attached is
+  /// dropped rather than retained.
   Stream<AudioClassifierResult> get results {
     _lifecycle.ensureOpen();
     return _backend.results;

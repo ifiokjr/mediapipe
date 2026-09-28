@@ -60,4 +60,15 @@ Create long-lived task instances near the owning feature boundary rather than on
 
 Every public task accepts an injectable runtime. Tests can substitute an implementation and verify application behavior without a network, GPU, or native SDK.
 
-Continue with the package pages or inspect the [examples]({{links.github}}/tree/main/packages).
+## 6. Run a complete example
+
+The [examples](examples) page lists a runnable program for every package, from a
+plain `dart run` script to a live camera app. They are built in continuous
+integration and executed on a device, so they are the fastest way to confirm
+that the SDK works in your environment:
+
+```sh
+dart run examples/cli/bin/vision_face_detection.dart
+```
+
+Continue with the package pages for the full API surface of each task family.

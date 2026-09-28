@@ -177,6 +177,33 @@ final class HolisticLandmarkerResult {
 
   /// Detected right-hand landmarks in world coordinates.
   final List<List<Landmark>> rightHandWorldLandmarks;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HolisticLandmarkerResult &&
+          _deepEquality.equals(faceLandmarks, other.faceLandmarks) &&
+          _deepEquality.equals(poseLandmarks, other.poseLandmarks) &&
+          _deepEquality.equals(poseWorldLandmarks, other.poseWorldLandmarks) &&
+          _deepEquality.equals(leftHandLandmarks, other.leftHandLandmarks) &&
+          _deepEquality.equals(leftHandWorldLandmarks, other.leftHandWorldLandmarks) &&
+          _deepEquality.equals(rightHandLandmarks, other.rightHandLandmarks) &&
+          _deepEquality.equals(rightHandWorldLandmarks, other.rightHandWorldLandmarks) &&
+          _deepEquality.equals(faceBlendshapes, other.faceBlendshapes) &&
+          _deepEquality.equals(poseSegmentationMasks, other.poseSegmentationMasks);
+
+  @override
+  int get hashCode => Object.hash(
+    _deepEquality.hash(faceLandmarks),
+    _deepEquality.hash(poseLandmarks),
+    _deepEquality.hash(poseWorldLandmarks),
+    _deepEquality.hash(leftHandLandmarks),
+    _deepEquality.hash(leftHandWorldLandmarks),
+    _deepEquality.hash(rightHandLandmarks),
+    _deepEquality.hash(rightHandWorldLandmarks),
+    _deepEquality.hash(faceBlendshapes),
+    _deepEquality.hash(poseSegmentationMasks),
+  );
 }
 
 /// Pose landmarks and optional segmentation masks.
@@ -199,6 +226,21 @@ final class PoseLandmarkerResult {
 
   /// Optional masks for detected poses.
   final List<MpImage> segmentationMasks;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PoseLandmarkerResult &&
+          _deepEquality.equals(landmarks, other.landmarks) &&
+          _deepEquality.equals(worldLandmarks, other.worldLandmarks) &&
+          _deepEquality.equals(segmentationMasks, other.segmentationMasks);
+
+  @override
+  int get hashCode => Object.hash(
+    _deepEquality.hash(landmarks),
+    _deepEquality.hash(worldLandmarks),
+    _deepEquality.hash(segmentationMasks),
+  );
 }
 
 /// Category and confidence masks returned by a segmentation task.
@@ -218,8 +260,58 @@ final class ImageSegmenterResult {
   /// Confidence for each category and pixel, when requested.
   final List<MpImage> confidenceMasks;
 
-  /// Quality score corresponding to each output mask.
+  /// Quality score for each output head, ordered by head index.
+  ///
+  /// Index `i` scores the output of head `i`, so the list aligns positionally
+  /// with the model's output heads rather than with `confidenceMasks` entries
+  /// from other heads. `null` means the model reports no quality scores.
   final Float32List? qualityScores;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImageSegmenterResult &&
+          categoryMask == other.categoryMask &&
+          const ListEquality<MpImage>().equals(confidenceMasks, other.confidenceMasks) &&
+          const Float32ListEquality().equals(qualityScores, other.qualityScores);
+
+  @override
+  int get hashCode => Object.hash(
+    categoryMask,
+    const ListEquality<MpImage>().hash(confidenceMasks),
+    const Float32ListEquality().hash(qualityScores),
+  );
+}
+
+/// Compares the contents of two `Float32List` values, treating `null` as equal
+/// only to `null`.
+@immutable
+final class Float32ListEquality implements Equality<Float32List?> {
+  /// Creates the constant list equality.
+  const Float32ListEquality();
+
+  @override
+  bool equals(Float32List? first, Float32List? second) {
+    if (first == null || second == null) return identical(first, second);
+    if (first.length != second.length) return false;
+    for (var i = 0; i < first.length; i++) {
+      if (first[i] != second[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  int hash(Float32List? list) {
+    if (list == null) return 0;
+    int result = list.length;
+    for (final double value in list.take(8)) {
+      result = Object.hash(result, value);
+    }
+    return result;
+  }
+
+  @override
+  bool isValidKey(Object? object) => object == null || object is Float32List;
 }
 
 /// Polarity of a user-drawn interactive-segmentation stroke.
@@ -248,6 +340,13 @@ final class PromptPoint {
 
   /// Vertical coordinate in the range 0–1.
   final double y;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is PromptPoint && x == other.x && y == other.y;
+
+  @override
+  int get hashCode => Object.hash(x, y);
 }
 
 /// A single interactive-segmentation brush stroke.
@@ -270,6 +369,18 @@ final class PromptStroke {
 
   /// Whether the user has finished drawing the stroke.
   final bool isCompleted;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PromptStroke &&
+          brushMode == other.brushMode &&
+          const ListEquality<PromptPoint>().equals(points, other.points) &&
+          isCompleted == other.isCompleted;
+
+  @override
+  int get hashCode =>
+      Object.hash(brushMode, const ListEquality<PromptPoint>().hash(points), isCompleted);
 }
 
 /// User guidance supplied to an interactive segmenter.

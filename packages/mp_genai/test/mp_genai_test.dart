@@ -6,6 +6,42 @@ import 'package:mp_genai/mp_genai.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('generation chunk equality', () {
+    test('LlmGenerationChunk compares text and completion', () {
+      expect(
+        const LlmGenerationChunk(text: 'a', isDone: false),
+        equals(const LlmGenerationChunk(text: 'a', isDone: false)),
+      );
+      expect(
+        const LlmGenerationChunk(text: 'a', isDone: false).hashCode,
+        equals(const LlmGenerationChunk(text: 'a', isDone: false).hashCode),
+      );
+      expect(
+        const LlmGenerationChunk(text: 'a', isDone: false),
+        isNot(equals(const LlmGenerationChunk(text: 'b', isDone: false))),
+      );
+      expect(
+        const LlmGenerationChunk(text: 'a', isDone: false),
+        isNot(equals(const LlmGenerationChunk(text: 'a', isDone: true))),
+      );
+    });
+
+    test('RagGenerationChunk compares text and completion', () {
+      expect(
+        const RagGenerationChunk(text: 'a', isDone: false),
+        equals(const RagGenerationChunk(text: 'a', isDone: false)),
+      );
+      expect(
+        const RagGenerationChunk(text: 'a', isDone: false),
+        isNot(equals(const RagGenerationChunk(text: 'b', isDone: false))),
+      );
+      expect(
+        const RagGenerationChunk(text: 'a', isDone: false),
+        isNot(equals(const RagGenerationChunk(text: 'a', isDone: true))),
+      );
+    });
+  });
+
   late _FakeGenAiRuntime runtime;
 
   setUp(() => runtime = _FakeGenAiRuntime());

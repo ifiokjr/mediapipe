@@ -49,6 +49,7 @@ void main() {
                 links: [
                   SidebarLink(text: 'Overview', href: '.'),
                   SidebarLink(text: 'Quickstart', href: 'quickstart'),
+                  SidebarLink(text: 'Examples', href: 'examples'),
                   SidebarLink(text: 'Platform support', href: 'platforms'),
                 ],
               ),

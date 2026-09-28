@@ -37,3 +37,4 @@ devenv.local.nix
 # Release artifacts
 .monochange/local/
 publish-*.json
+.mdt/cache/

@@ -3,10 +3,13 @@
   "excludes": [
     "**/.dart_tool/**",
     "**/.fvm/**",
+    "**/.mdt/**",
+    "**/.mp-sdk/**",
     "**/Pods/**",
     "**/build/**",
     "**/*.g.dart",
     "**/*.jaspr.dart",
+    "expo-mediapipe/**",
     "devenv.lock"
   ],
   "exec": {

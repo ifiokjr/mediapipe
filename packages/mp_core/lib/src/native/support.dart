@@ -2,6 +2,7 @@ import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:ffi/ffi.dart';
 
@@ -124,7 +125,10 @@ final class NativeScope {
       ..delegate = _delegate(options.delegate)
       ..host_environment = _hostEnvironment()
       ..host_system = _hostSystem()
-      ..host_version = string(Platform.version)
+      // The host version reaches MediaPipe's usage-logging path, so send a
+      // stable SDK label rather than the Dart VM's full version string, which
+      // also embeds OS details. See the privacy guide for the full contract.
+      ..host_version = string('mp-dart-1')
       ..ca_bundle_path = ffi.nullptr
       ..app_id = ffi.nullptr
       ..app_version = ffi.nullptr;
@@ -577,7 +581,3 @@ bindings.MpHostSystem _hostSystem() => switch (MpPlatform.current) {
   MpPlatform.android => bindings.MpHostSystem.MP_HOST_SYSTEM_ANDROID,
   _ => bindings.MpHostSystem.MP_HOST_SYSTEM_UNKNOWN,
 };
-
-extension<T> on List<T> {
-  T? get lastOrNull => isEmpty ? null : last;
-}

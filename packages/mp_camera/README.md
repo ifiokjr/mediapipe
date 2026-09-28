@@ -1,7 +1,10 @@
+<!-- {=packageHeader:"mp_camera"} -->
+
 # mp_camera
 
-Camera-frame conversion, orientation, and live-inference scheduling for MP
-vision tasks in Flutter.
+Camera frame conversion and scheduling for MP vision tasks in Flutter.
+
+<!-- {/packageHeader} -->
 
 `mp_camera` is the only package in the SDK that depends on `package:camera`.
 Portable vision, text, audio, and GenAI packages remain usable from plain Dart.
@@ -13,6 +16,21 @@ Portable vision, text, audio, and GenAI packages remain usable from plain Dart.
 - Sensor and device orientation compensation
 - Explicit preview mirroring metadata
 - A latest-frame scheduler with drop and failure telemetry
+
+## Install
+
+<!-- {=packageInstall:"mp_camera"} -->
+
+Add the package:
+
+```yaml
+dependencies:
+  { { name } }: ^0.1.0
+```
+
+`Camera frame conversion and scheduling for MP vision tasks in Flutter.`
+
+<!-- {/packageInstall} -->
 
 ## Usage
 
@@ -49,6 +67,31 @@ Listen to `scheduler.failures` in development and monitor `droppedCount` to
 choose an appropriate camera resolution. A dropped queued frame is expected in
 real-time inference; retaining stale frames is usually worse.
 
-See the [camera guide](https://ifiokjr.github.io/mediapipe/packages/camera/).
+The example in [`example/`](example/) exercises conversion and scheduling with
+synthetic frames, so it runs without a live camera.
 
-MP is independent software and is not affiliated with or endorsed by Google.
+## Failure contract
+
+<!-- {=unsupportedContract} -->
+
+Unsupported API and platform combinations fail explicitly with
+`MpException(MpStatus.unimplemented, …)` rather than silently returning empty
+results. Check `MpStatus` before treating a failure as a model or input problem.
+
+<!-- {/unsupportedContract} -->
+
+See the [camera guide]({{ links.docs }}packages/camera/).
+
+<!-- {=packageFooter:"mp_camera"} -->
+
+See the [mp_camera documentation](https://ifiokjr.github.io/mediapipe/packages/camera/) for
+the full data contract and platform notes.
+
+<!-- {/packageFooter} -->
+
+<!-- {=independenceNotice} -->
+
+MP is independent software. MediaPipe is a trademark of Google LLC; this
+project is not affiliated with or endorsed by Google.
+
+<!-- {/independenceNotice} -->

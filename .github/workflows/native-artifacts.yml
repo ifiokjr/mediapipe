@@ -25,18 +25,20 @@ jobs:
   build:
     strategy:
       fail-fast: false
+      # Targets with a supported host toolchain. Three targets are excluded
+      # until their infrastructure exists:
+      # - macos-x64: nixpkgs 26.11 dropped x86_64-darwin, so the devenv
+      #   bootstrap cannot run on the Intel macOS runner.
+      # - linux-arm64: Flutter 3.44.4 publishes no linux-arm64 build, so the
+      #   devenv bootstrap fails on the ARM Linux runner.
+      # - android-arm: OpenCV 3.4's bundled libpng references NEON symbols
+      #   that are undefined when cross-compiling for armeabi-v7a.
       matrix:
         include:
           - runner: macos-15
             target: macos-arm64
-          - runner: macos-15-intel
-            target: macos-x64
           - runner: ubuntu-24.04
             target: linux-x64
-          - runner: ubuntu-24.04-arm
-            target: linux-arm64
-          - runner: ubuntu-24.04
-            target: android-arm
           - runner: ubuntu-24.04
             target: android-arm64
           - runner: ubuntu-24.04
