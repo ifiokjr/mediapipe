@@ -83,7 +83,17 @@ jobs:
         # Generated release PRs contain the prepared release record after their
         # source changesets have been consumed.
         if: github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'release')
-        run: monochange preview --format md
+        run: |
+          set -euo pipefail
+          # `monochange preview` errors when no changesets are pending, which is
+          # the normal state of main right after a release merge and of pull
+          # requests that touch no publishable package.
+          if find .changeset -type f -name '*.md' -print -quit | grep -q .; then
+            monochange preview --format md
+          else
+            echo "No changesets are pending; skipping the release preview."
+          fi
+        shell: devenv shell -- bash -e {0}
 
   windows:
     runs-on: windows-latest
