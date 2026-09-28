@@ -5,7 +5,9 @@ import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:crypto/crypto.dart';
 
+/// One immutable native runtime archive published for a MediaPipe release.
 final class NativeArtifact {
+  /// Creates an artifact entry from parsed catalog values.
   const NativeArtifact({
     required this.mediaPipeVersion,
     required this.target,
@@ -13,18 +15,31 @@ final class NativeArtifact {
     required this.sha256,
   });
 
+  /// MediaPipe release the archive was built from, for example `v1.0.0`.
   final String mediaPipeVersion;
+
+  /// Target key from the catalog, for example `macos-arm64`.
   final String target;
+
+  /// HTTPS download location of the archive.
   final Uri uri;
+
+  /// Lowercase SHA-256 digest of the archive, verified after download.
   final String sha256;
 }
 
+/// Parsed `hook/native_artifacts.json` catalog of native runtime archives.
 final class NativeArtifactCatalog {
+  /// Creates a catalog for [mediaPipeVersion] with its [artifacts].
   const NativeArtifactCatalog({required this.mediaPipeVersion, required this.artifacts});
 
+  /// MediaPipe release every artifact in the catalog was built from.
   final String mediaPipeVersion;
+
+  /// Archives keyed by target name.
   final Map<String, NativeArtifact> artifacts;
 
+  /// Parses and validates the catalog JSON, rejecting malformed entries.
   static NativeArtifactCatalog parse(String source) {
     final Object? decoded = jsonDecode(source);
     if (decoded case {
@@ -59,6 +74,12 @@ final class NativeArtifactCatalog {
   }
 }
 
+/// Downloads, verifies, and extracts the archive for [artifact].
+///
+/// The extracted directory is cached under [sharedOutputDirectory] and reused
+/// while the recorded `.ready` marker matches the archive digest. Every
+/// download is checked against the catalog digest, and the extracted manifest
+/// and libraries are verified before the directory is marked ready.
 Future<Directory> resolveNativeArtifact({
   required NativeArtifact artifact,
   required Uri sharedOutputDirectory,
