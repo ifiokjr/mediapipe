@@ -1,3 +1,9 @@
+## [0.1.1](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.1) (2026-09-28)
+
+### Changed
+
+- **No package-specific changes were recorded; `mp_vision` was updated to 0.1.1 as part of group `mp`.**
+
 ## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-28)
 
 ### Features
