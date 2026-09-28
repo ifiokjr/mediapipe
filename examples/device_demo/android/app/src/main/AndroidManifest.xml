@@ -7,7 +7,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
-        android:label="mp_device_demo"
+        android:label="Move!"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
