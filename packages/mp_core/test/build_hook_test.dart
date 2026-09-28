@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
+import 'package:mp_core/src/native/artifact.dart';
 import 'package:test/test.dart';
 
 import '../hook/build.dart' as build_hook;
-import '../hook/native_artifact.dart';
 
 void main() {
   test('tracks an existing ancestor before the artifact root exists', () async {

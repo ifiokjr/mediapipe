@@ -2,8 +2,7 @@ import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
-
-import 'native_artifact.dart';
+import 'package:mp_core/src/native/artifact.dart';
 
 /// Bundles the MediaPipe Tasks C libraries for a native target.
 ///

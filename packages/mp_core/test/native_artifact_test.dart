@@ -3,9 +3,8 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
+import 'package:mp_core/src/native/artifact.dart';
 import 'package:test/test.dart';
-
-import '../hook/native_artifact.dart';
 
 void main() {
   test('catalog accepts HTTPS artifacts with lowercase digests', () {
