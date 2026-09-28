@@ -51,6 +51,16 @@ Generated FFI bindings must be reproducible from the pinned upstream tag. Never
 edit `bindings.g.dart` manually. Model binaries, credentials, and local native
 builds do not belong in Git.
 
+## Native hooks
+
+A published package may keep only the hook entrypoints pub.dev accepts in
+`hook/`: `hook/build.dart` and `hook/link.dart`. pub.dev rejects every other
+Dart file under `hook/` at upload time, which fails the release after its tag
+has been pushed. Keep helper code and catalog data elsewhere in the package
+(for example `lib/src/native/artifact.dart`) and import it from the hook with a
+`package:` URI; `test/hook_build_directory_test.dart` enforces this for every
+package in the workspace.
+
 ## Platform work
 
 Platform claims require evidence on the corresponding real runtime. Add a
