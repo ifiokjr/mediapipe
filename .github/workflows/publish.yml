@@ -1,12 +1,39 @@
 name: Publish
 
+# Publishes the dart packages of a release to pub.dev with trusted publishing
+# (OIDC). pub.dev only accepts automated publishing from workflow runs whose
+# ref is the release tag (`refs/tags/<tag-pattern>`); it rejects every token
+# minted from a branch ref, for push and workflow_dispatch events alike (the
+# "Enable publishing from `workflow_dispatch` events" option on pub.dev only
+# relaxes the event name; the tag-ref requirement stays).
+#
+# The release flow is:
+#   1. release-pr.yml pushes the release tag with a PAT so the `push` trigger
+#      below fires a run on the tag ref, then creates the draft release.
+#   2. The first run publishes the first batch of at most four packages (the
+#      pub.dev publish rate limit) in dependency order.
+#   3. The scheduled drain dispatches the next batch on the same tag ref until
+#      every package of the release is published, then publishes (un-drafts)
+#      the GitHub release.
+#
+# Manual retries must be dispatched ON the release tag ref:
+#
+#   gh workflow run publish.yml --ref v0.1.0
+#
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       tag:
         description: Release tag to resume; defaults to the oldest draft release
         required: false
         type: string
+  schedule:
+    # The drain dispatches only while a draft release is waiting, so the
+    # schedule stays quiet between releases.
+    - cron: "17 */4 * * *"
 
 permissions:
   contents: read
@@ -16,8 +43,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  drain:
+    name: Dispatch the next publishing batch
+    if: github.repository == 'ifiokjr/mediapipe' && github.event_name == 'schedule'
+    permissions:
+      actions: write # Dispatch the OIDC-eligible workflow_dispatch run.
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch publishing on the release tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="$(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+              --jq '[.[] | select(.draft == true and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+([+-].*)?$")))] | sort_by(.created_at) | .[0].tag_name'
+          )"
+          if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+            echo "No draft package release is waiting to be published."
+            exit 0
+          fi
+          # pub.dev trusted publishing validates the run ref, so the batch is
+          # dispatched ON the release tag instead of a branch.
+          gh workflow run publish.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$tag" \
+            --field "tag=$tag"
+        shell: bash
+
   publish:
-    if: github.repository == 'ifiokjr/mediapipe' && github.event_name == 'workflow_dispatch'
+    if: github.repository == 'ifiokjr/mediapipe' && github.event_name != 'schedule'
     environment: publisher
     permissions:
       contents: write
@@ -32,21 +89,34 @@ jobs:
           REQUESTED_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          tag="$REQUESTED_TAG"
-          if [ -z "$tag" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            tag="$GITHUB_REF_NAME"
+          elif [ -n "$REQUESTED_TAG" ]; then
+            tag="$REQUESTED_TAG"
+          elif [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            tag="$GITHUB_REF_NAME"
+          else
             tag="$(
               gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
                 --jq '[.[] | select(.draft == true and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+([+-].*)?$")))] | sort_by(.created_at) | .[0].tag_name'
             )"
+            if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+              echo "No draft package release is waiting to be published."
+              echo "present=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
           fi
 
-          if [ -z "$tag" ] || [ "$tag" = "null" ]; then
-            echo "No draft package release is waiting to be published."
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
             echo "::error::Refusing unexpected release tag '$tag'."
+            exit 1
+          fi
+
+          # pub.dev rejects every token minted from a branch ref, so a run
+          # that is not on the release tag cannot publish anything. Fail with
+          # instructions instead of un-drafting a partially published release.
+          if [ "$GITHUB_REF" != "refs/tags/$tag" ]; then
+            echo "::error::This run ref is $GITHUB_REF, not refs/tags/$tag. pub.dev trusted publishing only accepts runs on the release tag. Dispatch the publish on the tag instead: gh workflow run publish.yml --ref $tag"
             exit 1
           fi
 
@@ -57,9 +127,30 @@ jobs:
           } >> "$GITHUB_OUTPUT"
         shell: bash
 
+      - name: Wait for the draft release
+        if: steps.release.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # The release-pr tag job pushes the tag (starting this run) and then
+          # creates the draft release. Wait for the draft before publishing.
+          for attempt in $(seq 1 40); do
+            if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Draft release $RELEASE_TAG exists after $attempt attempt(s)."
+              exit 0
+            fi
+            echo "  attempt $attempt/40: release not found yet; sleeping 15s"
+            sleep 15
+          done
+          echo "::error::Draft release $RELEASE_TAG was not created within the wait window. Check the release-pr tag job." >&2
+          exit 1
+        shell: bash
+
       - name: Check out release tag
         if: steps.release.outputs.present == 'true'
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.release.outputs.tag }}
           fetch-depth: 0
@@ -85,7 +176,7 @@ jobs:
 
       - name: Set up Dart trusted publishing
         if: steps.release.outputs.present == 'true'
-        uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260 # v1.7.2
+        uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
 
       - name: Set up toolchains
         if: steps.release.outputs.present == 'true'
@@ -135,7 +226,13 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
       - name: Publish the GitHub release
-        if: steps.batch.outputs.count == '0' || steps.batch.outputs.final == 'true'
+        # GitHub Actions coerces an empty step output to the number 0 in
+        # comparisons, so this step must never rely on `count == '0'` alone:
+        # gate it on the release being present, otherwise a run without a
+        # draft release would still run `devenv` without a toolchain.
+        if: >-
+          steps.release.outputs.present == 'true' &&
+          (steps.batch.outputs.count == '0' || steps.batch.outputs.final == 'true')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: monochange step publish-release --from-ref HEAD --format json
@@ -143,7 +240,7 @@ jobs:
 
       - name: Upload MonoChange reports
         if: always() && steps.release.outputs.present == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: monochange-publish-${{ steps.release.outputs.tag }}
           path: |
