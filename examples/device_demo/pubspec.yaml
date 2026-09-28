@@ -20,9 +20,9 @@ dependencies:
   camera: ^0.12.1
   flutter:
     sdk: flutter
-  mp_camera: ^0.0.0
-  mp_core: ^0.0.0
-  mp_vision: ^0.0.0
+  mp_camera: ^0.1.0
+  mp_core: ^0.1.0
+  mp_vision: ^0.1.0
   sensors_plus: ^7.1.0
 
 dev_dependencies:

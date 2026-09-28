@@ -20,11 +20,11 @@ hooks:
 dependencies:
   http: ^1.6.0
   image: ^4.10.1
-  mp_audio: ^0.0.0
-  mp_core: ^0.0.0
-  mp_genai: ^0.0.0
-  mp_text: ^0.0.0
-  mp_vision: ^0.0.0
+  mp_audio: ^0.1.0
+  mp_core: ^0.1.0
+  mp_genai: ^0.1.0
+  mp_text: ^0.1.0
+  mp_vision: ^0.1.0
 
 dev_dependencies:
   lints: ^6.0.0
