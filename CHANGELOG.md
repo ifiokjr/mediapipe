@@ -5,6 +5,21 @@ share one version and are released together.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.1](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.1) (2026-09-28)
+
+Grouped release for `mp`.
+
+### Fixes
+
+#### Ship a pub.dev-valid `hook/` directory
+
+pub.dev rejects Dart files under `hook/` other than `hook/build.dart`, so the
+native artifact catalog and download helper moved to
+`lib/src/native/artifact.dart`. The 0.1.0 upload was rejected with "Hook files
+are experimental and `hook/native_artifact.dart` is not allowed yet."
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #20](https://github.com/ifiokjr/mediapipe/pull/20)
+
 ## [0.1.0](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.0) (2026-09-28)
 
 Grouped release for `mp`.
