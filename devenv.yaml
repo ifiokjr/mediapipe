@@ -6,7 +6,7 @@ inputs:
       nixpkgs:
         follows: nixpkgs
   ifiokjr-nixpkgs:
-    url: github:ifiokjr/nixpkgs/de04d8ef6273bfa71bede505cee70ebd4d618d43
+    url: github:ifiokjr/nixpkgs/c42c05779b3964c0c5ea42a6f3e3d048eeb4f477
     inputs:
       nixpkgs:
         follows: nixpkgs
