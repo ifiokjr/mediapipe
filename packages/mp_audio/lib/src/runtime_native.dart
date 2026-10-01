@@ -14,9 +14,7 @@ final class _NativeAudioRuntime implements AudioRuntime {
   const _NativeAudioRuntime();
 
   @override
-  Future<AudioClassifierBackend> createAudioClassifier(
-    AudioClassifierOptions options,
-  ) async {
+  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async {
     if (options.runningMode == AudioRunningMode.audioStream) {
       throw const MpException(
         MpStatus.unimplemented,
@@ -24,12 +22,9 @@ final class _NativeAudioRuntime implements AudioRuntime {
         task: 'AudioClassifier',
       );
     }
-
     final AudioClassifierOptions resolved = AudioClassifierOptions(
       baseOptions: BaseOptions(
-        modelAsset: await native.resolveNativeModelAsset(
-          options.baseOptions.modelAsset,
-        ),
+        modelAsset: await native.resolveNativeModelAsset(options.baseOptions.modelAsset),
         delegate: options.baseOptions.delegate,
         liteRtOptions: options.baseOptions.liteRtOptions,
       ),
@@ -66,12 +61,11 @@ final class _NativeAudioClassifier implements AudioClassifierBackend {
       _run(() => _worker.request<AudioClassifierResult>(audio));
 
   @override
-  Future<void> classifyAsync(AudioData audio, int timestampMs) =>
-      throw const MpException(
-        MpStatus.unimplemented,
-        'Native streaming audio requires a callback-copy bridge that is not linked in this build.',
-        task: 'AudioClassifier',
-      );
+  Future<void> classifyAsync(AudioData audio, int timestampMs) => throw const MpException(
+    MpStatus.unimplemented,
+    'Native streaming audio requires a callback-copy bridge that is not linked in this build.',
+    task: 'AudioClassifier',
+  );
 
   @override
   Future<void> close() => _run(() async {
@@ -85,7 +79,6 @@ final class _NativeAudioClassifier implements AudioClassifierBackend {
   Future<T> _run<T>(Future<T> Function() action) {
     final Future<T> operation = _tail.then((_) => action());
     _tail = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
-
     return operation;
   }
 }
@@ -97,17 +90,12 @@ final class _AudioClose {
 }
 
 native.NativeTaskWorkerHandler _createAudioWorker(Object? initialMessage) {
-  final int address = _createAudioClassifier(
-    initialMessage! as AudioClassifierOptions,
-  );
-
+  final int address = _createAudioClassifier(initialMessage! as AudioClassifierOptions);
   return (Object? command) {
     if (command is _AudioClose) {
       _closeAudioClassifier(address);
-
       return null;
     }
-
     return _classifyAudio(address, command! as AudioData);
   };
 }
@@ -119,19 +107,13 @@ int _createAudioClassifier(AudioClassifierOptions options) {
         .allocator<native.MpAudioClassifierOptions>();
     nativeOptions.ref
       ..base_options = scope.baseOptions(options.baseOptions).ref
-      ..classifier_options = scope
-          .classifierOptions(options.classifierOptions)
-          .ref
+      ..classifier_options = scope.classifierOptions(options.classifierOptions).ref
       ..running_mode = native.MpAudioRunningMode.kMpAudioRunningModeAudioClips
       ..result_callback = ffi.nullptr;
     final ffi.Pointer<native.MpAudioClassifierPtr> output = scope
         .allocator<native.MpAudioClassifierPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    scope.check(
-      native.MpAudioClassifierCreate(nativeOptions, output, error),
-      error,
-    );
-
+    scope.check(native.MpAudioClassifierCreate(nativeOptions, output, error), error);
     return output.value.address;
   } finally {
     scope.release();
@@ -144,9 +126,7 @@ AudioClassifierResult _classifyAudio(int address, AudioData audio) {
       .allocator<native.MpAudioClassifierResult>();
   var ownsResult = false;
   try {
-    final ffi.Pointer<ffi.Float> samples = scope.allocator<ffi.Float>(
-      audio.samples.length,
-    );
+    final ffi.Pointer<ffi.Float> samples = scope.allocator<ffi.Float>(audio.samples.length);
     samples.asTypedList(audio.samples.length).setAll(0, audio.samples);
     final ffi.Pointer<native.MpAudioData> data = native.MpAudioData.$allocate(
       scope.allocator,
@@ -156,7 +136,6 @@ AudioClassifierResult _classifyAudio(int address, AudioData audio) {
       audio_data_size: audio.samples.length,
     );
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-
     scope.check(
       native.MpAudioClassifierClassify(
         ffi.Pointer<native.MpAudioClassifierInternal>.fromAddress(address),
@@ -170,8 +149,7 @@ AudioClassifierResult _classifyAudio(int address, AudioData audio) {
     return AudioClassifierResult(
       List<ClassificationResult>.generate(
         result.ref.results_count,
-        (int index) =>
-            native.classificationResultFromNative(result.ref.results[index]),
+        (int index) => native.classificationResultFromNative(result.ref.results[index]),
         growable: false,
       ),
     );

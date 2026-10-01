@@ -6,6 +6,5 @@ import 'platform_channel_flutter.dart';
 import 'runtime.dart';
 
 /// Creates the Android generative AI bridge when the plugin is available.
-GenAiRuntime createGenAiRuntime() => Platform.isAndroid
-    ? const MobileGenAiRuntime()
-    : UnsupportedGenAiRuntime(MpPlatform.current);
+GenAiRuntime createGenAiRuntime() =>
+    Platform.isAndroid ? const MobileGenAiRuntime() : UnsupportedGenAiRuntime(MpPlatform.current);

@@ -8,8 +8,5 @@ void main() {
     sampleRateHz: 16_000,
     samples: Float32List(16_000),
   );
-  assert(
-    audio.duration == const Duration(seconds: 1),
-    'Expected one second of audio.',
-  );
+  assert(audio.duration == const Duration(seconds: 1), 'Expected one second of audio.');
 }

@@ -8,6 +8,7 @@ import com.google.mediapipe.tasks.text.textproofreader.TextProofreaderResult
 import com.google.mediapipe.tasks.text.textproofreader.TextProofreaderStreamingResult
 import com.google.mediapipe.tasks.text.textsummarizer.TextSummarizer
 import com.google.mediapipe.tasks.text.textsummarizer.TextSummarizerStreamingResult
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -58,6 +59,7 @@ class MpTextPlugin :
                 "summarizer.summarize" -> summarize(call, result)
                 "summarizer.stream" -> summarizeStreaming(call, result)
                 "summarizer.close" -> closeSummarizer(call, result)
+
                 else -> result.notImplemented()
             }
         } catch (error: IllegalArgumentException) {
@@ -111,6 +113,7 @@ class MpTextPlugin :
                         "corrections" to output.corrections.toDartCorrections(),
                     ),
                 )
+
             } catch (error: Throwable) {
                 result.errorOnMain(error)
             }
@@ -130,6 +133,7 @@ class MpTextPlugin :
                 ?: throw IllegalArgumentException("Unknown TextProofreader handle: $handle")
         executor.execute {
             try {
+
                 proofreader.proofreadStreaming(
                     text,
                     object : TextProofreader.ProofreaderResultCallback {
@@ -174,6 +178,7 @@ class MpTextPlugin :
                 proofreader.close()
                 result.successOnMain(null)
             } catch (error: Throwable) {
+
                 result.errorOnMain(error)
             }
         }
@@ -193,6 +198,7 @@ class MpTextPlugin :
             }
         executor.execute {
             try {
+
                 val options =
                     TextSummarizer.TextSummarizerOptions
                         .builder()
@@ -226,6 +232,7 @@ class MpTextPlugin :
             try {
                 result.successOnMain(mapOf("summary" to summarizer.summarize(text).summary))
             } catch (error: Throwable) {
+
                 result.errorOnMain(error)
             }
         }
@@ -244,6 +251,7 @@ class MpTextPlugin :
                 ?: throw IllegalArgumentException("Unknown TextSummarizer handle: $handle")
         executor.execute {
             try {
+
                 summarizer.summarizeStreaming(
                     text,
                     object : TextSummarizer.SummarizationResultCallback {
@@ -287,6 +295,7 @@ class MpTextPlugin :
                 summarizer.close()
                 result.successOnMain(null)
             } catch (error: Throwable) {
+
                 result.errorOnMain(error)
             }
         }

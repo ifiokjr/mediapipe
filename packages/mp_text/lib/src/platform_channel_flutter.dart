@@ -14,22 +14,13 @@ const EventChannel _events = EventChannel('dev.ifiokjr.mp_text/events');
 final _MobileTextBridge _bridge = _MobileTextBridge();
 
 /// Creates the Android or iOS proofreader backend registered by this plugin.
-Future<TextProofreaderBackend> createPlatformTextProofreader(
-  TextProofreaderOptions options,
-) async {
-  final _ResolvedModelFile model = await _resolveModelFile(
-    options.baseOptions.modelAsset,
-  );
+Future<TextProofreaderBackend> createPlatformTextProofreader(TextProofreaderOptions options) async {
+  final _ResolvedModelFile model = await _resolveModelFile(options.baseOptions.modelAsset);
   try {
-    final int handle = await _bridge.createTask(
-      'proofreader.create',
-      <String, Object?>{
-        'modelPath': model.path,
-        'maxTokens': options.maxTokens,
-      },
-      task: 'TextProofreader',
-    );
-
+    final int handle = await _bridge.createTask('proofreader.create', <String, Object?>{
+      'modelPath': model.path,
+      'maxTokens': options.maxTokens,
+    }, task: 'TextProofreader');
     return _MobileTextProofreader(handle, model);
   } on Object {
     await model.close();
@@ -38,23 +29,14 @@ Future<TextProofreaderBackend> createPlatformTextProofreader(
 }
 
 /// Creates the Android or iOS summarizer backend registered by this plugin.
-Future<TextSummarizerBackend> createPlatformTextSummarizer(
-  TextSummarizerOptions options,
-) async {
-  final _ResolvedModelFile model = await _resolveModelFile(
-    options.baseOptions.modelAsset,
-  );
+Future<TextSummarizerBackend> createPlatformTextSummarizer(TextSummarizerOptions options) async {
+  final _ResolvedModelFile model = await _resolveModelFile(options.baseOptions.modelAsset);
   try {
-    final int handle = await _bridge.createTask(
-      'summarizer.create',
-      <String, Object?>{
-        'modelPath': model.path,
-        'maxTokens': options.maxTokens,
-        'mode': options.mode.name,
-      },
-      task: 'TextSummarizer',
-    );
-
+    final int handle = await _bridge.createTask('summarizer.create', <String, Object?>{
+      'modelPath': model.path,
+      'maxTokens': options.maxTokens,
+      'mode': options.mode.name,
+    }, task: 'TextSummarizer');
     return _MobileTextSummarizer(handle, model);
   } on Object {
     await model.close();
@@ -70,7 +52,6 @@ final class _ResolvedModelFile {
 
   Future<void> close() async {
     final Directory? directory = temporaryDirectory;
-
     if (directory != null && directory.existsSync()) {
       directory.deleteSync(recursive: true);
     }
@@ -79,31 +60,18 @@ final class _ResolvedModelFile {
 
 Future<_ResolvedModelFile> _resolveModelFile(ModelAsset asset) async {
   final ModelAsset resolved = await native.resolveNativeModelAsset(asset);
-
   switch (resolved) {
     case ModelAssetPath(:final path):
       final File file = File(path).absolute;
-
       if (!file.existsSync()) {
-        throw MpException(
-          MpStatus.notFound,
-          'The model file does not exist: ${file.path}',
-        );
+        throw MpException(MpStatus.notFound, 'The model file does not exist: ${file.path}');
       }
       return _ResolvedModelFile(file.path);
     case ModelAssetBytes(:final bytes, :final name):
-      final Directory directory = await Directory.systemTemp.createTemp(
-        'mp_text_model_',
-      );
-      final String rawName =
-          name?.split(RegExp(r'[/\\]')).lastOrNull ?? 'model.litertlm';
-      final String safeName = rawName.replaceAll(
-        RegExp('[^A-Za-z0-9._-]'),
-        '_',
-      );
-      final File file = File(
-        '${directory.path}${Platform.pathSeparator}$safeName',
-      );
+      final Directory directory = await Directory.systemTemp.createTemp('mp_text_model_');
+      final String rawName = name?.split(RegExp(r'[/\\]')).lastOrNull ?? 'model.litertlm';
+      final String safeName = rawName.replaceAll(RegExp('[^A-Za-z0-9._-]'), '_');
+      final File file = File('${directory.path}${Platform.pathSeparator}$safeName');
       try {
         file.writeAsBytesSync(bytes, flush: true);
         return _ResolvedModelFile(file.path, directory);
@@ -135,7 +103,6 @@ abstract base class _MobileTextTask implements MpTask {
 
   void ensureAvailable() {
     if (_closed) throw MpTaskClosedError(taskName);
-
     if (_busy) {
       throw MpException(
         MpStatus.failedPrecondition,
@@ -151,13 +118,8 @@ abstract base class _MobileTextTask implements MpTask {
     // `Future.sync` turns a synchronous throw inside [operation] into a rejected
     // future so `whenComplete` always clears `_busy`. Calling `operation()`
     // directly would skip the cleanup and strand this task as permanently busy.
-    final Future<T> result = Future<T>.sync(operation)
-        .whenComplete(() => _busy = false);
-    _activeOperation = result.then<void>(
-      (_) {},
-      onError: (Object _, StackTrace _) {},
-    );
-
+    final Future<T> result = Future<T>.sync(operation).whenComplete(() => _busy = false);
+    _activeOperation = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
   }
 
@@ -171,9 +133,7 @@ abstract base class _MobileTextTask implements MpTask {
       _busy = false;
       rethrow;
     }
-
     _activeOperation = result.done.whenComplete(() => _busy = false);
-
     return result.stream;
   }
 
@@ -182,33 +142,29 @@ abstract base class _MobileTextTask implements MpTask {
     _closed = true;
     await _activeOperation;
     try {
-      await _bridge.invokeVoid(method, <String, Object?>{
-        'handle': handle,
-      }, task: taskName);
+      await _bridge.invokeVoid(method, <String, Object?>{'handle': handle}, task: taskName);
     } finally {
       await model.close();
     }
   }
 }
 
-final class _MobileTextProofreader extends _MobileTextTask
-    implements TextProofreaderBackend {
+final class _MobileTextProofreader extends _MobileTextTask implements TextProofreaderBackend {
   _MobileTextProofreader(int handle, _ResolvedModelFile model)
     : super(handle, model, 'TextProofreader');
 
   @override
-  Future<TextProofreaderResult> proofread(String text) =>
-      runExclusive(() async {
-        final Map<Object?, Object?> result = await _bridge.invokeMap(
-          'proofreader.proofread',
-          <String, Object?>{'handle': handle, 'text': text},
-          task: taskName,
-        );
-        return TextProofreaderResult(
-          text: _requiredString(result, 'text', taskName),
-          corrections: _readCorrections(result['corrections'], taskName),
-        );
-      });
+  Future<TextProofreaderResult> proofread(String text) => runExclusive(() async {
+    final Map<Object?, Object?> result = await _bridge.invokeMap(
+      'proofreader.proofread',
+      <String, Object?>{'handle': handle, 'text': text},
+      task: taskName,
+    );
+    return TextProofreaderResult(
+      text: _requiredString(result, 'text', taskName),
+      corrections: _readCorrections(result['corrections'], taskName),
+    );
+  });
 
   @override
   Stream<TextProofreaderChunk> proofreadStreaming(String text) => runStreaming(
@@ -228,8 +184,7 @@ final class _MobileTextProofreader extends _MobileTextTask
   Future<void> close() => closeTask('proofreader.close');
 }
 
-final class _MobileTextSummarizer extends _MobileTextTask
-    implements TextSummarizerBackend {
+final class _MobileTextSummarizer extends _MobileTextTask implements TextSummarizerBackend {
   _MobileTextSummarizer(int handle, _ResolvedModelFile model)
     : super(handle, model, 'TextSummarizer');
 
@@ -299,7 +254,6 @@ final class _TypedPendingStream<T> implements _PendingStream {
   void fail(Object error, [StackTrace? stackTrace]) {
     if (completion.isCompleted) return;
     completion.complete();
-
     if (!_streamClosed) {
       _streamClosed = true;
       controller.addError(error, stackTrace);
@@ -311,7 +265,6 @@ final class _TypedPendingStream<T> implements _PendingStream {
   void close() {
     if (completion.isCompleted) return;
     completion.complete();
-
     if (!_streamClosed) {
       _streamClosed = true;
       unawaited(controller.close());
@@ -321,10 +274,7 @@ final class _TypedPendingStream<T> implements _PendingStream {
 
 final class _MobileTextBridge {
   _MobileTextBridge() {
-    _events.receiveBroadcastStream().listen(
-      _onEvent,
-      onError: _onEventChannelError,
-    );
+    _events.receiveBroadcastStream().listen(_onEvent, onError: _onEventChannelError);
   }
 
   final Map<String, _PendingStream> _pending = <String, _PendingStream>{};
@@ -337,11 +287,7 @@ final class _MobileTextBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result is num) return result.toInt();
-    throw MpException(
-      MpStatus.internal,
-      '$task creation returned an invalid handle.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task creation returned an invalid handle.', task: task);
   }
 
   Future<Map<Object?, Object?>> invokeMap(
@@ -351,11 +297,7 @@ final class _MobileTextBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result case final Map<Object?, Object?> map) return map;
-    throw MpException(
-      MpStatus.internal,
-      '$task returned an invalid result.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned an invalid result.', task: task);
   }
 
   Future<void> invokeVoid(
@@ -372,8 +314,7 @@ final class _MobileTextBridge {
     required String task,
     required T Function(Map<Object?, Object?> event) convert,
   }) {
-    final String requestId =
-        '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
+    final String requestId = '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
     final _TypedPendingStream<T> pending = _TypedPendingStream<T>(convert);
     _pending[requestId] = pending;
     unawaited(
@@ -385,10 +326,7 @@ final class _MobileTextBridge {
         return null;
       }),
     );
-    return _StreamOperation<T>(
-      pending.controller.stream,
-      pending.completion.future,
-    );
+    return _StreamOperation<T>(pending.controller.stream, pending.completion.future);
   }
 
   Future<Object?> _invoke(
@@ -418,33 +356,24 @@ final class _MobileTextBridge {
   void _onEvent(Object? rawEvent) {
     if (rawEvent is! Map<Object?, Object?>) return;
     final String? requestId = rawEvent['requestId'] as String?;
-
     if (requestId == null) return;
     final _PendingStream? pending = _pending[requestId];
-
     if (pending == null) return;
-
     switch (rawEvent['kind']) {
       case 'data':
         pending.add(rawEvent);
       case 'done':
         _pending.remove(requestId)?.close();
       case 'error':
-        final String message =
-            rawEvent['message'] as String? ?? 'The platform stream failed.';
+        final String message = rawEvent['message'] as String? ?? 'The platform stream failed.';
         final String code = rawEvent['code'] as String? ?? 'internal';
-        _pending
-            .remove(requestId)
-            ?.fail(MpException(_statusFromPlatformCode(code), message));
+        _pending.remove(requestId)?.fail(MpException(_statusFromPlatformCode(code), message));
     }
   }
 
   void _onEventChannelError(Object error, StackTrace stackTrace) {
-    final List<_PendingStream> pending = _pending.values.toList(
-      growable: false,
-    );
+    final List<_PendingStream> pending = _pending.values.toList(growable: false);
     _pending.clear();
-
     for (final _PendingStream stream in pending) {
       stream.fail(error, stackTrace);
     }
@@ -453,47 +382,26 @@ final class _MobileTextBridge {
 
 String _requiredString(Map<Object?, Object?> map, String key, String task) {
   final Object? value = map[key];
-
   if (value is String) return value;
-  throw MpException(
-    MpStatus.internal,
-    '$task returned a non-string $key.',
-    task: task,
-  );
+  throw MpException(MpStatus.internal, '$task returned a non-string $key.', task: task);
 }
 
 bool _requiredBool(Map<Object?, Object?> map, String key, String task) {
   final Object? value = map[key];
-
   if (value is bool) return value;
-  throw MpException(
-    MpStatus.internal,
-    '$task returned a non-boolean $key.',
-    task: task,
-  );
+  throw MpException(MpStatus.internal, '$task returned a non-boolean $key.', task: task);
 }
 
 List<TextCorrection> _readCorrections(Object? raw, String task) {
   if (raw == null) return const <TextCorrection>[];
-
   if (raw is! List<Object?>) {
-    throw MpException(
-      MpStatus.internal,
-      '$task returned invalid corrections.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned invalid corrections.', task: task);
   }
-
   return raw
       .map((Object? value) {
         if (value is! Map<Object?, Object?>) {
-          throw MpException(
-            MpStatus.internal,
-            '$task returned an invalid correction.',
-            task: task,
-          );
+          throw MpException(MpStatus.internal, '$task returned an invalid correction.', task: task);
         }
-
         final String type = _requiredString(value, 'type', task);
         return TextCorrection(
           type: switch (type) {
@@ -506,7 +414,6 @@ List<TextCorrection> _readCorrections(Object? raw, String task) {
               task: task,
             ),
           },
-
           text: _requiredString(value, 'text', task),
         );
       })

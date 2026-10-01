@@ -3,11 +3,7 @@ import 'dart:async';
 /// One failed frame-processing attempt.
 final class LatestFrameFailure<T extends Object> {
   /// Creates a failure for [item].
-  const LatestFrameFailure({
-    required this.item,
-    required this.error,
-    required this.stackTrace,
-  });
+  const LatestFrameFailure({required this.item, required this.error, required this.stackTrace});
 
   /// Item whose processing callback failed.
   final T item;
@@ -65,11 +61,9 @@ final class LatestFrameScheduler<T extends Object> {
   void submit(T item) {
     if (_closed) throw StateError('LatestFrameScheduler is closed.');
     _submittedCount += 1;
-
     if (_pending != null) _droppedCount += 1;
     _pending = item;
     _idleCompleter ??= Completer<void>();
-
     if (!_processing) unawaited(_drain());
   }
 
@@ -95,14 +89,7 @@ final class LatestFrameScheduler<T extends Object> {
           _processedCount += 1;
         } on Object catch (error, stackTrace) {
           _failedCount += 1;
-
-          _failures.add(
-            LatestFrameFailure<T>(
-              item: item,
-              error: error,
-              stackTrace: stackTrace,
-            ),
-          );
+          _failures.add(LatestFrameFailure<T>(item: item, error: error, stackTrace: stackTrace));
         }
       }
     } finally {

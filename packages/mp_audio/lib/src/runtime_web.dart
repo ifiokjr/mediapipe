@@ -12,9 +12,7 @@ final WebTaskAssets _defaultAssets = WebTaskAssets(
   moduleUri: Uri.parse(
     'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-audio@1.0.1/audio_bundle.mjs',
   ),
-  wasmRoot: Uri.parse(
-    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-audio@1.0.1/wasm',
-  ),
+  wasmRoot: Uri.parse('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-audio@1.0.1/wasm'),
 );
 
 /// Creates the default web audio runtime.
@@ -29,15 +27,14 @@ final class WebAudioRuntime implements AudioRuntime {
   final WebTaskAssets assets;
 
   @override
-  Future<AudioClassifierBackend> createAudioClassifier(
-    AudioClassifierOptions options,
-  ) async {
+  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async {
     final JSObject module = await importWebTaskModule(assets.moduleUri);
     final JSObject resolver = requireWebObject(module, 'FilesetResolver');
-    final JSPromise<JSObject> filesetPromise =
-        callWebMethod<JSPromise<JSObject>>(resolver, 'forAudioTasks', <JSAny?>[
-          assets.wasmRoot.toString().toJS,
-        ]);
+    final JSPromise<JSObject> filesetPromise = callWebMethod<JSPromise<JSObject>>(
+      resolver,
+      'forAudioTasks',
+      <JSAny?>[assets.wasmRoot.toString().toJS],
+    );
     final JSObject taskClass = requireWebObject(module, 'AudioClassifier');
     final JSPromise<JSObject> taskPromise = callWebMethod<JSPromise<JSObject>>(
       taskClass,
@@ -81,10 +78,7 @@ final class _WebAudioClassifier implements AudioClassifierBackend {
 
   void _ensureOpen() {
     if (_isClosed) {
-      throw const MpException(
-        MpStatus.failedPrecondition,
-        'The web audio task is closed.',
-      );
+      throw const MpException(MpStatus.failedPrecondition, 'The web audio task is closed.');
     }
   }
 
@@ -98,24 +92,19 @@ final class _WebAudioClassifier implements AudioClassifierBackend {
     ]);
     final List<Object?> windows = webDartify(raw)! as List<Object?>;
     return AudioClassifierResult(
-      windows.map(
-        (Object? value) =>
-            webClassificationResult(value! as Map<Object?, Object?>),
-      ),
+      windows.map((Object? value) => webClassificationResult(value! as Map<Object?, Object?>)),
     );
   }
 
   @override
   Future<void> classifyAsync(AudioData audio, int timestampMs) {
     _ensureOpen();
-
     if (_runningMode != AudioRunningMode.audioStream) {
       throw const MpException(
         MpStatus.failedPrecondition,
         'classifyAsync requires audioStream mode.',
       );
     }
-
     return _pending = _pending
         .then((_) async {
           final AudioClassifierResult result = await classify(audio);
@@ -149,16 +138,12 @@ final class _WebAudioClassifier implements AudioClassifierBackend {
 Float32List _toMono(AudioData audio) {
   if (audio.channelCount == 1) return Float32List.fromList(audio.samples);
   final Float32List mono = Float32List(audio.frameCount);
-
   for (int frame = 0; frame < audio.frameCount; frame += 1) {
     double sum = 0;
-
     for (int channel = 0; channel < audio.channelCount; channel += 1) {
       sum += audio.samples[(frame * audio.channelCount) + channel];
     }
-
     mono[frame] = sum / audio.channelCount;
   }
-
   return mono;
 }

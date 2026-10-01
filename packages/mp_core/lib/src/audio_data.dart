@@ -7,27 +7,14 @@ import 'package:meta/meta.dart';
 @immutable
 final class AudioData {
   /// Creates audio data and copies [samples].
-  AudioData({
-    required this.channelCount,
-    required this.sampleRateHz,
-    required Float32List samples,
-  }) : samples = Float32List.fromList(samples) {
+  AudioData({required this.channelCount, required this.sampleRateHz, required Float32List samples})
+    : samples = Float32List.fromList(samples) {
     if (channelCount <= 0) {
-      throw ArgumentError.value(
-        channelCount,
-        'channelCount',
-        'must be greater than zero',
-      );
+      throw ArgumentError.value(channelCount, 'channelCount', 'must be greater than zero');
     }
-
     if (!sampleRateHz.isFinite || sampleRateHz <= 0) {
-      throw ArgumentError.value(
-        sampleRateHz,
-        'sampleRateHz',
-        'must be finite and positive',
-      );
+      throw ArgumentError.value(sampleRateHz, 'sampleRateHz', 'must be finite and positive');
     }
-
     if (samples.isEmpty || samples.length % channelCount != 0) {
       throw ArgumentError.value(
         samples.length,
@@ -50,10 +37,8 @@ final class AudioData {
   int get frameCount => samples.length ~/ channelCount;
 
   /// Audio duration.
-  Duration get duration => Duration(
-    microseconds: (frameCount * Duration.microsecondsPerSecond / sampleRateHz)
-        .round(),
-  );
+  Duration get duration =>
+      Duration(microseconds: (frameCount * Duration.microsecondsPerSecond / sampleRateHz).round());
 
   @override
   bool operator ==(Object other) =>
@@ -64,11 +49,8 @@ final class AudioData {
           const ListEquality<double>().equals(samples, other.samples);
 
   @override
-  int get hashCode => Object.hash(
-    channelCount,
-    sampleRateHz,
-    const ListEquality<double>().hash(samples),
-  );
+  int get hashCode =>
+      Object.hash(channelCount, sampleRateHz, const ListEquality<double>().hash(samples));
 }
 
 /// MediaPipe audio task execution modes.

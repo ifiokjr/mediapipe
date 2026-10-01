@@ -79,12 +79,7 @@ MpStatus MpAudioClassifierClassifyAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpAudioClassifierClassifyAsync(
-      classifier,
-      audio_data,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpAudioClassifierClassifyAsync(classifier, audio_data, timestamp_ms, error_msg),
   );
 }
 
@@ -97,12 +92,9 @@ MpStatus MpAudioClassifierClassifyAsync(
 /// error message upon failure. It's the caller responsibility to free the
 /// error message with `MpErrorFree()`.
 /// @return An `MpStatus` indicating success or failure.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpAudioClassifierPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpAudioClassifierClose')
+@ffi.Native<ffi.UnsignedInt Function(MpAudioClassifierPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpAudioClassifierClose',
+)
 external int _MpAudioClassifierClose(
   MpAudioClassifierPtr classifier,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -121,9 +113,7 @@ MpStatus MpAudioClassifierClose(
 /// @param result A pointer to the classification result.
 /// @return An `MpStatus` indicating success or failure.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpAudioClassifierResult>)>()
-external void MpAudioClassifierCloseResult(
-  ffi.Pointer<MpAudioClassifierResult> result,
-);
+external void MpAudioClassifierCloseResult(ffi.Pointer<MpAudioClassifierResult> result);
 
 /// Creates an AudioClassifier from the provided `options`.
 /// The caller is responsible for calling `MpAudioClassifierClose` to release the
@@ -158,9 +148,7 @@ MpStatus MpAudioClassifierCreate(
   ffi.Pointer<MpAudioClassifierPtr> classifier_out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpAudioClassifierCreate(options, classifier_out, error_msg),
-  );
+  return MpStatus.fromValue(_MpAudioClassifierCreate(options, classifier_out, error_msg));
 }
 
 /// Frees an error message.
@@ -173,12 +161,9 @@ external void MpErrorFree(ffi.Pointer<ffi.Char> error_message);
 /// non-null pointer to a char*, which will be populated with a newly-allocated
 /// error message upon failure. It's the caller responsibility to free the error
 /// message with free().
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpFaceDetectorPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpFaceDetectorClose')
+@ffi.Native<ffi.UnsignedInt Function(MpFaceDetectorPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpFaceDetectorClose',
+)
 external int _MpFaceDetectorClose(
   MpFaceDetectorPtr detector,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -194,9 +179,7 @@ MpStatus MpFaceDetectorClose(
 /// Frees the memory allocated inside a MpFaceDetectorResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpFaceDetectorResult>)>()
-external void MpFaceDetectorCloseResult(
-  ffi.Pointer<MpFaceDetectorResult> result,
-);
+external void MpFaceDetectorCloseResult(ffi.Pointer<MpFaceDetectorResult> result);
 
 /// Creates an FaceDetector from the provided `options`.
 ///
@@ -223,9 +206,7 @@ MpStatus MpFaceDetectorCreate(
   ffi.Pointer<MpFaceDetectorPtr> detector,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpFaceDetectorCreate(options, detector, error_msg),
-  );
+  return MpStatus.fromValue(_MpFaceDetectorCreate(options, detector, error_msg));
 }
 
 /// Sends live image data to face detection, and the results will be
@@ -273,13 +254,7 @@ MpStatus MpFaceDetectorDetectAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpFaceDetectorDetectAsync(
-      detector,
-      image,
-      options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpFaceDetectorDetectAsync(detector, image, options, timestamp_ms, error_msg),
   );
 }
 
@@ -323,14 +298,7 @@ MpStatus MpFaceDetectorDetectForVideo(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpFaceDetectorDetectForVideo(
-      detector,
-      image,
-      options,
-      timestamp_ms,
-      result,
-      error_msg,
-    ),
+    _MpFaceDetectorDetectForVideo(detector, image, options, timestamp_ms, result, error_msg),
   );
 }
 
@@ -375,12 +343,9 @@ MpStatus MpFaceDetectorDetectImage(
 /// non-null pointer to a char*, which will be populated with a newly-allocated
 /// error message upon failure. It's the caller responsibility to free the error
 /// message with MpErrorFree().
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpFaceLandmarkerPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpFaceLandmarkerClose')
+@ffi.Native<ffi.UnsignedInt Function(MpFaceLandmarkerPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpFaceLandmarkerClose',
+)
 external int _MpFaceLandmarkerClose(
   MpFaceLandmarkerPtr landmarker,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -396,9 +361,7 @@ MpStatus MpFaceLandmarkerClose(
 /// Frees the memory allocated inside a MpFaceLandmarkerResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpFaceLandmarkerResult>)>()
-external void MpFaceLandmarkerCloseResult(
-  ffi.Pointer<MpFaceLandmarkerResult> result,
-);
+external void MpFaceLandmarkerCloseResult(ffi.Pointer<MpFaceLandmarkerResult> result);
 
 /// Creates an FaceLandmarker from the provided `options`.
 ///
@@ -425,9 +388,7 @@ MpStatus MpFaceLandmarkerCreate(
   ffi.Pointer<MpFaceLandmarkerPtr> landmarker,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpFaceLandmarkerCreate(options, landmarker, error_msg),
-  );
+  return MpStatus.fromValue(_MpFaceLandmarkerCreate(options, landmarker, error_msg));
 }
 
 /// Sends live image data to face landmark detection, and the results will be
@@ -475,13 +436,7 @@ MpStatus MpFaceLandmarkerDetectAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpFaceLandmarkerDetectAsync(
-      landmarker,
-      image,
-      options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpFaceLandmarkerDetectAsync(landmarker, image, options, timestamp_ms, error_msg),
   );
 }
 
@@ -526,14 +481,7 @@ MpStatus MpFaceLandmarkerDetectForVideo(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpFaceLandmarkerDetectForVideo(
-      landmarker,
-      image,
-      options,
-      timestamp_ms,
-      result,
-      error_msg,
-    ),
+    _MpFaceLandmarkerDetectForVideo(landmarker, image, options, timestamp_ms, result, error_msg),
   );
 }
 
@@ -640,9 +588,7 @@ MpStatus MpFlatbufferParserCreate(
   ffi.Pointer<MpFlatbufferParser> parser_out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpFlatbufferParserCreate(enable_strict_json, parser_out, error_msg),
-  );
+  return MpStatus.fromValue(_MpFlatbufferParserCreate(enable_strict_json, parser_out, error_msg));
 }
 
 /// Deletes a Flatbuffer Parser.
@@ -652,9 +598,7 @@ external void MpFlatbufferParserDelete(MpFlatbufferParser parser);
 /// Gets the error message from the parser.
 /// The returned string is owned by the Parser and should not be freed.
 @ffi.Native<ffi.Pointer<ffi.Char> Function(MpFlatbufferParser)>()
-external ffi.Pointer<ffi.Char> MpFlatbufferParserGetError(
-  MpFlatbufferParser parser,
-);
+external ffi.Pointer<ffi.Char> MpFlatbufferParserGetError(MpFlatbufferParser parser);
 
 /// Parses the Flatbuffer schema source.
 ///
@@ -682,9 +626,7 @@ MpStatus MpFlatbufferParserParse(
   ffi.Pointer<ffi.Char> source,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpFlatbufferParserParse(parser, source, error_msg),
-  );
+  return MpStatus.fromValue(_MpFlatbufferParserParse(parser, source, error_msg));
 }
 
 /// Frees gesture recognizer.
@@ -693,12 +635,9 @@ MpStatus MpFlatbufferParserParse(
 /// `char*`, which will be populated with a newly-allocated error message upon
 /// failure. It's the caller responsibility to free the error message with
 /// 'MpErrorFree()`.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpGestureRecognizerPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpGestureRecognizerClose')
+@ffi.Native<ffi.UnsignedInt Function(MpGestureRecognizerPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpGestureRecognizerClose',
+)
 external int _MpGestureRecognizerClose(
   MpGestureRecognizerPtr recognizer,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -714,9 +653,7 @@ MpStatus MpGestureRecognizerClose(
 /// Frees the memory allocated inside a MpGestureRecognizerResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpGestureRecognizerResult>)>()
-external void MpGestureRecognizerCloseResult(
-  ffi.Pointer<MpGestureRecognizerResult> result,
-);
+external void MpGestureRecognizerCloseResult(ffi.Pointer<MpGestureRecognizerResult> result);
 
 /// Creates an GestureRecognizer from the provided `options`.
 /// If successful, returns `kMpOk` and sets `*recognizer` to the new
@@ -744,9 +681,7 @@ MpStatus MpGestureRecognizerCreate(
   ffi.Pointer<MpGestureRecognizerPtr> recognizer,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpGestureRecognizerCreate(options, recognizer, error_msg),
-  );
+  return MpStatus.fromValue(_MpGestureRecognizerCreate(options, recognizer, error_msg));
 }
 
 /// Sends live image data to gesture recognition, and the results will be
@@ -902,12 +837,9 @@ MpStatus MpGestureRecognizerRecognizeImage(
 /// non-null pointer to a `char*`, which will be populated with a newly-allocated
 /// error message upon failure. It's the caller responsibility to free the error
 /// message with `free()`.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpHandLandmarkerPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpHandLandmarkerClose')
+@ffi.Native<ffi.UnsignedInt Function(MpHandLandmarkerPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpHandLandmarkerClose',
+)
 external int _MpHandLandmarkerClose(
   MpHandLandmarkerPtr landmarker,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -923,9 +855,7 @@ MpStatus MpHandLandmarkerClose(
 /// Frees the memory allocated inside a MpHandLandmarkerResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpHandLandmarkerResult>)>()
-external void MpHandLandmarkerCloseResult(
-  ffi.Pointer<MpHandLandmarkerResult> result,
-);
+external void MpHandLandmarkerCloseResult(ffi.Pointer<MpHandLandmarkerResult> result);
 
 /// Creates an HandLandmarker from the provided `options`.
 /// If successful, returns `kMpOk` and sets `*landmarker` to the new
@@ -953,9 +883,7 @@ MpStatus MpHandLandmarkerCreate(
   ffi.Pointer<MpHandLandmarkerPtr> landmarker,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpHandLandmarkerCreate(options, landmarker, error_msg),
-  );
+  return MpStatus.fromValue(_MpHandLandmarkerCreate(options, landmarker, error_msg));
 }
 
 /// Sends live image data to hand landmark detection, and the results will be
@@ -1003,13 +931,7 @@ MpStatus MpHandLandmarkerDetectAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpHandLandmarkerDetectAsync(
-      landmarker,
-      image,
-      options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpHandLandmarkerDetectAsync(landmarker, image, options, timestamp_ms, error_msg),
   );
 }
 
@@ -1054,14 +976,7 @@ MpStatus MpHandLandmarkerDetectForVideo(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpHandLandmarkerDetectForVideo(
-      landmarker,
-      image,
-      options,
-      timestamp_ms,
-      result,
-      error_msg,
-    ),
+    _MpHandLandmarkerDetectForVideo(landmarker, image, options, timestamp_ms, result, error_msg),
   );
 }
 
@@ -1107,12 +1022,9 @@ MpStatus MpHandLandmarkerDetectImage(
 /// non-null pointer to a char*, which will be populated with a newly-allocated
 /// error message upon failure. It's the caller responsibility to free the error
 /// message with MpErrorFree().
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpHolisticLandmarkerPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpHolisticLandmarkerClose')
+@ffi.Native<ffi.UnsignedInt Function(MpHolisticLandmarkerPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpHolisticLandmarkerClose',
+)
 external int _MpHolisticLandmarkerClose(
   MpHolisticLandmarkerPtr landmarker,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -1128,9 +1040,7 @@ MpStatus MpHolisticLandmarkerClose(
 /// Frees the memory allocated inside a MpHolisticLandmarkerResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpHolisticLandmarkerResult>)>()
-external void MpHolisticLandmarkerCloseResult(
-  ffi.Pointer<MpHolisticLandmarkerResult> result,
-);
+external void MpHolisticLandmarkerCloseResult(ffi.Pointer<MpHolisticLandmarkerResult> result);
 
 /// Creates an HolisticLandmarker from the provided `options`.
 ///
@@ -1157,9 +1067,7 @@ MpStatus MpHolisticLandmarkerCreate(
   ffi.Pointer<MpHolisticLandmarkerPtr> landmarker,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpHolisticLandmarkerCreate(options, landmarker, error_msg),
-  );
+  return MpStatus.fromValue(_MpHolisticLandmarkerCreate(options, landmarker, error_msg));
 }
 
 /// Sends live image data to holistic landmark detection, and the results will be
@@ -1206,13 +1114,7 @@ MpStatus MpHolisticLandmarkerDetectAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpHolisticLandmarkerDetectAsync(
-      landmarker,
-      image,
-      options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpHolisticLandmarkerDetectAsync(landmarker, image, options, timestamp_ms, error_msg),
   );
 }
 
@@ -1299,13 +1201,7 @@ MpStatus MpHolisticLandmarkerDetectImage(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpHolisticLandmarkerDetectImage(
-      landmarker,
-      image,
-      options,
-      result,
-      error_msg,
-    ),
+    _MpHolisticLandmarkerDetectImage(landmarker, image, options, result, error_msg),
   );
 }
 
@@ -1439,13 +1335,7 @@ MpStatus MpImageClassifierClassifyImage(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpImageClassifierClassifyImage(
-      classifier,
-      image,
-      image_processing_options,
-      result,
-      error_msg,
-    ),
+    _MpImageClassifierClassifyImage(classifier, image, image_processing_options, result, error_msg),
   );
 }
 
@@ -1453,12 +1343,9 @@ MpStatus MpImageClassifierClassifyImage(
 /// If an error occurs, returns an error code and sets the error parameter to an
 /// an error message (if `error_msg` is not `nullptr`). You must free the memory
 /// allocated for the error message.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpImageClassifierPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpImageClassifierClose')
+@ffi.Native<ffi.UnsignedInt Function(MpImageClassifierPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpImageClassifierClose',
+)
 external int _MpImageClassifierClose(
   MpImageClassifierPtr classifier,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -1474,9 +1361,7 @@ MpStatus MpImageClassifierClose(
 /// Frees the memory allocated inside a MpImageClassifierResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpImageClassifierResult>)>()
-external void MpImageClassifierCloseResult(
-  ffi.Pointer<MpImageClassifierResult> result,
-);
+external void MpImageClassifierCloseResult(ffi.Pointer<MpImageClassifierResult> result);
 
 /// Creates an ImageClassifier from the provided `options`.
 /// Returns a pointer to the image classifier on success.
@@ -1501,9 +1386,7 @@ MpStatus MpImageClassifierCreate(
   ffi.Pointer<MpImageClassifierPtr> classifier,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageClassifierCreate(options, classifier, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageClassifierCreate(options, classifier, error_msg));
 }
 
 /// Creates an MpImage from a file.
@@ -1597,11 +1480,7 @@ MpStatus MpImageCreateFromFloatData(
 /// newly-allocated error message upon failure. It's the caller responsibility to
 /// free the error message with free().
 @ffi.Native<
-  ffi.UnsignedInt Function(
-    MpImagePtr,
-    ffi.Pointer<MpImagePtr>,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
+  ffi.UnsignedInt Function(MpImagePtr, ffi.Pointer<MpImagePtr>, ffi.Pointer<ffi.Pointer<ffi.Char>>)
 >(symbol: 'MpImageCreateFromImageFrame')
 external int _MpImageCreateFromImageFrame(
   MpImagePtr image,
@@ -1614,9 +1493,7 @@ MpStatus MpImageCreateFromImageFrame(
   ffi.Pointer<MpImagePtr> out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageCreateFromImageFrame(image, out, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageCreateFromImageFrame(image, out, error_msg));
 }
 
 /// Creates an MpImage from a buffer of pixel data. The buffer is copied
@@ -1817,12 +1694,9 @@ MpStatus MpImageDataUint8(
 /// `char*`, which will be populated with a newly-allocated error message upon
 /// failure. It's the caller responsibility to free the error message with
 /// `MpErrorFree()`.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpImageEmbedderPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpImageEmbedderClose')
+@ffi.Native<ffi.UnsignedInt Function(MpImageEmbedderPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpImageEmbedderClose',
+)
 external int _MpImageEmbedderClose(
   MpImageEmbedderPtr embedder,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -1838,9 +1712,7 @@ MpStatus MpImageEmbedderClose(
 /// Frees the memory allocated inside a ImageEmbedderResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<ImageEmbedderResult>)>()
-external void MpImageEmbedderCloseResult(
-  ffi.Pointer<ImageEmbedderResult> result,
-);
+external void MpImageEmbedderCloseResult(ffi.Pointer<ImageEmbedderResult> result);
 
 /// Utility function to compute cosine similarity [1] between two embeddings.
 /// Returns kMpOk on success and sets `similarity` to the computed similarity.
@@ -1871,9 +1743,7 @@ MpStatus MpImageEmbedderCosineSimilarity(
   ffi.Pointer<ffi.Double> similarity,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageEmbedderCosineSimilarity(u, v, similarity, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageEmbedderCosineSimilarity(u, v, similarity, error_msg));
 }
 
 /// Creates an ImageEmbedder from the provided `options`.
@@ -1901,9 +1771,7 @@ MpStatus MpImageEmbedderCreate(
   ffi.Pointer<MpImageEmbedderPtr> embedder,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageEmbedderCreate(options, embedder, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageEmbedderCreate(options, embedder, error_msg));
 }
 
 /// Sends live image data to embedder, and the results will be available via
@@ -1951,13 +1819,7 @@ MpStatus MpImageEmbedderEmbedAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpImageEmbedderEmbedAsync(
-      embedder,
-      image,
-      image_processing_options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpImageEmbedderEmbedAsync(embedder, image, image_processing_options, timestamp_ms, error_msg),
   );
 }
 
@@ -2046,13 +1908,7 @@ MpStatus MpImageEmbedderEmbedImage(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpImageEmbedderEmbedImage(
-      embedder,
-      image,
-      image_processing_options,
-      result,
-      error_msg,
-    ),
+    _MpImageEmbedderEmbedImage(embedder, image, image_processing_options, result, error_msg),
   );
 }
 
@@ -2106,9 +1962,7 @@ MpStatus MpImageGetValueFloat32(
   ffi.Pointer<ffi.Float> out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageGetValueFloat32(image, pos, pos_size, out, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageGetValueFloat32(image, pos, pos_size, out, error_msg));
 }
 
 /// Sets `out` to the value at the given coordinate for uint16 images.
@@ -2136,9 +1990,7 @@ MpStatus MpImageGetValueUint16(
   ffi.Pointer<ffi.Uint16> out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageGetValueUint16(image, pos, pos_size, out, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageGetValueUint16(image, pos, pos_size, out, error_msg));
 }
 
 /// Sets `out` to the value at the given coordinate for uint8 images.
@@ -2166,9 +2018,7 @@ MpStatus MpImageGetValueUint8(
   ffi.Pointer<ffi.Uint8> out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageGetValueUint8(image, pos, pos_size, out, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageGetValueUint8(image, pos, pos_size, out, error_msg));
 }
 
 /// Returns the width of the image.
@@ -2197,12 +2047,9 @@ external bool MpImageIsEmpty(MpImagePtr image);
 /// non-null pointer to a `char*`, which will be populated with a newly-allocated
 /// error message upon failure. It's the caller responsibility to free the error
 /// message with `MpErrorFree()`.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpImageSegmenterPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpImageSegmenterClose')
+@ffi.Native<ffi.UnsignedInt Function(MpImageSegmenterPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpImageSegmenterClose',
+)
 external int _MpImageSegmenterClose(
   MpImageSegmenterPtr segmenter,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -2218,9 +2065,7 @@ MpStatus MpImageSegmenterClose(
 /// Frees the memory allocated inside a MpImageSegmenterResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpImageSegmenterResult>)>()
-external void MpImageSegmenterCloseResult(
-  ffi.Pointer<MpImageSegmenterResult> result,
-);
+external void MpImageSegmenterCloseResult(ffi.Pointer<MpImageSegmenterResult> result);
 
 /// Creates an ImageSegmenter from the provided `options`.
 /// Returns 'kMpOk' on success and sets `segmenter` to the created
@@ -2248,9 +2093,7 @@ MpStatus MpImageSegmenterCreate(
   ffi.Pointer<MpImageSegmenterPtr> segmenter,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageSegmenterCreate(options, segmenter, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageSegmenterCreate(options, segmenter, error_msg));
 }
 
 /// Gets the category label list of the ImageSegmenter can recognize.
@@ -2283,9 +2126,7 @@ MpStatus MpImageSegmenterGetLabels(
   ffi.Pointer<MpStringList> label_list,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpImageSegmenterGetLabels(segmenter, label_list, error_msg),
-  );
+  return MpStatus.fromValue(_MpImageSegmenterGetLabels(segmenter, label_list, error_msg));
 }
 
 /// Sends live image data to image segmentation, and the results will be
@@ -2333,13 +2174,7 @@ MpStatus MpImageSegmenterSegmentAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpImageSegmenterSegmentAsync(
-      segmenter,
-      image,
-      options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpImageSegmenterSegmentAsync(segmenter, image, options, timestamp_ms, error_msg),
   );
 }
 
@@ -2384,14 +2219,7 @@ MpStatus MpImageSegmenterSegmentForVideo(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpImageSegmenterSegmentForVideo(
-      segmenter,
-      image,
-      options,
-      timestamp_ms,
-      result,
-      error_msg,
-    ),
+    _MpImageSegmenterSegmentForVideo(segmenter, image, options, timestamp_ms, result, error_msg),
   );
 }
 
@@ -2444,10 +2272,7 @@ external bool MpImageUsesGpu(MpImagePtr image);
 /// failure. It's the caller responsibility to free the error message with
 /// `MpErrorFree()`.
 @ffi.Native<
-  ffi.UnsignedInt Function(
-    MpInteractiveSegmenterLegacyPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
+  ffi.UnsignedInt Function(MpInteractiveSegmenterLegacyPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)
 >(symbol: 'MpInteractiveSegmenterLegacyClose')
 external int _MpInteractiveSegmenterLegacyClose(
   MpInteractiveSegmenterLegacyPtr segmenter,
@@ -2458,17 +2283,13 @@ MpStatus MpInteractiveSegmenterLegacyClose(
   MpInteractiveSegmenterLegacyPtr segmenter,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpInteractiveSegmenterLegacyClose(segmenter, error_msg),
-  );
+  return MpStatus.fromValue(_MpInteractiveSegmenterLegacyClose(segmenter, error_msg));
 }
 
 /// Frees the memory allocated inside a MpImageSegmenterResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpImageSegmenterResult>)>()
-external void MpInteractiveSegmenterLegacyCloseResult(
-  ffi.Pointer<MpImageSegmenterResult> result,
-);
+external void MpInteractiveSegmenterLegacyCloseResult(ffi.Pointer<MpImageSegmenterResult> result);
 
 /// Creates an InteractiveSegmenterLegacy from the provided `options`.
 /// Return kMpOk on success and sets `segmenter` to the created
@@ -2496,9 +2317,7 @@ MpStatus MpInteractiveSegmenterLegacyCreate(
   ffi.Pointer<MpInteractiveSegmenterLegacyPtr> segmenter,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpInteractiveSegmenterLegacyCreate(options, segmenter, error_msg),
-  );
+  return MpStatus.fromValue(_MpInteractiveSegmenterLegacyCreate(options, segmenter, error_msg));
 }
 
 /// Performs interactive segmentation on the input `image`.
@@ -2556,12 +2375,9 @@ MpStatus MpInteractiveSegmenterLegacySegmentImage(
 /// `char*`, which will be populated with a newly-allocated error message upon
 /// failure. It's the caller responsibility to free the error message with
 /// `free()`.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpLanguageDetectorPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpLanguageDetectorClose')
+@ffi.Native<ffi.UnsignedInt Function(MpLanguageDetectorPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpLanguageDetectorClose',
+)
 external int _MpLanguageDetectorClose(
   MpLanguageDetectorPtr detector,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -2577,9 +2393,7 @@ MpStatus MpLanguageDetectorClose(
 /// Frees the memory allocated inside a MpLanguageDetectorResult result. Does not
 /// free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpLanguageDetectorResult>)>()
-external void MpLanguageDetectorCloseResult(
-  ffi.Pointer<MpLanguageDetectorResult> result,
-);
+external void MpLanguageDetectorCloseResult(ffi.Pointer<MpLanguageDetectorResult> result);
 
 /// Creates a LanguageDetector from the provided `options`.
 /// If successful, returns `kMpOk` and sets `*detector` to the new
@@ -2607,9 +2421,7 @@ MpStatus MpLanguageDetectorCreate(
   ffi.Pointer<MpLanguageDetectorPtr> detector,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpLanguageDetectorCreate(options, detector, error_msg),
-  );
+  return MpStatus.fromValue(_MpLanguageDetectorCreate(options, detector, error_msg));
 }
 
 /// Performs language detection on the input `utf8_str`.
@@ -2641,21 +2453,16 @@ MpStatus MpLanguageDetectorDetect(
   ffi.Pointer<MpLanguageDetectorResult> result,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpLanguageDetectorDetect(detector, utf8_str, result, error_msg),
-  );
+  return MpStatus.fromValue(_MpLanguageDetectorDetect(detector, utf8_str, result, error_msg));
 }
 
 /// Frees object detector.
 /// If an error occurs, returns an error code and sets the error parameter to an
 /// an error message (if `error_msg` is not `nullptr`). You must free the memory
 /// allocated for the error message.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpObjectDetectorPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpObjectDetectorClose')
+@ffi.Native<ffi.UnsignedInt Function(MpObjectDetectorPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpObjectDetectorClose',
+)
 external int _MpObjectDetectorClose(
   MpObjectDetectorPtr detector,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -2671,9 +2478,7 @@ MpStatus MpObjectDetectorClose(
 /// Frees the memory allocated inside a MpObjectDetectorResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpObjectDetectorResult>)>()
-external void MpObjectDetectorCloseResult(
-  ffi.Pointer<MpObjectDetectorResult> result,
-);
+external void MpObjectDetectorCloseResult(ffi.Pointer<MpObjectDetectorResult> result);
 
 /// Creates an ObjectDetector from the provided `options`.
 /// Returns a pointer to the image detector on success.
@@ -2698,9 +2503,7 @@ MpStatus MpObjectDetectorCreate(
   ffi.Pointer<MpObjectDetectorPtr> detector_out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpObjectDetectorCreate(options, detector_out, error_msg),
-  );
+  return MpStatus.fromValue(_MpObjectDetectorCreate(options, detector_out, error_msg));
 }
 
 /// Sends live image data to image detection, and the results will be
@@ -2746,13 +2549,7 @@ MpStatus MpObjectDetectorDetectAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpObjectDetectorDetectAsync(
-      detector,
-      image,
-      options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpObjectDetectorDetectAsync(detector, image, options, timestamp_ms, error_msg),
   );
 }
 
@@ -2793,14 +2590,7 @@ MpStatus MpObjectDetectorDetectForVideo(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpObjectDetectorDetectForVideo(
-      detector,
-      image,
-      options,
-      timestamp_ms,
-      result,
-      error_msg,
-    ),
+    _MpObjectDetectorDetectForVideo(detector, image, options, timestamp_ms, result, error_msg),
   );
 }
 
@@ -2841,12 +2631,9 @@ MpStatus MpObjectDetectorDetectImage(
 /// If an error occurs, returns an error code and sets the error parameter to an
 /// an error message (if `error_msg` is not `nullptr`). You must free the memory
 /// allocated for the error message.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpPoseLandmarkerPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpPoseLandmarkerClose')
+@ffi.Native<ffi.UnsignedInt Function(MpPoseLandmarkerPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpPoseLandmarkerClose',
+)
 external int _MpPoseLandmarkerClose(
   MpPoseLandmarkerPtr landmarker,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -2862,9 +2649,7 @@ MpStatus MpPoseLandmarkerClose(
 /// Frees the memory allocated inside a MpPoseLandmarkerResult result.
 /// Does not free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpPoseLandmarkerResult>)>()
-external void MpPoseLandmarkerCloseResult(
-  ffi.Pointer<MpPoseLandmarkerResult> result,
-);
+external void MpPoseLandmarkerCloseResult(ffi.Pointer<MpPoseLandmarkerResult> result);
 
 /// Creates an PoseLandmarker from the provided `options`.
 /// Returns a pointer to the pose landmarker on success.
@@ -2889,9 +2674,7 @@ MpStatus MpPoseLandmarkerCreate(
   ffi.Pointer<MpPoseLandmarkerPtr> landmarker_out,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpPoseLandmarkerCreate(options, landmarker_out, error_msg),
-  );
+  return MpStatus.fromValue(_MpPoseLandmarkerCreate(options, landmarker_out, error_msg));
 }
 
 /// Sends live image data to pose landmark detection, and the results will be
@@ -2937,13 +2720,7 @@ MpStatus MpPoseLandmarkerDetectAsync(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpPoseLandmarkerDetectAsync(
-      landmarker,
-      image,
-      options,
-      timestamp_ms,
-      error_msg,
-    ),
+    _MpPoseLandmarkerDetectAsync(landmarker, image, options, timestamp_ms, error_msg),
   );
 }
 
@@ -2984,14 +2761,7 @@ MpStatus MpPoseLandmarkerDetectForVideo(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
   return MpStatus.fromValue(
-    _MpPoseLandmarkerDetectForVideo(
-      landmarker,
-      image,
-      options,
-      timestamp_ms,
-      result,
-      error_msg,
-    ),
+    _MpPoseLandmarkerDetectForVideo(landmarker, image, options, timestamp_ms, result, error_msg),
   );
 }
 
@@ -3059,9 +2829,7 @@ MpStatus MpTextClassifierClassify(
   ffi.Pointer<MpTextClassifierResult> result,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpTextClassifierClassify(classifier, utf8_str, result, error_msg),
-  );
+  return MpStatus.fromValue(_MpTextClassifierClassify(classifier, utf8_str, result, error_msg));
 }
 
 /// Shuts down the TextClassifier when all the work is done. Frees all memory.
@@ -3069,12 +2837,9 @@ MpStatus MpTextClassifierClassify(
 /// To obtain a detailed error, error_msg must be non-null pointer to a char*,
 /// which will be populated with a newly-allocated error message upon failure.
 /// It's the caller responsibility to free the error message with MpErrorFree().
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpTextClassifierPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpTextClassifierClose')
+@ffi.Native<ffi.UnsignedInt Function(MpTextClassifierPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpTextClassifierClose',
+)
 external int _MpTextClassifierClose(
   MpTextClassifierPtr classifier,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -3090,9 +2855,7 @@ MpStatus MpTextClassifierClose(
 /// Frees the memory allocated inside a MpTextClassifierResult result. Does not
 /// free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpTextClassifierResult>)>()
-external void MpTextClassifierCloseResult(
-  ffi.Pointer<MpTextClassifierResult> result,
-);
+external void MpTextClassifierCloseResult(ffi.Pointer<MpTextClassifierResult> result);
 
 /// Creates a TextClassifier from the provided `options`.
 /// If successful, returns `kMpOk` and sets `*classifier` to the new
@@ -3118,9 +2881,7 @@ MpStatus MpTextClassifierCreate(
   ffi.Pointer<MpTextClassifierPtr> classifier,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpTextClassifierCreate(options, classifier, error_msg),
-  );
+  return MpStatus.fromValue(_MpTextClassifierCreate(options, classifier, error_msg));
 }
 
 /// Shuts down the TextEmbedder when all the work is done. Frees all memory.
@@ -3129,12 +2890,9 @@ MpStatus MpTextClassifierCreate(
 /// `char*`, which will be populated with a newly-allocated error message upon
 /// failure. It's the caller responsibility to free the error message with
 /// `MpErrorFree()`.
-@ffi.Native<
-  ffi.UnsignedInt Function(
-    MpTextEmbedderPtr,
-    ffi.Pointer<ffi.Pointer<ffi.Char>>,
-  )
->(symbol: 'MpTextEmbedderClose')
+@ffi.Native<ffi.UnsignedInt Function(MpTextEmbedderPtr, ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
+  symbol: 'MpTextEmbedderClose',
+)
 external int _MpTextEmbedderClose(
   MpTextEmbedderPtr embedder,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -3150,9 +2908,7 @@ MpStatus MpTextEmbedderClose(
 /// Frees the memory allocated inside a MpTextEmbedderResult result. Does not
 /// free the result pointer itself.
 @ffi.Native<ffi.Void Function(ffi.Pointer<MpTextEmbedderResult>)>()
-external void MpTextEmbedderCloseResult(
-  ffi.Pointer<MpTextEmbedderResult> result,
-);
+external void MpTextEmbedderCloseResult(ffi.Pointer<MpTextEmbedderResult> result);
 
 /// Utility function to compute cosine similarity [1] between two embeddings.
 /// Returns `kMpOk` on success, or an error status if e.g. the embeddings are
@@ -3186,9 +2942,7 @@ MpStatus MpTextEmbedderCosSimilarity(
   ffi.Pointer<ffi.Double> similarity,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpTextEmbedderCosSimilarity(u, v, similarity, error_msg),
-  );
+  return MpStatus.fromValue(_MpTextEmbedderCosSimilarity(u, v, similarity, error_msg));
 }
 
 /// Creates a TextEmbedder from the provided `options`.
@@ -3217,9 +2971,7 @@ MpStatus MpTextEmbedderCreate(
   ffi.Pointer<MpTextEmbedderPtr> embedder,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 ) {
-  return MpStatus.fromValue(
-    _MpTextEmbedderCreate(options, embedder, error_msg),
-  );
+  return MpStatus.fromValue(_MpTextEmbedderCreate(options, embedder, error_msg));
 }
 
 /// Performs embedding extraction on the input `utf8_str`.
@@ -3333,8 +3085,7 @@ final class MpAudioClassifierOptions extends ffi.Struct {
   @ffi.UnsignedInt()
   external int running_modeAsInt;
 
-  MpAudioRunningMode get running_mode =>
-      MpAudioRunningMode.fromValue(running_modeAsInt);
+  MpAudioRunningMode get running_mode => MpAudioRunningMode.fromValue(running_modeAsInt);
   set running_mode(MpAudioRunningMode value) => running_modeAsInt = value.value;
 
   /// The user-defined result callback for processing audio stream data.
@@ -3342,10 +3093,7 @@ final class MpAudioClassifierOptions extends ffi.Struct {
   /// to kMpAudioRunningModeAudioStream.
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Void Function(
-        ffi.UnsignedInt status,
-        ffi.Pointer<MpAudioClassifierResult> result,
-      )
+      ffi.Void Function(ffi.UnsignedInt status, ffi.Pointer<MpAudioClassifierResult> result)
     >
   >
   result_callback;
@@ -3443,10 +3191,8 @@ final class MpBaseOptions extends ffi.Struct {
   @ffi.UnsignedInt()
   external int host_environmentAsInt;
 
-  MpHostEnvironment get host_environment =>
-      MpHostEnvironment.fromValue(host_environmentAsInt);
-  set host_environment(MpHostEnvironment value) =>
-      host_environmentAsInt = value.value;
+  MpHostEnvironment get host_environment => MpHostEnvironment.fromValue(host_environmentAsInt);
+  set host_environment(MpHostEnvironment value) => host_environmentAsInt = value.value;
 
   /// The OS on which the task is running.
   @ffi.UnsignedInt()
@@ -4008,8 +3754,7 @@ final class MpFaceLandmarkerResult extends ffi.Struct {
     ..ref.face_blendshapes = face_blendshapes
     ..ref.face_blendshapes_count = face_blendshapes_count
     ..ref.facial_transformation_matrixes = facial_transformation_matrixes
-    ..ref.facial_transformation_matrixes_count =
-        facial_transformation_matrixes_count;
+    ..ref.facial_transformation_matrixes_count = facial_transformation_matrixes_count;
 }
 
 /// Represents a Flatbuffer Parser.
@@ -4639,8 +4384,7 @@ final class MpInteractiveSegmenterLegacyOptions extends ffi.Struct {
   external bool output_category_mask;
 }
 
-typedef MpInteractiveSegmenterLegacyPtr =
-    ffi.Pointer<MpInteractiveSegmenterLegacyInternal>;
+typedef MpInteractiveSegmenterLegacyPtr = ffi.Pointer<MpInteractiveSegmenterLegacyInternal>;
 
 /// Landmark represents a point in 3D space with x, y, z coordinates. The
 /// landmark coordinates are in meters. z represents the landmark depth, and the
@@ -5147,8 +4891,7 @@ final class MpRegionOfInterest extends ffi.Struct {
   @ffi.UnsignedInt()
   external int formatAsInt;
 
-  MpRegionOfInterestFormat get format =>
-      MpRegionOfInterestFormat.fromValue(formatAsInt);
+  MpRegionOfInterestFormat get format => MpRegionOfInterestFormat.fromValue(formatAsInt);
   set format(MpRegionOfInterestFormat value) => formatAsInt = value.value;
 
   /// Represents the ROI in keypoint format, this should have a valid keypoint
@@ -5191,9 +4934,7 @@ enum MpRegionOfInterestFormat {
     0 => MP_REGION_OF_INTEREST_FORMAT_UNSPECIFIED,
     1 => MP_REGION_OF_INTEREST_FORMAT_KEYPOINT,
     2 => MP_REGION_OF_INTEREST_FORMAT_SCRIBBLE,
-    _ => throw ArgumentError(
-      'Unknown value for MpRegionOfInterestFormat: $value',
-    ),
+    _ => throw ArgumentError('Unknown value for MpRegionOfInterestFormat: $value'),
   };
 }
 
@@ -5351,9 +5092,7 @@ enum MpTextEmbedderEmbeddingType {
     6 => MP_TEXT_EMBEDDER_EMBEDDING_TYPE_QUESTION_ANSWERING,
     7 => MP_TEXT_EMBEDDER_EMBEDDING_TYPE_FACT_CHECKING,
     8 => MP_TEXT_EMBEDDER_EMBEDDING_TYPE_CODE_RETRIEVAL,
-    _ => throw ArgumentError(
-      'Unknown value for MpTextEmbedderEmbeddingType: $value',
-    ),
+    _ => throw ArgumentError('Unknown value for MpTextEmbedderEmbeddingType: $value'),
   };
 }
 
@@ -5365,8 +5104,7 @@ final class MpTextEmbedderFormatContext extends ffi.Struct {
 
   MpTextEmbedderEmbeddingType get task_type =>
       MpTextEmbedderEmbeddingType.fromValue(task_typeAsInt);
-  set task_type(MpTextEmbedderEmbeddingType value) =>
-      task_typeAsInt = value.value;
+  set task_type(MpTextEmbedderEmbeddingType value) => task_typeAsInt = value.value;
 
   /// The title of the text, used to format the input text.
   external ffi.Pointer<ffi.Char> title;

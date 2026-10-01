@@ -43,11 +43,7 @@ enum TextEmbeddingRole {
 @immutable
 final class TextEmbedderFormatContext {
   /// Creates a text formatting context.
-  const TextEmbedderFormatContext({
-    required this.taskType,
-    required this.role,
-    this.title,
-  });
+  const TextEmbedderFormatContext({required this.taskType, required this.role, this.title});
 
   /// The embedding task intent.
   final TextEmbeddingType taskType;
@@ -78,10 +74,7 @@ final class TextEmbedderOptions {
 /// Platform implementation used by [TextEmbedder].
 abstract interface class TextEmbedderBackend implements MpTask {
   /// Extracts embeddings from [text].
-  Future<EmbeddingResult> embed(
-    String text, {
-    TextEmbedderFormatContext? formatContext,
-  });
+  Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext});
 }
 
 /// Extracts vector embeddings from input text.
@@ -92,23 +85,15 @@ final class TextEmbedder implements MpTask {
   final TaskLifecycle _lifecycle = TaskLifecycle('TextEmbedder');
 
   /// Creates an embedder using [runtime], or the active platform adapter.
-  static Future<TextEmbedder> create(
-    TextEmbedderOptions options, {
-    TextRuntime? runtime,
-  }) async => TextEmbedder._(
-    await (runtime ?? defaultTextRuntime).createTextEmbedder(options),
-  );
+  static Future<TextEmbedder> create(TextEmbedderOptions options, {TextRuntime? runtime}) async =>
+      TextEmbedder._(await (runtime ?? defaultTextRuntime).createTextEmbedder(options));
 
   @override
   bool get isClosed => _lifecycle.isClosed;
 
   /// Extracts embeddings from [text].
-  Future<EmbeddingResult> embed(
-    String text, {
-    TextEmbedderFormatContext? formatContext,
-  }) {
+  Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) {
     _lifecycle.ensureOpen();
-
     return _backend.embed(text, formatContext: formatContext);
   }
 

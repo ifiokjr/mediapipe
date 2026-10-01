@@ -16,11 +16,7 @@ import 'package:mp_core/mp_core.dart';
 /// A pinned test asset.
 final class MpExampleAsset {
   /// Creates an asset description.
-  const MpExampleAsset({
-    required this.name,
-    required this.url,
-    required this.sha256,
-  });
+  const MpExampleAsset({required this.name, required this.url, required this.sha256});
 
   /// A short human-readable name used in example output.
   final String name;
@@ -35,12 +31,9 @@ final class MpExampleAsset {
   ModelAsset get modelAsset => ModelAsset.uri(Uri.parse(url), sha256: sha256);
 }
 
-const String _vision =
-    'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/vision/';
-const String _text =
-    'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/text/';
-const String _audio =
-    'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/audio/';
+const String _vision = 'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/vision/';
+const String _text = 'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/text/';
+const String _audio = 'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/audio/';
 
 /// Models used by the runnable examples.
 abstract final class MpExampleModels {
@@ -136,9 +129,7 @@ final class MpAssetCache {
   /// Creates a cache under the system temporary directory, or `MP_EXAMPLE_CACHE`.
   factory MpAssetCache.defaults() {
     final String? override = Platform.environment['MP_EXAMPLE_CACHE'];
-
-    if (override != null && override.isNotEmpty)
-      return MpAssetCache(Directory(override));
+    if (override != null && override.isNotEmpty) return MpAssetCache(Directory(override));
     return MpAssetCache(Directory.systemTemp.createTempSync('mp_examples_'));
   }
 
@@ -153,39 +144,30 @@ final class MpAssetCache {
   /// fails with the expected and actual hashes instead of a task-creation error.
   Future<Uint8List> bytes(MpExampleAsset asset, {http.Client? client}) async {
     final Uint8List? cached = _memory[asset.url];
-
     if (cached != null) return cached;
 
     final File file = File('${directory.path}/${asset.name}');
     final Uint8List result;
-
     if (file.existsSync()) {
       result = file.readAsBytesSync();
     } else {
       final http.Client httpClient = client ?? http.Client();
       try {
-        final http.Response response = await httpClient.get(
-          Uri.parse(asset.url),
-        );
-
+        final http.Response response = await httpClient.get(Uri.parse(asset.url));
         if (response.statusCode != 200) {
           throw MpException(
             MpStatus.unavailable,
             'Could not download ${asset.name}: HTTP ${response.statusCode}.',
           );
         }
-
         result = response.bodyBytes;
-
         directory.createSync(recursive: true);
         file.writeAsBytesSync(result, flush: true);
       } finally {
         if (client == null) httpClient.close();
       }
     }
-
     _memory[asset.url] = result;
-
     return result;
   }
 
@@ -195,7 +177,6 @@ final class MpAssetCache {
   /// needs to hand over the bytes.
   Future<ModelAsset> model(MpExampleAsset asset, {http.Client? client}) async {
     final Uint8List data = await bytes(asset, client: client);
-
     return ModelAsset.bytes(data, name: asset.name);
   }
 }
@@ -207,17 +188,10 @@ final class MpAssetCache {
 /// [height] to resize; classifier models usually require a fixed input size.
 MpImage mpImageFromBytes(Uint8List bytes, {int? width, int? height}) {
   img.Image? decoded = img.decodeImage(bytes);
-
   if (decoded == null) {
-    throw const MpException(
-      MpStatus.invalidArgument,
-      'The example image could not be decoded.',
-    );
+    throw const MpException(MpStatus.invalidArgument, 'The example image could not be decoded.');
   }
-
-  if (width != null &&
-      height != null &&
-      (decoded.width != width || decoded.height != height)) {
+  if (width != null && height != null && (decoded.width != width || decoded.height != height)) {
     decoded = img.copyResize(
       decoded,
       width: width,
@@ -225,10 +199,7 @@ MpImage mpImageFromBytes(Uint8List bytes, {int? width, int? height}) {
       interpolation: img.Interpolation.linear,
     );
   }
-
-  final img.Image rgb = decoded.numChannels == 3
-      ? decoded
-      : decoded.convert(numChannels: 3);
+  final img.Image rgb = decoded.numChannels == 3 ? decoded : decoded.convert(numChannels: 3);
   return MpImage.uint8(
     width: rgb.width,
     height: rgb.height,
@@ -246,10 +217,7 @@ AudioData mpAudioFromWav(Uint8List bytes) {
   if (bytes.length < 44 ||
       String.fromCharCodes(bytes.sublist(0, 4)) != 'RIFF' ||
       String.fromCharCodes(bytes.sublist(8, 12)) != 'WAVE') {
-    throw const MpException(
-      MpStatus.invalidArgument,
-      'The example audio is not a RIFF WAVE file.',
-    );
+    throw const MpException(MpStatus.invalidArgument, 'The example audio is not a RIFF WAVE file.');
   }
 
   var offset = 12;
@@ -259,47 +227,27 @@ AudioData mpAudioFromWav(Uint8List bytes) {
   Uint8List? samples;
 
   while (offset + 8 <= bytes.length) {
-    final String chunkId = String.fromCharCodes(
-      bytes.sublist(offset, offset + 4),
-    );
+    final String chunkId = String.fromCharCodes(bytes.sublist(offset, offset + 4));
     final int chunkSize = ByteData.sublistView(
       bytes,
       offset + 4,
       offset + 8,
     ).getUint32(0, Endian.little);
     final int body = offset + 8;
-
     if (chunkId == 'fmt ' && body + 16 <= bytes.length) {
-      channelCount = ByteData.sublistView(
-        bytes,
-        body + 2,
-        body + 4,
-      ).getUint16(0, Endian.little);
-      sampleRate = ByteData.sublistView(
-        bytes,
-        body + 4,
-        body + 8,
-      ).getUint32(0, Endian.little);
-      bitsPerSample = ByteData.sublistView(
-        bytes,
-        body + 14,
-        body + 16,
-      ).getUint16(0, Endian.little);
+      channelCount = ByteData.sublistView(bytes, body + 2, body + 4).getUint16(0, Endian.little);
+      sampleRate = ByteData.sublistView(bytes, body + 4, body + 8).getUint32(0, Endian.little);
+      bitsPerSample = ByteData.sublistView(bytes, body + 14, body + 16).getUint16(0, Endian.little);
     } else if (chunkId == 'data') {
       final int end = (body + chunkSize).clamp(body, bytes.length);
       samples = Uint8List.sublistView(bytes, body, end);
     }
-
     offset = body + chunkSize + (chunkSize.isOdd ? 1 : 0);
   }
 
   if (samples == null) {
-    throw const MpException(
-      MpStatus.invalidArgument,
-      'The example audio has no data chunk.',
-    );
+    throw const MpException(MpStatus.invalidArgument, 'The example audio has no data chunk.');
   }
-
   if (bitsPerSample != 16) {
     throw MpException(
       MpStatus.unimplemented,
@@ -308,21 +256,11 @@ AudioData mpAudioFromWav(Uint8List bytes) {
   }
 
   final Float32List mono = Float32List(samples.length ~/ 2 ~/ channelCount);
-
   for (var frame = 0; frame < mono.length; frame++) {
     final int byteOffset = frame * channelCount * 2;
     mono[frame] =
-        ByteData.sublistView(
-          samples,
-          byteOffset,
-          byteOffset + 2,
-        ).getInt16(0, Endian.little) /
+        ByteData.sublistView(samples, byteOffset, byteOffset + 2).getInt16(0, Endian.little) /
         32768.0;
   }
-
-  return AudioData(
-    samples: mono,
-    sampleRateHz: sampleRate.toDouble(),
-    channelCount: 1,
-  );
+  return AudioData(samples: mono, sampleRateHz: sampleRate.toDouble(), channelCount: 1);
 }

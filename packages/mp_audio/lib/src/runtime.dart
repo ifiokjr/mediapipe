@@ -9,9 +9,7 @@ import 'runtime_stub.dart'
 /// A platform adapter capable of creating MediaPipe audio task backends.
 abstract interface class AudioRuntime {
   /// Creates an audio classifier backend.
-  Future<AudioClassifierBackend> createAudioClassifier(
-    AudioClassifierOptions options,
-  );
+  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options);
 }
 
 /// The adapter selected for the active platform.
@@ -26,11 +24,10 @@ final class UnsupportedAudioRuntime implements AudioRuntime {
   final MpPlatform platform;
 
   @override
-  Future<AudioClassifierBackend> createAudioClassifier(
-    AudioClassifierOptions options,
-  ) async => throw MpException(
-    MpStatus.unimplemented,
-    'No AudioClassifier backend is linked for ${platform.name}.',
-    task: 'AudioClassifier',
-  );
+  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async =>
+      throw MpException(
+        MpStatus.unimplemented,
+        'No AudioClassifier backend is linked for ${platform.name}.',
+        task: 'AudioClassifier',
+      );
 }

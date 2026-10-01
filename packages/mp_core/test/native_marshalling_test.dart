@@ -31,39 +31,32 @@ void main() {
 
       expect(
         native.matrixFromNative(matrix),
-        MpMatrix(
-          rows: 2,
-          columns: 3,
-          values: Float32List.fromList(<double>[1, 2, 3, 4, 5, 6]),
-        ),
+        MpMatrix(rows: 2, columns: 3, values: Float32List.fromList(<double>[1, 2, 3, 4, 5, 6])),
       );
     });
   });
 
   test('copies nested classification data out of native memory', () {
     using((Arena arena) {
-      final ffi.Pointer<native.MpCategory> categories =
-          arena<native.MpCategory>();
+      final ffi.Pointer<native.MpCategory> categories = arena<native.MpCategory>();
       categories.ref
         ..index = 7
         ..score = 0.75
         ..category_name = 'running'.toNativeUtf8(allocator: arena).cast()
         ..display_name = 'Running'.toNativeUtf8(allocator: arena).cast();
-      final ffi.Pointer<native.MpClassifications> heads =
-          arena<native.MpClassifications>();
+      final ffi.Pointer<native.MpClassifications> heads = arena<native.MpClassifications>();
       heads.ref
         ..categories = categories
         ..categories_count = 1
         ..head_index = 2
         ..head_name = 'activity'.toNativeUtf8(allocator: arena).cast();
-      final native.MpClassificationResult result =
-          native.MpClassificationResult.$allocate(
-            arena,
-            classifications: heads,
-            classifications_count: 1,
-            timestamp_ms: 42,
-            has_timestamp_ms: true,
-          ).ref;
+      final native.MpClassificationResult result = native.MpClassificationResult.$allocate(
+        arena,
+        classifications: heads,
+        classifications_count: 1,
+        timestamp_ms: 42,
+        has_timestamp_ms: true,
+      ).ref;
 
       expect(
         native.classificationResultFromNative(result),
@@ -74,12 +67,7 @@ void main() {
               headIndex: 2,
               headName: 'activity',
               categories: const <Category>[
-                Category(
-                  index: 7,
-                  score: 0.75,
-                  categoryName: 'running',
-                  displayName: 'Running',
-                ),
+                Category(index: 7, score: 0.75, categoryName: 'running', displayName: 'Running'),
               ],
             ),
           ],
@@ -88,49 +76,33 @@ void main() {
     });
   });
 
-  test(
-    'builds native base and image-processing options with owned storage',
-    () {
-      final native.NativeScope scope = native.NativeScope(task: 'test');
-      try {
-        final native.MpBaseOptions base = scope
-            .baseOptions(
-              BaseOptions(
-                modelAsset: ModelAsset.bytes(
-                  Uint8List.fromList(<int>[1, 2, 3]),
-                ),
-              ),
-            )
-            .ref;
-        expect(base.model_asset_buffer_count, 3);
-        expect(base.model_asset_buffer.cast<ffi.Uint8>().asTypedList(3), <int>[
-          1,
-          2,
-          3,
-        ]);
-        expect(base.file_descriptor, -1);
-        expect(base.delegate, native.MpDelegate.MP_DELEGATE_CPU);
+  test('builds native base and image-processing options with owned storage', () {
+    final native.NativeScope scope = native.NativeScope(task: 'test');
+    try {
+      final native.MpBaseOptions base = scope
+          .baseOptions(
+            BaseOptions(modelAsset: ModelAsset.bytes(Uint8List.fromList(<int>[1, 2, 3]))),
+          )
+          .ref;
+      expect(base.model_asset_buffer_count, 3);
+      expect(base.model_asset_buffer.cast<ffi.Uint8>().asTypedList(3), <int>[1, 2, 3]);
+      expect(base.file_descriptor, -1);
+      expect(base.delegate, native.MpDelegate.MP_DELEGATE_CPU);
 
-        final native.MpImageProcessingOptions processing = scope
-            .imageProcessingOptions(
-              ImageProcessingOptions(
-                rotationDegrees: 90,
-                regionOfInterest: NormalizedRect(
-                  left: 0.1,
-                  top: 0.2,
-                  right: 0.9,
-                  bottom: 0.8,
-                ),
-              ),
-            )
-            .ref;
-        expect(processing.has_region_of_interest, 1);
-        expect(processing.rotation_degrees, 90);
-        expect(processing.region_of_interest.left, closeTo(0.1, 0.000001));
-        expect(processing.region_of_interest.bottom, closeTo(0.8, 0.000001));
-      } finally {
-        scope.release();
-      }
-    },
-  );
+      final native.MpImageProcessingOptions processing = scope
+          .imageProcessingOptions(
+            ImageProcessingOptions(
+              rotationDegrees: 90,
+              regionOfInterest: NormalizedRect(left: 0.1, top: 0.2, right: 0.9, bottom: 0.8),
+            ),
+          )
+          .ref;
+      expect(processing.has_region_of_interest, 1);
+      expect(processing.rotation_degrees, 90);
+      expect(processing.region_of_interest.left, closeTo(0.1, 0.000001));
+      expect(processing.region_of_interest.bottom, closeTo(0.8, 0.000001));
+    } finally {
+      scope.release();
+    }
+  });
 }

@@ -26,9 +26,7 @@ void main() {
   });
 
   test('downloads and verifies an archive before exposing libraries', () async {
-    final Directory output = await Directory.systemTemp.createTemp(
-      'mp-native-test-',
-    );
+    final Directory output = await Directory.systemTemp.createTemp('mp-native-test-');
     final List<int> library = <int>[1, 3, 3, 7];
     final List<int> archive = _archiveBytes(<String, List<int>>{
       'libmediapipe.so': library,
@@ -36,9 +34,7 @@ void main() {
         jsonEncode(<String, Object>{
           'mediaPipeVersion': 'v1.0.0',
           'target': 'linux-x64',
-          'libraries': <String, String>{
-            'libmediapipe.so': sha256.convert(library).toString(),
-          },
+          'libraries': <String, String>{'libmediapipe.so': sha256.convert(library).toString()},
         }),
       ),
     });
@@ -52,25 +48,18 @@ void main() {
       artifact: NativeArtifact(
         mediaPipeVersion: 'v1.0.0',
         target: 'linux-x64',
-        uri: Uri.parse(
-          'http://${server.address.host}:${server.port}/artifact.zip',
-        ),
+        uri: Uri.parse('http://${server.address.host}:${server.port}/artifact.zip'),
         sha256: sha256.convert(archive).toString(),
       ),
       sharedOutputDirectory: output.uri,
     );
 
-    expect(
-      File.fromUri(resolved.uri.resolve('libmediapipe.so')).readAsBytesSync(),
-      library,
-    );
+    expect(File.fromUri(resolved.uri.resolve('libmediapipe.so')).readAsBytesSync(), library);
     expect(File.fromUri(resolved.uri.resolve('.ready')).existsSync(), isTrue);
   });
 
   test('rejects an archive whose outer checksum does not match', () async {
-    final Directory output = await Directory.systemTemp.createTemp(
-      'mp-native-test-',
-    );
+    final Directory output = await Directory.systemTemp.createTemp('mp-native-test-');
     final List<int> archive = _archiveBytes(<String, List<int>>{
       'manifest.json': utf8.encode('{}'),
     });
@@ -85,9 +74,7 @@ void main() {
         artifact: NativeArtifact(
           mediaPipeVersion: 'v1.0.0',
           target: 'linux-x64',
-          uri: Uri.parse(
-            'http://${server.address.host}:${server.port}/artifact.zip',
-          ),
+          uri: Uri.parse('http://${server.address.host}:${server.port}/artifact.zip'),
           sha256: '0' * 64,
         ),
         sharedOutputDirectory: output.uri,
@@ -95,8 +82,7 @@ void main() {
       throwsStateError,
     );
     expect(
-      Directory.fromUri(output.uri.resolve('mp_core/linux-x64-${'0' * 64}/'))
-          .existsSync(),
+      Directory.fromUri(output.uri.resolve('mp_core/linux-x64-${'0' * 64}/')).existsSync(),
       isFalse,
     );
   });
@@ -104,19 +90,14 @@ void main() {
 
 List<int> _archiveBytes(Map<String, List<int>> files) {
   final Archive archive = Archive();
-
   for (final MapEntry<String, List<int>> entry in files.entries) {
     archive.add(ArchiveFile.bytes(entry.key, entry.value));
   }
-
   return ZipEncoder().encodeBytes(archive, modified: DateTime.utc(1980));
 }
 
 Future<HttpServer> _serve(List<int> responseBytes) async {
-  final HttpServer server = await HttpServer.bind(
-    InternetAddress.loopbackIPv4,
-    0,
-  );
+  final HttpServer server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
   server.listen((HttpRequest request) async {
     request.response
       ..statusCode = HttpStatus.ok
@@ -124,6 +105,5 @@ Future<HttpServer> _serve(List<int> responseBytes) async {
       ..add(responseBytes);
     await request.response.close();
   });
-
   return server;
 }

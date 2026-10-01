@@ -100,9 +100,7 @@ final class FaceLandmarkerResult {
     Iterable<MpMatrix> facialTransformationMatrixes = const <MpMatrix>[],
   }) : faceLandmarks = _immutableNested(faceLandmarks),
        faceBlendshapes = List<Classifications>.unmodifiable(faceBlendshapes),
-       facialTransformationMatrixes = List<MpMatrix>.unmodifiable(
-         facialTransformationMatrixes,
-       );
+       facialTransformationMatrixes = List<MpMatrix>.unmodifiable(facialTransformationMatrixes);
 
   /// Detected landmarks for each face.
   final List<List<NormalizedLandmark>> faceLandmarks;
@@ -119,10 +117,7 @@ final class FaceLandmarkerResult {
       other is FaceLandmarkerResult &&
           _deepEquality.equals(faceLandmarks, other.faceLandmarks) &&
           _deepEquality.equals(faceBlendshapes, other.faceBlendshapes) &&
-          _deepEquality.equals(
-            facialTransformationMatrixes,
-            other.facialTransformationMatrixes,
-          );
+          _deepEquality.equals(facialTransformationMatrixes, other.facialTransformationMatrixes);
 
   @override
   int get hashCode => Object.hash(
@@ -154,9 +149,7 @@ final class HolisticLandmarkerResult {
        rightHandLandmarks = _immutableNested(rightHandLandmarks),
        rightHandWorldLandmarks = _immutableNested(rightHandWorldLandmarks),
        faceBlendshapes = List<Classifications>.unmodifiable(faceBlendshapes),
-       poseSegmentationMasks = List<MpImage>.unmodifiable(
-         poseSegmentationMasks,
-       );
+       poseSegmentationMasks = List<MpImage>.unmodifiable(poseSegmentationMasks);
 
   /// Detected face landmarks.
   final List<List<NormalizedLandmark>> faceLandmarks;
@@ -193,20 +186,11 @@ final class HolisticLandmarkerResult {
           _deepEquality.equals(poseLandmarks, other.poseLandmarks) &&
           _deepEquality.equals(poseWorldLandmarks, other.poseWorldLandmarks) &&
           _deepEquality.equals(leftHandLandmarks, other.leftHandLandmarks) &&
-          _deepEquality.equals(
-            leftHandWorldLandmarks,
-            other.leftHandWorldLandmarks,
-          ) &&
+          _deepEquality.equals(leftHandWorldLandmarks, other.leftHandWorldLandmarks) &&
           _deepEquality.equals(rightHandLandmarks, other.rightHandLandmarks) &&
-          _deepEquality.equals(
-            rightHandWorldLandmarks,
-            other.rightHandWorldLandmarks,
-          ) &&
+          _deepEquality.equals(rightHandWorldLandmarks, other.rightHandWorldLandmarks) &&
           _deepEquality.equals(faceBlendshapes, other.faceBlendshapes) &&
-          _deepEquality.equals(
-            poseSegmentationMasks,
-            other.poseSegmentationMasks,
-          );
+          _deepEquality.equals(poseSegmentationMasks, other.poseSegmentationMasks);
 
   @override
   int get hashCode => Object.hash(
@@ -268,9 +252,7 @@ final class ImageSegmenterResult {
     Iterable<MpImage> confidenceMasks = const <MpImage>[],
     Float32List? qualityScores,
   }) : confidenceMasks = List<MpImage>.unmodifiable(confidenceMasks),
-       qualityScores = qualityScores == null
-           ? null
-           : Float32List.fromList(qualityScores);
+       qualityScores = qualityScores == null ? null : Float32List.fromList(qualityScores);
 
   /// Category index for each pixel, when requested.
   final MpImage? categoryMask;
@@ -290,14 +272,8 @@ final class ImageSegmenterResult {
       identical(this, other) ||
       other is ImageSegmenterResult &&
           categoryMask == other.categoryMask &&
-          const ListEquality<MpImage>().equals(
-            confidenceMasks,
-            other.confidenceMasks,
-          ) &&
-          const Float32ListEquality().equals(
-            qualityScores,
-            other.qualityScores,
-          );
+          const ListEquality<MpImage>().equals(confidenceMasks, other.confidenceMasks) &&
+          const Float32ListEquality().equals(qualityScores, other.qualityScores);
 
   @override
   int get hashCode => Object.hash(
@@ -317,13 +293,10 @@ final class Float32ListEquality implements Equality<Float32List?> {
   @override
   bool equals(Float32List? first, Float32List? second) {
     if (first == null || second == null) return identical(first, second);
-
     if (first.length != second.length) return false;
-
     for (var i = 0; i < first.length; i++) {
       if (first[i] != second[i]) return false;
     }
-
     return true;
   }
 
@@ -331,11 +304,9 @@ final class Float32ListEquality implements Equality<Float32List?> {
   int hash(Float32List? list) {
     if (list == null) return 0;
     int result = list.length;
-
     for (final double value in list.take(8)) {
       result = Object.hash(result, value);
     }
-
     return result;
   }
 
@@ -360,11 +331,8 @@ enum BrushMode {
 final class PromptPoint {
   /// Creates a normalized point.
   PromptPoint(this.x, this.y) {
-    if (x < 0 || x > 1)
-      throw ArgumentError.value(x, 'x', 'must be between 0 and 1');
-
-    if (y < 0 || y > 1)
-      throw ArgumentError.value(y, 'y', 'must be between 0 and 1');
+    if (x < 0 || x > 1) throw ArgumentError.value(x, 'x', 'must be between 0 and 1');
+    if (y < 0 || y > 1) throw ArgumentError.value(y, 'y', 'must be between 0 and 1');
   }
 
   /// Horizontal coordinate in the range 0–1.
@@ -375,8 +343,7 @@ final class PromptPoint {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PromptPoint && x == other.x && y == other.y;
+      identical(this, other) || other is PromptPoint && x == other.x && y == other.y;
 
   @override
   int get hashCode => Object.hash(x, y);
@@ -391,8 +358,7 @@ final class PromptStroke {
     required Iterable<PromptPoint> points,
     this.isCompleted = true,
   }) : points = List<PromptPoint>.unmodifiable(points) {
-    if (this.points.isEmpty)
-      throw ArgumentError.value(points, 'points', 'must not be empty');
+    if (this.points.isEmpty) throw ArgumentError.value(points, 'points', 'must not be empty');
   }
 
   /// Whether the stroke includes, excludes, or encloses a region.
@@ -413,11 +379,8 @@ final class PromptStroke {
           isCompleted == other.isCompleted;
 
   @override
-  int get hashCode => Object.hash(
-    brushMode,
-    const ListEquality<PromptPoint>().hash(points),
-    isCompleted,
-  );
+  int get hashCode =>
+      Object.hash(brushMode, const ListEquality<PromptPoint>().hash(points), isCompleted);
 }
 
 /// User guidance supplied to an interactive segmenter.
@@ -429,12 +392,10 @@ sealed class InteractivePrompt {
   factory InteractivePrompt.keypoint(PromptPoint point) = KeypointPrompt;
 
   /// Uses a legacy foreground scribble.
-  factory InteractivePrompt.scribble(Iterable<PromptPoint> points) =
-      ScribblePrompt;
+  factory InteractivePrompt.scribble(Iterable<PromptPoint> points) = ScribblePrompt;
 
   /// Uses signed brush strokes supported by the current web task.
-  factory InteractivePrompt.strokes(Iterable<PromptStroke> strokes) =
-      StrokePrompt;
+  factory InteractivePrompt.strokes(Iterable<PromptStroke> strokes) = StrokePrompt;
 }
 
 /// A single-point interactive segmentation prompt.
@@ -452,8 +413,7 @@ final class ScribblePrompt extends InteractivePrompt {
   ScribblePrompt(Iterable<PromptPoint> points)
     : points = List<PromptPoint>.unmodifiable(points),
       super._() {
-    if (this.points.isEmpty)
-      throw ArgumentError.value(points, 'points', 'must not be empty');
+    if (this.points.isEmpty) throw ArgumentError.value(points, 'points', 'must not be empty');
   }
 
   /// Foreground scribble points.
@@ -466,8 +426,7 @@ final class StrokePrompt extends InteractivePrompt {
   StrokePrompt(Iterable<PromptStroke> strokes)
     : strokes = List<PromptStroke>.unmodifiable(strokes),
       super._() {
-    if (this.strokes.isEmpty)
-      throw ArgumentError.value(strokes, 'strokes', 'must not be empty');
+    if (this.strokes.isEmpty) throw ArgumentError.value(strokes, 'strokes', 'must not be empty');
   }
 
   /// User-drawn signed strokes.

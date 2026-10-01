@@ -51,25 +51,14 @@ Future<void> main(List<String> arguments) async {
   );
 
   final List<File> artifacts = _findArtifacts(upstream, target);
-  final Directory output = Directory.fromUri(
-    repositoryRoot.uri.resolve('.mp-sdk/${target.name}/'),
-  );
-
+  final Directory output = Directory.fromUri(repositoryRoot.uri.resolve('.mp-sdk/${target.name}/'));
   if (output.existsSync()) output.deleteSync(recursive: true);
   output.createSync(recursive: true);
   final List<File> copied = <File>[];
-
   for (final File artifact in artifacts) {
-    copied.add(
-      await _copyWritable(artifact, output.uri.resolve(_baseName(artifact))),
-    );
+    copied.add(await _copyWritable(artifact, output.uri.resolve(_baseName(artifact))));
   }
-
-  await _makeLibrariesRelocatable(
-    copied,
-    target: target,
-    workingDirectory: repositoryRoot.path,
-  );
+  await _makeLibrariesRelocatable(copied, target: target, workingDirectory: repositoryRoot.path);
   await _writeManifest(output, target.name, copied);
   stdout.writeln('Built ${copied.length} libraries in ${output.path}');
 }
@@ -81,16 +70,12 @@ Future<void> main(List<String> arguments) async {
 /// `/usr/bin` shims also add the selected macOS SDK sysroot, which invoking the
 /// compiler binary inside Xcode directly does not do.
 Future<Map<String, String>> resolveMacOsToolchainEnvironment({
-  Future<String> Function(String executable, List<String> arguments)?
-  commandRunner,
+  Future<String> Function(String executable, List<String> arguments)? commandRunner,
 }) async {
-  final Future<String> Function(String, List<String>) runCommand =
-      commandRunner ?? _runTool;
-  final String developerDirectory = await runCommand(
-    'xcode-select',
-    const <String>['--print-path'],
-  );
-
+  final Future<String> Function(String, List<String>) runCommand = commandRunner ?? _runTool;
+  final String developerDirectory = await runCommand('xcode-select', const <String>[
+    '--print-path',
+  ]);
   return <String, String>{
     'CC': '/usr/bin/clang',
     'CXX': '/usr/bin/clang++',
@@ -101,7 +86,6 @@ Future<Map<String, String>> resolveMacOsToolchainEnvironment({
 Future<String> _runTool(String executable, List<String> arguments) async {
   final ProcessResult result = await Process.run(executable, arguments);
   final String output = (result.stdout as String).trim();
-
   if (result.exitCode != 0 || output.isEmpty) {
     throw ProcessException(
       executable,
@@ -110,26 +94,18 @@ Future<String> _runTool(String executable, List<String> arguments) async {
       result.exitCode,
     );
   }
-
   return output;
 }
 
 Future<NativeTarget> _readTarget(List<String> arguments) async {
   if (arguments.isEmpty) return NativeTarget.host();
-
   if (arguments case ['--target', final String value]) {
     return NativeTarget.parse(value);
   }
-
-  throw const FormatException(
-    'Usage: build_native.dart [--target <os-architecture>]',
-  );
+  throw const FormatException('Usage: build_native.dart [--target <os-architecture>]');
 }
 
-Future<void> _ensureUpstream(
-  Directory repositoryRoot,
-  Directory upstream,
-) async {
+Future<void> _ensureUpstream(Directory repositoryRoot, Directory upstream) async {
   if (!upstream.existsSync()) {
     upstream.parent.createSync(recursive: true);
     await _runStreaming('git', <String>[
@@ -141,23 +117,17 @@ Future<void> _ensureUpstream(
       upstream.path,
     ], workingDirectory: repositoryRoot.path);
   }
-
   final String revision = (await _run('git', const <String>[
     'describe',
     '--tags',
     '--exact-match',
   ], workingDirectory: upstream.path)).trim();
-
   if (revision != _mediaPipeVersion) {
     throw StateError('Expected MediaPipe $_mediaPipeVersion, found $revision.');
   }
 }
 
-void _applyCompatibilityPatches(
-  Directory repositoryRoot,
-  Directory upstream,
-  NativeTarget target,
-) {
+void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream, NativeTarget target) {
   final String javaDependency = target.isAndroid
       ? 'bazel_dep(name = "rules_android_ndk", version = "0.1.3")\n'
             'android_ndk_repository_extension = use_extension(\n'
@@ -187,9 +157,7 @@ void _applyCompatibilityPatches(
   final File sourcePatch = File.fromUri(
     repositoryRoot.uri.resolve('tool/patches/opencv-modern-toolchains.patch'),
   );
-  final File upstreamPatch = File.fromUri(
-    upstream.uri.resolve('third_party/$patchName'),
-  );
+  final File upstreamPatch = File.fromUri(upstream.uri.resolve('third_party/$patchName'));
   upstreamPatch.writeAsStringSync(sourcePatch.readAsStringSync());
   _replaceExactly(
     File.fromUri(upstream.uri.resolve('third_party/BUILD')),
@@ -209,10 +177,7 @@ void _applyCompatibilityPatches(
         '    patches = ["@//third_party:$patchName"],\n'
         '    strip_prefix = "opencv-3.4.11",',
   );
-  final File aggregateBuild = File.fromUri(
-    upstream.uri.resolve('mediapipe/tasks/c/BUILD'),
-  );
-
+  final File aggregateBuild = File.fromUri(upstream.uri.resolve('mediapipe/tasks/c/BUILD'));
   if (target.isAndroid) {
     _replaceExactly(
       File.fromUri(upstream.uri.resolve('third_party/BUILD')),
@@ -233,7 +198,6 @@ void _applyCompatibilityPatches(
           '        "@platforms//os:linux": [',
     );
   }
-
   final String targetCacheEntries = switch (target.os) {
     'android' =>
       '        # rules_android_ndk does not expose its C++ runtime to\n'
@@ -257,7 +221,6 @@ void _applyCompatibilityPatches(
           '        "CPU_NEON_SUPPORTED": "ON",\n',
     _ => '',
   };
-
   _replaceExactly(
     File.fromUri(upstream.uri.resolve('third_party/BUILD')),
     '        "BUILD_EXAMPLES": "OFF",\n'
@@ -280,32 +243,23 @@ void _applyCompatibilityPatches(
 
 void _replaceExactly(File file, String original, String replacement) {
   final String contents = file.readAsStringSync();
-
   if (contents.contains(replacement)) return;
-
   if (!contents.contains(original)) {
     throw StateError('Compatibility patch no longer matches ${file.path}.');
   }
-
   file.writeAsStringSync(contents.replaceFirst(original, replacement));
 }
 
 List<File> _findArtifacts(Directory upstream, NativeTarget target) {
-  final Directory output = Directory.fromUri(
-    upstream.uri.resolve('bazel-bin/mediapipe/tasks/c/'),
-  );
+  final Directory output = Directory.fromUri(upstream.uri.resolve('bazel-bin/mediapipe/tasks/c/'));
   final List<File> candidates = output
       .listSync()
       .whereType<File>()
       .where((File file) => file.uri.pathSegments.last == target.libraryName)
       .toList();
-
   if (candidates.length != 1) {
-    throw StateError(
-      'Expected one ${target.libraryName} in ${output.path}, found $candidates.',
-    );
+    throw StateError('Expected one ${target.libraryName} in ${output.path}, found $candidates.');
   }
-
   final Directory openCvOutput = Directory.fromUri(
     upstream.uri.resolve('bazel-bin/third_party/opencv_cmake/lib/'),
   );
@@ -316,11 +270,8 @@ List<File> _findArtifacts(Directory upstream, NativeTarget target) {
           .where((File file) => _isSharedLibrary(_baseName(file), target.os))
           .toList()
         ..sort((File left, File right) => left.path.compareTo(right.path));
-
   if (openCvLibraries.isEmpty) {
-    throw StateError(
-      'No OpenCV shared libraries found in ${openCvOutput.path}.',
-    );
+    throw StateError('No OpenCV shared libraries found in ${openCvOutput.path}.');
   }
   return <File>[
     candidates.single,
@@ -333,34 +284,22 @@ File _androidCxxRuntime(NativeTarget target) {
   final Directory prebuilt = Directory.fromUri(
     _androidNdk().uri.resolve('toolchains/llvm/prebuilt/'),
   );
-  final List<Directory> hosts = prebuilt
-      .listSync()
-      .whereType<Directory>()
-      .toList();
-
+  final List<Directory> hosts = prebuilt.listSync().whereType<Directory>().toList();
   if (hosts.length != 1) {
-    throw StateError(
-      'Expected one Android NDK host toolchain in ${prebuilt.path}.',
-    );
+    throw StateError('Expected one Android NDK host toolchain in ${prebuilt.path}.');
   }
-
   final String triple = switch (target.architecture) {
     'arm' => 'arm-linux-androideabi',
     'arm64' => 'aarch64-linux-android',
     'x64' => 'x86_64-linux-android',
-    _ => throw StateError(
-      'Unsupported Android architecture: ${target.architecture}.',
-    ),
+    _ => throw StateError('Unsupported Android architecture: ${target.architecture}.'),
   };
-
   final File runtime = File.fromUri(
     hosts.single.uri.resolve('sysroot/usr/lib/$triple/libc++_shared.so'),
   );
-
   if (!runtime.existsSync()) {
     throw StateError('Android C++ runtime does not exist at ${runtime.path}.');
   }
-
   return runtime;
 }
 
@@ -376,7 +315,6 @@ String _baseName(File file) => file.uri.pathSegments.last;
 Future<File> _copyWritable(File source, Uri destination) async {
   final File output = File.fromUri(destination);
   await source.openRead().pipe(output.openWrite());
-
   return output;
 }
 
@@ -387,7 +325,6 @@ Future<void> _makeLibrariesRelocatable(
 }) async {
   if (target.os == 'macos') {
     final Set<String> packagedNames = libraries.map(_baseName).toSet();
-
     for (final File library in libraries) {
       final String name = _baseName(library);
       final String linkedLibraries = await _run('otool', <String>[
@@ -395,26 +332,15 @@ Future<void> _makeLibrariesRelocatable(
         library.path,
       ], workingDirectory: workingDirectory);
       final List<String> changes = <String>[];
-
       for (final String line in linkedLibraries.split('\n').skip(1)) {
-        final String dependency =
-            line.trim().split(RegExp(r'\s+')).firstOrNull ?? '';
-
+        final String dependency = line.trim().split(RegExp(r'\s+')).firstOrNull ?? '';
         if (dependency.isEmpty) continue;
         final String dependencyName = dependency.split('/').last;
-
-        if (!packagedNames.contains(dependencyName) ||
-            dependency == '@rpath/$dependencyName') {
+        if (!packagedNames.contains(dependencyName) || dependency == '@rpath/$dependencyName') {
           continue;
         }
-
-        changes.addAll(<String>[
-          '-change',
-          dependency,
-          '@rpath/$dependencyName',
-        ]);
+        changes.addAll(<String>['-change', dependency, '@rpath/$dependencyName']);
       }
-
       await _runStreaming('install_name_tool', <String>[
         ...changes,
         '-id',
@@ -435,26 +361,17 @@ Future<void> _makeLibrariesRelocatable(
   }
 }
 
-Future<void> _writeManifest(
-  Directory output,
-  String target,
-  List<File> libraries,
-) async {
+Future<void> _writeManifest(Directory output, String target, List<File> libraries) async {
   final Map<String, String> checksums = <String, String>{};
-
   for (final File library in libraries) {
-    checksums[_baseName(library)] = sha256
-        .convert(await library.readAsBytes())
-        .toString();
+    checksums[_baseName(library)] = sha256.convert(await library.readAsBytes()).toString();
   }
-
   final File manifest = File.fromUri(output.uri.resolve('manifest.json'));
-  final String contents = const JsonEncoder.withIndent('  ')
-      .convert(<String, Object>{
-        'mediaPipeVersion': _mediaPipeVersion,
-        'target': target,
-        'libraries': checksums,
-      });
+  final String contents = const JsonEncoder.withIndent('  ').convert(<String, Object>{
+    'mediaPipeVersion': _mediaPipeVersion,
+    'target': target,
+    'libraries': checksums,
+  });
   await manifest.writeAsString('$contents\n');
 }
 
@@ -462,8 +379,7 @@ Directory _androidNdk() {
   const String pinnedVersion = '28.2.13676358';
   final String? explicit = Platform.environment['ANDROID_NDK_HOME'];
   final String? sdk =
-      Platform.environment['ANDROID_SDK_ROOT'] ??
-      Platform.environment['ANDROID_HOME'];
+      Platform.environment['ANDROID_SDK_ROOT'] ?? Platform.environment['ANDROID_HOME'];
   final Directory ndk = explicit != null && explicit.isNotEmpty
       ? Directory(explicit)
       : sdk != null && sdk.isNotEmpty
@@ -471,26 +387,21 @@ Directory _androidNdk() {
       : throw StateError(
           'Set ANDROID_NDK_HOME, ANDROID_SDK_ROOT, or ANDROID_HOME to build Android artifacts.',
         );
-
   if (!ndk.existsSync()) {
     throw StateError('Android NDK does not exist at ${ndk.path}.');
   }
-
   return ndk;
 }
 
 Directory _findRepositoryRoot() {
   Directory current = Directory.current.absolute;
-
   while (current.parent.path != current.path) {
     if (File.fromUri(current.uri.resolve('pubspec.yaml')).existsSync() &&
-        Directory.fromUri(current.uri.resolve('packages/mp_core/'))
-            .existsSync()) {
+        Directory.fromUri(current.uri.resolve('packages/mp_core/')).existsSync()) {
       return current;
     }
     current = current.parent;
   }
-
   throw StateError('Could not find the MP workspace root.');
 }
 
@@ -506,12 +417,7 @@ Future<String> _run(
   );
   if (result.exitCode != 0) {
     stderr.write(result.stderr);
-    throw ProcessException(
-      executable,
-      arguments,
-      'Command failed',
-      result.exitCode,
-    );
+    throw ProcessException(executable, arguments, 'Command failed', result.exitCode);
   }
   return result.stdout as String;
 }

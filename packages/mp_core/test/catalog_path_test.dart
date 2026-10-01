@@ -56,7 +56,6 @@ Map<String, Object?> _catalogTargets() {
   final File catalog = File('hook/native_artifacts.json');
   final String source = catalog.readAsStringSync();
   final RegExpMatch? start = RegExp(r'"artifacts"\s*:\s*\{').firstMatch(source);
-
   if (start == null) return const <String, Object?>{};
   final Map<String, Object?> targets = <String, Object?>{};
   for (final RegExpMatch match in RegExp(
@@ -65,6 +64,5 @@ Map<String, Object?> _catalogTargets() {
   ).allMatches(source.substring(start.end))) {
     targets[match.group(1)!] = true;
   }
-
   return targets;
 }

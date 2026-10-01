@@ -18,9 +18,7 @@ void main() {
   test('never rewinds, even after the stopwatch stalls', () {
     final MpCameraClock clock = MpCameraClock();
 
-    final List<int> readings = <int>[
-      for (var i = 0; i < 500; i++) clock.nextTimestampMs(),
-    ];
+    final List<int> readings = <int>[for (var i = 0; i < 500; i++) clock.nextTimestampMs()];
     for (var i = 1; i < readings.length; i++) {
       expect(readings[i], greaterThan(readings[i - 1]));
     }

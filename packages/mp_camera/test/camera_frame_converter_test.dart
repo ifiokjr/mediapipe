@@ -33,16 +33,7 @@ void main() {
       expect(frame.processingOptions.rotationDegrees, 270);
       expect(frame.mirroredPreview, isTrue);
       expect(frame.image.format, MpImageFormat.srgba);
-      expect((frame.image as MpImageUint8).data, <int>[
-        10,
-        20,
-        30,
-        255,
-        40,
-        50,
-        60,
-        128,
-      ]);
+      expect((frame.image as MpImageUint8).data, <int>[10, 20, 30, 255, 40, 50, 60, 128]);
     });
 
     test('converts neutral NV21 using row strides', () {
@@ -107,19 +98,11 @@ void main() {
       );
 
       expect(
-        () => MpCameraFrameConverter.convert(
-          image,
-          timestampMs: 0,
-          rotationDegrees: 0,
-        ),
+        () => MpCameraFrameConverter.convert(image, timestampMs: 0, rotationDegrees: 0),
         throwsUnsupportedError,
       );
       expect(
-        () => MpCameraFrameConverter.convert(
-          image,
-          timestampMs: -1,
-          rotationDegrees: 0,
-        ),
+        () => MpCameraFrameConverter.convert(image, timestampMs: -1, rotationDegrees: 0),
         throwsArgumentError,
       );
     });
@@ -143,12 +126,9 @@ CameraImage _cameraImage({
   ),
 );
 
-CameraImagePlane _plane(
-  List<int> bytes, {
-  required int bytesPerRow,
-  required int bytesPerPixel,
-}) => CameraImagePlane(
-  bytes: Uint8List.fromList(bytes),
-  bytesPerPixel: bytesPerPixel,
-  bytesPerRow: bytesPerRow,
-);
+CameraImagePlane _plane(List<int> bytes, {required int bytesPerRow, required int bytesPerPixel}) =>
+    CameraImagePlane(
+      bytes: Uint8List.fromList(bytes),
+      bytesPerPixel: bytesPerPixel,
+      bytesPerRow: bytesPerRow,
+    );

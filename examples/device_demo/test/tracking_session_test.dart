@@ -6,19 +6,15 @@ import 'package:mp_core/mp_core.dart';
 import 'package:mp_device_demo/playground/tracking_session.dart';
 
 void main() {
-  test(
-    'camera cleanup errors are visible and a subsequent retry can recover',
-    () async {
-      final TrackingSession session = TrackingSession()
-        ..camera = _FailingCamera();
-      await session.configure(enabled: false, faceMode: false);
-      expect(session.status, contains('Resource cleanup failed'));
-      expect(session.loading, isFalse);
-      await session.configure(enabled: false, faceMode: false);
-      expect(session.status, 'Camera off · animated demo');
-      session.dispose();
-    },
-  );
+  test('camera cleanup errors are visible and a subsequent retry can recover', () async {
+    final TrackingSession session = TrackingSession()..camera = _FailingCamera();
+    await session.configure(enabled: false, faceMode: false);
+    expect(session.status, contains('Resource cleanup failed'));
+    expect(session.loading, isFalse);
+    await session.configure(enabled: false, faceMode: false);
+    expect(session.status, 'Camera off · animated demo');
+    session.dispose();
+  });
   test('upright frames rotate dimensions and pixel positions together', () {
     final MpImageUint8 image = MpImageUint8(
       width: 2,
@@ -35,23 +31,14 @@ void main() {
     expect(() => uprightImage(image, 45), throwsArgumentError);
   });
 
-  test(
-    'disposal while a mode change is queued never notifies a dead view',
-    () async {
-      final TrackingSession session = TrackingSession();
-      final Future<void> first = session.configure(
-        enabled: false,
-        faceMode: true,
-      );
-      final Future<void> second = session.configure(
-        enabled: false,
-        faceMode: false,
-      );
-      session.dispose();
-      await first;
-      await second;
-    },
-  );
+  test('disposal while a mode change is queued never notifies a dead view', () async {
+    final TrackingSession session = TrackingSession();
+    final Future<void> first = session.configure(enabled: false, faceMode: true);
+    final Future<void> second = session.configure(enabled: false, faceMode: false);
+    session.dispose();
+    await first;
+    await second;
+  });
 }
 
 class _FailingCamera extends CameraController {

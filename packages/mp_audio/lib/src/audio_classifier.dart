@@ -29,9 +29,7 @@ final class AudioClassifierOptions {
 final class AudioClassifierResult {
   /// Creates an immutable audio classifier result.
   AudioClassifierResult(Iterable<ClassificationResult> classifications)
-    : classifications = List<ClassificationResult>.unmodifiable(
-        classifications,
-      );
+    : classifications = List<ClassificationResult>.unmodifiable(classifications);
 
   /// Classification results for each window in chronological order.
   final List<ClassificationResult> classifications;
@@ -40,14 +38,10 @@ final class AudioClassifierResult {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AudioClassifierResult &&
-          const ListEquality<ClassificationResult>().equals(
-            classifications,
-            other.classifications,
-          );
+          const ListEquality<ClassificationResult>().equals(classifications, other.classifications);
 
   @override
-  int get hashCode =>
-      const ListEquality<ClassificationResult>().hash(classifications);
+  int get hashCode => const ListEquality<ClassificationResult>().hash(classifications);
 }
 
 /// Platform implementation used by [AudioClassifier].
@@ -92,7 +86,6 @@ final class AudioClassifier implements MpTask {
   /// dropped rather than retained.
   Stream<AudioClassifierResult> get results {
     _lifecycle.ensureOpen();
-
     return _backend.results;
   }
 
@@ -100,7 +93,6 @@ final class AudioClassifier implements MpTask {
   Future<AudioClassifierResult> classify(AudioData audio) {
     _lifecycle.ensureOpen();
     _requireMode(AudioRunningMode.audioClips, 'classify');
-
     return _backend.classify(audio);
   }
 
@@ -109,7 +101,6 @@ final class AudioClassifier implements MpTask {
     _lifecycle.ensureOpen();
     _requireMode(AudioRunningMode.audioStream, 'classifyAsync');
     _timestamps.add(timestampMs);
-
     return _backend.classifyAsync(audio, timestampMs);
   }
 

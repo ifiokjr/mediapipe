@@ -21,14 +21,10 @@ void main() {
   setUp(() {
     calls.clear();
     materializedModelPath = null;
-    messenger.setMockMethodCallHandler(
-      _events,
-      (MethodCall call) async => null,
-    );
+    messenger.setMockMethodCallHandler(_events, (MethodCall call) async => null);
     messenger.setMockMethodCallHandler(_methods, (MethodCall call) async {
       calls.add(call);
-      final Map<Object?, Object?> arguments =
-          call.arguments! as Map<Object?, Object?>;
+      final Map<Object?, Object?> arguments = call.arguments! as Map<Object?, Object?>;
       switch (call.method) {
         case 'llm.create':
           materializedModelPath = arguments['modelPath']! as String;
@@ -114,7 +110,6 @@ void main() {
         case 'rag.close':
           return null;
       }
-
       throw PlatformException(code: 'unimplemented', message: call.method);
     });
   });
@@ -124,70 +119,55 @@ void main() {
     messenger.setMockMethodCallHandler(_events, null);
   });
 
-  test(
-    'LLM bridge materializes bytes, streams chunks, and releases the model',
-    () async {
-      final LlmInference inference = await LlmInference.create(
-        LlmInferenceOptions(
-          baseOptions: BaseOptions(
-            modelAsset: ModelAsset.bytes(
-              Uint8List.fromList(<int>[1, 2, 3]),
-              name: '../model.task',
-            ),
-          ),
-          maxTokens: 256,
-          maxTopK: 16,
-          supportedLoraRanks: const <int>[4, 8],
-          preferredBackend: LlmBackend.gpu,
+  test('LLM bridge materializes bytes, streams chunks, and releases the model', () async {
+    final LlmInference inference = await LlmInference.create(
+      LlmInferenceOptions(
+        baseOptions: BaseOptions(
+          modelAsset: ModelAsset.bytes(Uint8List.fromList(<int>[1, 2, 3]), name: '../model.task'),
         ),
-        runtime: const MobileGenAiRuntime(),
-      );
-      final LlmSession session = await inference.createSession(
-        options: LlmSessionOptions(topK: 8, temperature: 0.5),
-      );
-      await session.addQueryChunk('Describe the frame.');
+        maxTokens: 256,
+        maxTopK: 16,
+        supportedLoraRanks: const <int>[4, 8],
+        preferredBackend: LlmBackend.gpu,
+      ),
+      runtime: const MobileGenAiRuntime(),
+    );
+    final LlmSession session = await inference.createSession(
+      options: LlmSessionOptions(topK: 8, temperature: 0.5),
+    );
+    await session.addQueryChunk('Describe the frame.');
 
-      final LlmGeneration generation = await session.generate();
-      final List<LlmGenerationChunk> chunks = await generation.chunks.toList();
+    final LlmGeneration generation = await session.generate();
+    final List<LlmGenerationChunk> chunks = await generation.chunks.toList();
 
-      expect(chunks.map((LlmGenerationChunk chunk) => chunk.text), <String>[
-        'local ',
-        'response',
-      ]);
-      expect(await generation.response, 'local response');
-      await session.close();
-      await inference.close();
+    expect(chunks.map((LlmGenerationChunk chunk) => chunk.text), <String>['local ', 'response']);
+    expect(await generation.response, 'local response');
+    await session.close();
+    await inference.close();
 
-      final Map<Object?, Object?> createArguments = _argumentsFor(
-        calls,
+    final Map<Object?, Object?> createArguments = _argumentsFor(calls, 'llm.create');
+    expect(createArguments['maxTokens'], 256);
+    expect(createArguments['supportedLoraRanks'], <int>[4, 8]);
+    expect(createArguments['preferredBackend'], 'gpu');
+    expect(File(materializedModelPath!).existsSync(), isFalse);
+    expect(
+      calls.map((MethodCall call) => call.method),
+      containsAllInOrder(<String>[
         'llm.create',
-      );
-      expect(createArguments['maxTokens'], 256);
-      expect(createArguments['supportedLoraRanks'], <int>[4, 8]);
-      expect(createArguments['preferredBackend'], 'gpu');
-      expect(File(materializedModelPath!).existsSync(), isFalse);
-      expect(
-        calls.map((MethodCall call) => call.method),
-        containsAllInOrder(<String>[
-          'llm.create',
-          'llm.createSession',
-          'llm.addQuery',
-          'llm.generate',
-          'llm.closeSession',
-          'llm.close',
-        ]),
-      );
-    },
-  );
+        'llm.createSession',
+        'llm.addQuery',
+        'llm.generate',
+        'llm.closeSession',
+        'llm.close',
+      ]),
+    );
+  });
 
   test('a rejected image input does not strand the session as busy', () async {
     final LlmInference inference = await LlmInference.create(
       LlmInferenceOptions(
         baseOptions: BaseOptions(
-          modelAsset: ModelAsset.bytes(
-            Uint8List.fromList(<int>[1, 2, 3]),
-            name: 'model.task',
-          ),
+          modelAsset: ModelAsset.bytes(Uint8List.fromList(<int>[1, 2, 3]), name: 'model.task'),
         ),
       ),
       runtime: const MobileGenAiRuntime(),
@@ -199,12 +179,7 @@ void main() {
     // operation, which must still release the session for later use.
     await expectLater(
       session.addImage(
-        MpImage.float32(
-          width: 2,
-          height: 2,
-          format: MpImageFormat.float32x1,
-          data: Float32List(4),
-        ),
+        MpImage.float32(width: 2, height: 2, format: MpImageFormat.float32x1, data: Float32List(4)),
       ),
       throwsA(isA<MpException>()),
     );
@@ -242,36 +217,26 @@ void main() {
       runtime: const MobileGenAiRuntime(),
     );
 
-    final GenerateContentResponse response = await generativeModel
-        .generateContent(<GenAiContent>[
-          GenAiContent.text(role: 'user', text: 'Check this action.'),
-        ]);
+    final GenerateContentResponse response = await generativeModel.generateContent(<GenAiContent>[
+      GenAiContent.text(role: 'user', text: 'Check this action.'),
+    ]);
     await generativeModel.close();
 
     final GenAiFunctionCallPart part =
-        response.candidates.single.content.parts.single
-            as GenAiFunctionCallPart;
+        response.candidates.single.content.parts.single as GenAiFunctionCallPart;
     expect(part.call.name, 'verify_action');
     expect(part.call.arguments['confidence'], 0.8);
     expect(part.call.arguments['labels'], <Object?>['person', 'door']);
-    final Map<Object?, Object?> createArguments = _argumentsFor(
-      calls,
-      'functionCalling.create',
-    );
+    final Map<Object?, Object?> createArguments = _argumentsFor(calls, 'functionCalling.create');
     expect(createArguments['formatter'], 'hammer');
     final List<Object?> tools = createArguments['tools']! as List<Object?>;
     final Map<Object?, Object?> tool = tools.single as Map<Object?, Object?>;
     final List<Object?> declarations = tool['declarations']! as List<Object?>;
-    expect(
-      (declarations.single as Map<Object?, Object?>)['name'],
-      'verify_action',
-    );
+    expect((declarations.single as Map<Object?, Object?>)['name'], 'verify_action');
   });
 
   test('image bridge converts generated pixels and timestamps', () async {
-    final Directory modelDirectory = Directory.systemTemp.createTempSync(
-      'mp_genai_image_',
-    );
+    final Directory modelDirectory = Directory.systemTemp.createTempSync('mp_genai_image_');
     addTearDown(() => modelDirectory.deleteSync(recursive: true));
     final ImageGenerator generator = await ImageGenerator.create(
       ImageGeneratorOptions(modelDirectory: modelDirectory.path),
@@ -288,25 +253,17 @@ void main() {
     expect(result.generatedImage, isA<MpImageUint8>());
     expect((result.generatedImage as MpImageUint8).data, <int>[1, 2, 3, 255]);
     expect(result.timestamp, const Duration(milliseconds: 17));
-    final Map<Object?, Object?> arguments = _argumentsFor(
-      calls,
-      'imageGenerator.generate',
-    );
+    final Map<Object?, Object?> arguments = _argumentsFor(calls, 'imageGenerator.generate');
     expect(arguments['iterations'], 2);
     expect(arguments['seed'], 7);
   });
 
   test('RAG bridge maps records, retrieval options, and entities', () async {
     final File llmModel = _temporaryFile('mp_genai_rag_llm_', 'model.task');
-    final File embeddingModel = _temporaryFile(
-      'mp_genai_rag_embedding_',
-      'embed.tflite',
-    );
+    final File embeddingModel = _temporaryFile('mp_genai_rag_embedding_', 'embed.tflite');
     final RagPipeline pipeline = await RagPipeline.create(
       RagPipelineOptions(
-        embeddingModel: GeckoEmbeddingModelOptions(
-          model: ModelAsset.path(embeddingModel.path),
-        ),
+        embeddingModel: GeckoEmbeddingModelOptions(model: ModelAsset.path(embeddingModel.path)),
         vectorStore: const InMemoryVectorStoreOptions(),
         inferenceOptions: _inferenceOptions(llmModel),
         promptTemplate: 'Context: {0}\nQuery: {1}',
@@ -316,10 +273,7 @@ void main() {
 
     expect(
       await pipeline.record(
-        RagDocument(
-          text: 'Recorded evidence',
-          metadata: <String, Object?>{'frame': 42},
-        ),
+        RagDocument(text: 'Recorded evidence', metadata: <String, Object?>{'frame': 42}),
       ),
       isTrue,
     );
@@ -336,36 +290,27 @@ void main() {
     expect(results.single.text, 'Recorded evidence');
     expect(results.single.embedding, <double>[0.25, 0.75]);
     expect(results.single.metadata['frame'], 42);
-    final Map<Object?, Object?> retrieveArguments = _argumentsFor(
-      calls,
-      'rag.retrieve',
-    );
+    final Map<Object?, Object?> retrieveArguments = _argumentsFor(calls, 'rag.retrieve');
     expect(retrieveArguments['topK'], 3);
     expect(retrieveArguments['minSimilarityScore'], 0.4);
     expect(retrieveArguments['task'], 'factVerification');
   });
 }
 
-LlmInferenceOptions _inferenceOptions(File model) => LlmInferenceOptions(
-  baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path)),
-);
+LlmInferenceOptions _inferenceOptions(File model) =>
+    LlmInferenceOptions(baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path)));
 
 File _temporaryFile(String prefix, String name) {
   final Directory directory = Directory.systemTemp.createTempSync(prefix);
   addTearDown(() => directory.deleteSync(recursive: true));
-
-  return File('${directory.path}${Platform.pathSeparator}$name')
-    ..writeAsBytesSync(<int>[1]);
+  return File('${directory.path}${Platform.pathSeparator}$name')..writeAsBytesSync(<int>[1]);
 }
 
 Map<Object?, Object?> _argumentsFor(List<MethodCall> calls, String method) =>
     calls.singleWhere((MethodCall call) => call.method == method).arguments!
         as Map<Object?, Object?>;
 
-Future<void> _sendEvent(
-  TestDefaultBinaryMessenger messenger,
-  Map<String, Object?> event,
-) async {
+Future<void> _sendEvent(TestDefaultBinaryMessenger messenger, Map<String, Object?> event) async {
   await messenger.handlePlatformMessage(
     _events.name,
     const StandardMethodCodec().encodeSuccessEnvelope(event),

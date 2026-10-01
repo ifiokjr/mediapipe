@@ -34,12 +34,8 @@ enum LiteRtAccelerator {
 @immutable
 final class LiteRtOptions {
   /// Creates LiteRT options.
-  LiteRtOptions({
-    this.accelerator = LiteRtAccelerator.cpu,
-    this.npuDispatchLibraryDirectory,
-  }) {
-    if (accelerator != LiteRtAccelerator.npu &&
-        npuDispatchLibraryDirectory != null) {
+  LiteRtOptions({this.accelerator = LiteRtAccelerator.cpu, this.npuDispatchLibraryDirectory}) {
+    if (accelerator != LiteRtAccelerator.npu && npuDispatchLibraryDirectory != null) {
       throw ArgumentError.value(
         npuDispatchLibraryDirectory,
         'npuDispatchLibraryDirectory',
@@ -105,9 +101,7 @@ final class ModelAssetPath extends ModelAsset {
 @immutable
 final class ModelAssetBytes extends ModelAsset {
   /// Creates an immutable copy of [bytes].
-  ModelAssetBytes(Uint8List bytes, {this.name})
-    : bytes = Uint8List.fromList(bytes),
-      super._() {
+  ModelAssetBytes(Uint8List bytes, {this.name}) : bytes = Uint8List.fromList(bytes), super._() {
     if (bytes.isEmpty) {
       throw ArgumentError.value(bytes, 'bytes', 'must not be empty');
     }
@@ -138,13 +132,8 @@ final class ModelAssetUri extends ModelAsset {
     if (!uri.hasScheme) {
       throw ArgumentError.value(uri, 'uri', 'must be absolute');
     }
-
     if (sha256 != null && !RegExp(r'^[a-f0-9]{64}$').hasMatch(sha256!)) {
-      throw ArgumentError.value(
-        sha256,
-        'sha256',
-        'must be a lowercase SHA-256 digest',
-      );
+      throw ArgumentError.value(sha256, 'sha256', 'must be a lowercase SHA-256 digest');
     }
   }
 
@@ -167,17 +156,9 @@ final class ModelAssetUri extends ModelAsset {
 @immutable
 final class BaseOptions {
   /// Creates common task options.
-  BaseOptions({
-    required this.modelAsset,
-    this.delegate = MpDelegate.cpu,
-    this.liteRtOptions,
-  }) {
+  BaseOptions({required this.modelAsset, this.delegate = MpDelegate.cpu, this.liteRtOptions}) {
     if (delegate != MpDelegate.liteRt && liteRtOptions != null) {
-      throw ArgumentError.value(
-        liteRtOptions,
-        'liteRtOptions',
-        'requires MpDelegate.liteRt',
-      );
+      throw ArgumentError.value(liteRtOptions, 'liteRtOptions', 'requires MpDelegate.liteRt');
     }
   }
 
@@ -215,26 +196,13 @@ final class ClassifierOptions {
   }) : categoryAllowlist = List<String>.unmodifiable(categoryAllowlist),
        categoryDenylist = List<String>.unmodifiable(categoryDenylist) {
     if (maxResults != null && maxResults! <= 0) {
-      throw ArgumentError.value(
-        maxResults,
-        'maxResults',
-        'must be greater than zero',
-      );
+      throw ArgumentError.value(maxResults, 'maxResults', 'must be greater than zero');
     }
-
-    if (scoreThreshold != null &&
-        (scoreThreshold! < 0 || scoreThreshold! > 1)) {
-      throw ArgumentError.value(
-        scoreThreshold,
-        'scoreThreshold',
-        'must be between 0 and 1',
-      );
+    if (scoreThreshold != null && (scoreThreshold! < 0 || scoreThreshold! > 1)) {
+      throw ArgumentError.value(scoreThreshold, 'scoreThreshold', 'must be between 0 and 1');
     }
-
     if (this.categoryAllowlist.isNotEmpty && this.categoryDenylist.isNotEmpty) {
-      throw ArgumentError(
-        'categoryAllowlist and categoryDenylist are mutually exclusive.',
-      );
+      throw ArgumentError('categoryAllowlist and categoryDenylist are mutually exclusive.');
     }
   }
 
@@ -260,14 +228,8 @@ final class ClassifierOptions {
           displayNamesLocale == other.displayNamesLocale &&
           maxResults == other.maxResults &&
           scoreThreshold == other.scoreThreshold &&
-          const ListEquality<String>().equals(
-            categoryAllowlist,
-            other.categoryAllowlist,
-          ) &&
-          const ListEquality<String>().equals(
-            categoryDenylist,
-            other.categoryDenylist,
-          );
+          const ListEquality<String>().equals(categoryAllowlist, other.categoryAllowlist) &&
+          const ListEquality<String>().equals(categoryDenylist, other.categoryDenylist);
 
   @override
   int get hashCode => Object.hash(
@@ -294,9 +256,7 @@ final class EmbedderOptions {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is EmbedderOptions &&
-          l2Normalize == other.l2Normalize &&
-          quantize == other.quantize;
+      other is EmbedderOptions && l2Normalize == other.l2Normalize && quantize == other.quantize;
 
   @override
   int get hashCode => Object.hash(l2Normalize, quantize);

@@ -63,11 +63,7 @@ enum MpImageStorage {
 /// An immutable, tightly packed image passed to a vision task.
 @immutable
 sealed class MpImage {
-  const MpImage._({
-    required this.width,
-    required this.height,
-    required this.format,
-  });
+  const MpImage._({required this.width, required this.height, required this.format});
 
   /// Creates an image backed by 8-bit [data].
   factory MpImage.uint8({
@@ -118,28 +114,14 @@ sealed class MpImage {
     required MpImageStorage storage,
     required int sampleCount,
   }) {
-    if (width <= 0)
-      throw ArgumentError.value(width, 'width', 'must be greater than zero');
-
-    if (height <= 0)
-      throw ArgumentError.value(height, 'height', 'must be greater than zero');
-
+    if (width <= 0) throw ArgumentError.value(width, 'width', 'must be greater than zero');
+    if (height <= 0) throw ArgumentError.value(height, 'height', 'must be greater than zero');
     if (format.storage != storage) {
-      throw ArgumentError.value(
-        format,
-        'format',
-        'requires ${format.storage.name} storage',
-      );
+      throw ArgumentError.value(format, 'format', 'requires ${format.storage.name} storage');
     }
-
     final int expected = width * height * format.channels;
-
     if (sampleCount != expected) {
-      throw ArgumentError.value(
-        sampleCount,
-        'data.length',
-        'must equal $expected',
-      );
+      throw ArgumentError.value(sampleCount, 'data.length', 'must equal $expected');
     }
   }
 }
@@ -180,8 +162,7 @@ final class MpImageUint8 extends MpImage {
           const ListEquality<int>().equals(data, other.data);
 
   @override
-  int get hashCode =>
-      Object.hash(width, height, format, const ListEquality<int>().hash(data));
+  int get hashCode => Object.hash(width, height, format, const ListEquality<int>().hash(data));
 }
 
 /// An image backed by unsigned 16-bit samples.
@@ -220,8 +201,7 @@ final class MpImageUint16 extends MpImage {
           const ListEquality<int>().equals(data, other.data);
 
   @override
-  int get hashCode =>
-      Object.hash(width, height, format, const ListEquality<int>().hash(data));
+  int get hashCode => Object.hash(width, height, format, const ListEquality<int>().hash(data));
 }
 
 /// An image backed by 32-bit floating-point samples.
@@ -260,12 +240,7 @@ final class MpImageFloat32 extends MpImage {
           const ListEquality<double>().equals(data, other.data);
 
   @override
-  int get hashCode => Object.hash(
-    width,
-    height,
-    format,
-    const ListEquality<double>().hash(data),
-  );
+  int get hashCode => Object.hash(width, height, format, const ListEquality<double>().hash(data));
 }
 
 /// Input transforms applied before a vision task runs.
@@ -274,11 +249,7 @@ final class ImageProcessingOptions {
   /// Creates image-processing options.
   ImageProcessingOptions({this.regionOfInterest, this.rotationDegrees = 0}) {
     if (rotationDegrees % 90 != 0) {
-      throw ArgumentError.value(
-        rotationDegrees,
-        'rotationDegrees',
-        'must be a multiple of 90',
-      );
+      throw ArgumentError.value(rotationDegrees, 'rotationDegrees', 'must be a multiple of 90');
     }
   }
 
@@ -316,19 +287,11 @@ final class NormalizedRect {
       'bottom': bottom,
     }.entries) {
       if (entry.value < 0 || entry.value > 1) {
-        throw ArgumentError.value(
-          entry.value,
-          entry.key,
-          'must be between 0 and 1',
-        );
+        throw ArgumentError.value(entry.value, entry.key, 'must be between 0 and 1');
       }
     }
-
-    if (left >= right)
-      throw ArgumentError.value(left, 'left', 'must be less than right');
-
-    if (top >= bottom)
-      throw ArgumentError.value(top, 'top', 'must be less than bottom');
+    if (left >= right) throw ArgumentError.value(left, 'left', 'must be less than right');
+    if (top >= bottom) throw ArgumentError.value(top, 'top', 'must be less than bottom');
   }
 
   /// Left edge in the range 0–1.

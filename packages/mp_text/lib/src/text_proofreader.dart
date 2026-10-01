@@ -16,13 +16,8 @@ final class TextProofreaderOptions {
         'TextProofreader supports only the CPU delegate',
       );
     }
-
     if (maxTokens case final int value when value <= 0) {
-      throw ArgumentError.value(
-        value,
-        'maxTokens',
-        'must be greater than zero',
-      );
+      throw ArgumentError.value(value, 'maxTokens', 'must be greater than zero');
     }
   }
 
@@ -61,8 +56,7 @@ final class TextCorrection {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TextCorrection && type == other.type && text == other.text;
+      identical(this, other) || other is TextCorrection && type == other.type && text == other.text;
 
   @override
   int get hashCode => Object.hash(type, text);
@@ -72,10 +66,8 @@ final class TextCorrection {
 @immutable
 final class TextProofreaderResult {
   /// Creates an immutable proofreading result.
-  TextProofreaderResult({
-    required this.text,
-    Iterable<TextCorrection> corrections = const [],
-  }) : corrections = List<TextCorrection>.unmodifiable(corrections);
+  TextProofreaderResult({required this.text, Iterable<TextCorrection> corrections = const []})
+    : corrections = List<TextCorrection>.unmodifiable(corrections);
 
   /// Corrected text with all insertions and deletions applied.
   final String text;
@@ -88,14 +80,10 @@ final class TextProofreaderResult {
       identical(this, other) ||
       other is TextProofreaderResult &&
           text == other.text &&
-          const ListEquality<TextCorrection>().equals(
-            corrections,
-            other.corrections,
-          );
+          const ListEquality<TextCorrection>().equals(corrections, other.corrections);
 
   @override
-  int get hashCode =>
-      Object.hash(text, const ListEquality<TextCorrection>().hash(corrections));
+  int get hashCode => Object.hash(text, const ListEquality<TextCorrection>().hash(corrections));
 }
 
 /// One incremental update from [TextProofreader.proofreadStreaming].
@@ -138,9 +126,8 @@ final class TextProofreader implements MpTask {
   static Future<TextProofreader> create(
     TextProofreaderOptions options, {
     TextRuntime? runtime,
-  }) async => TextProofreader._(
-    await (runtime ?? defaultTextRuntime).createTextProofreader(options),
-  );
+  }) async =>
+      TextProofreader._(await (runtime ?? defaultTextRuntime).createTextProofreader(options));
 
   @override
   bool get isClosed => _lifecycle.isClosed;
@@ -148,14 +135,12 @@ final class TextProofreader implements MpTask {
   /// Corrects [text] and waits for the complete result.
   Future<TextProofreaderResult> proofread(String text) {
     _lifecycle.ensureOpen();
-
     return _backend.proofread(text);
   }
 
   /// Corrects [text] and emits incremental output.
   Stream<TextProofreaderChunk> proofreadStreaming(String text) {
     _lifecycle.ensureOpen();
-
     return _backend.proofreadStreaming(text);
   }
 

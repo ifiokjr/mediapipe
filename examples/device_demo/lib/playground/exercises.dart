@@ -113,13 +113,8 @@ enum Exercise {
 
 /// Normalized movement depth; null means the required joints are not visible.
 /// Aspect compensation prevents portrait images distorting joint angles.
-double? movementDepth(
-  Exercise exercise,
-  List<NormalizedLandmark> pose,
-  double aspectRatio,
-) {
-  if (pose.length < 33 || !aspectRatio.isFinite || aspectRatio <= 0)
-    return null;
+double? movementDepth(Exercise exercise, List<NormalizedLandmark> pose, double aspectRatio) {
+  if (pose.length < 33 || !aspectRatio.isFinite || aspectRatio <= 0) return null;
 
   for (final int index in exercise.joints) {
     final NormalizedLandmark p = pose[index];
@@ -145,51 +140,34 @@ double? movementDepth(
 
     if (length < .00001) return double.nan;
 
-    return math.acos(((ax * cx + ay * cy) / length).clamp(-1.0, 1.0)) *
-        180 /
-        math.pi;
+    return math.acos(((ax * cx + ay * cy) / length).clamp(-1.0, 1.0)) * 180 / math.pi;
   }
 
   final double knees = (angle(23, 25, 27) + angle(24, 26, 28)) / 2;
   final double elbows = (angle(11, 13, 15) + angle(12, 14, 16)) / 2;
-  final double torso =
-      ((pose[11].y + pose[12].y) - (pose[23].y + pose[24].y)).abs() / 2;
-  final double torsoX =
-      ((pose[11].x + pose[12].x - pose[23].x - pose[24].x) * aspectRatio / 2)
-          .abs();
+  final double torso = ((pose[11].y + pose[12].y) - (pose[23].y + pose[24].y)).abs() / 2;
+  final double torsoX = ((pose[11].x + pose[12].x - pose[23].x - pose[24].x) * aspectRatio / 2)
+      .abs();
 
   if (exercise == Exercise.pressUps && torso > torsoX * .6) return null;
-
   if (exercise == Exercise.curls && torso < torsoX) return null;
-
   final double depth = switch (exercise) {
     Exercise.squats => (170 - knees) / 75,
-    Exercise.lunges =>
-      (165 - math.min(angle(23, 25, 27), angle(24, 26, 28))) / 70,
+    Exercise.lunges => (165 - math.min(angle(23, 25, 27), angle(24, 26, 28))) / 70,
     Exercise.pressUps => (170 - elbows) / 80,
     Exercise.curls => (165 - elbows) / 110,
     Exercise.burpees => (170 - knees) / 75,
-    Exercise.lateralRaises =>
-      ((angle(23, 11, 13) + angle(24, 12, 14)) / 2 - 15) / 70,
-    Exercise.highKnees =>
-      (170 - math.min(angle(11, 23, 25), angle(12, 24, 26))) / 85,
+    Exercise.lateralRaises => ((angle(23, 11, 13) + angle(24, 12, 14)) / 2 - 15) / 70,
+    Exercise.highKnees => (170 - math.min(angle(11, 23, 25), angle(12, 24, 26))) / 85,
     Exercise.sitUps => (115 - (angle(11, 23, 25) + angle(12, 24, 26)) / 2) / 45,
     Exercise.sideBends =>
-      (((pose[11].x + pose[12].x - pose[23].x - pose[24].x) / 2 * aspectRatio)
-                      .abs() /
+      (((pose[11].x + pose[12].x - pose[23].x - pose[24].x) / 2 * aspectRatio).abs() /
                   math.max(torso, .01) -
               .08) /
           .4,
     Exercise.starJumps => math.min(
-      ((pose[11].y + pose[12].y - pose[15].y - pose[16].y) /
-                  2 /
-                  math.max(torso, .01) +
-              .4) /
-          .9,
-      ((pose[27].x - pose[28].x).abs() /
-                  math.max((pose[11].x - pose[12].x).abs(), .01) -
-              1) /
-          .9,
+      ((pose[11].y + pose[12].y - pose[15].y - pose[16].y) / 2 / math.max(torso, .01) + .4) / .9,
+      ((pose[27].x - pose[28].x).abs() / math.max((pose[11].x - pose[12].x).abs(), .01) - 1) / .9,
     ),
   };
 
@@ -243,11 +221,8 @@ final class RepCounter {
     if (previous != null && timestampMs <= previous) return;
     _lastTimestamp = timestampMs;
 
-    if (value == null ||
-        !value.isFinite ||
-        (previous != null && timestampMs - previous > 700)) {
+    if (value == null || !value.isFinite || (previous != null && timestampMs - previous > 700)) {
       _loseTracking();
-
       return;
     }
 
@@ -354,8 +329,7 @@ final class BurpeeCounter {
   /// Advances only in sequence, with a minimum interval between transitions.
   void update(List<NormalizedLandmark> pose, double aspect, int timestamp) {
     if (_lastTimestamp != null && timestamp <= _lastTimestamp!) return;
-    final bool gap =
-        _lastTimestamp != null && timestamp - _lastTimestamp! > 700;
+    final bool gap = _lastTimestamp != null && timestamp - _lastTimestamp! > 700;
     _lastTimestamp = timestamp;
     final double? bend = movementDepth(Exercise.burpees, pose, aspect);
     tracking = bend != null && !gap;
@@ -364,24 +338,19 @@ final class BurpeeCounter {
       stage = BurpeeStage.ready;
       _floor = null;
       _stageSince = null;
-
       return;
     }
 
     final double shoulderY = (pose[11].y + pose[12].y) / 2;
     final double hipY = (pose[23].y + pose[24].y) / 2;
     final double ankleY = (pose[27].y + pose[28].y) / 2;
-    final double torsoX =
-        ((pose[11].x + pose[12].x - pose[23].x - pose[24].x) * aspect / 2)
-            .abs();
+    final double torsoX = ((pose[11].x + pose[12].x - pose[23].x - pose[24].x) * aspect / 2).abs();
     final bool upright = hipY - shoulderY > torsoX;
     final bool standing = upright && bend! < .2;
     final bool crouched = bend! > .8;
-    final bool plank =
-        !upright && (shoulderY - hipY).abs() < torsoX * .6 && bend < .25;
+    final bool plank = !upright && (shoulderY - hipY).abs() < torsoX * .6 && bend < .25;
 
     if (_stageSince != null && timestamp - _stageSince! < 100) return;
-
     final bool advance = switch (stage) {
       BurpeeStage.ready => standing,
       BurpeeStage.crouch || BurpeeStage.returnCrouch => crouched,

@@ -68,24 +68,17 @@ class _MotionPlaygroundAppState extends State<MotionPlaygroundApp> {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(48, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(48, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
     ),
-    home: _Playground(
-      onTheme: () => setState(() => _dark = !_dark),
-      dark: _dark,
-    ),
+    home: _Playground(onTheme: () => setState(() => _dark = !_dark), dark: _dark),
   );
 }
 
@@ -120,10 +113,7 @@ class _PlaygroundState extends State<_Playground>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _animation = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    );
+    _animation = AnimationController(vsync: this, duration: const Duration(seconds: 5));
     unawaited(_animation.repeat());
     _session.addListener(_onTracking);
   }
@@ -157,20 +147,13 @@ class _PlaygroundState extends State<_Playground>
       _burpees.interrupt();
     }
 
-    if (_live &&
-        !_paused &&
-        !_faceMode &&
-        _session.timestampMs != _lastTimestamp) {
+    if (_live && !_paused && !_faceMode && _session.timestampMs != _lastTimestamp) {
       _lastTimestamp = _session.timestampMs;
       _counter.update(
         movementDepth(_exercise, _session.pose, _session.aspectRatio),
         _session.timestampMs,
       );
-      _burpees.update(
-        _session.pose,
-        _session.aspectRatio,
-        _session.timestampMs,
-      );
+      _burpees.update(_session.pose, _session.aspectRatio, _session.timestampMs);
     }
 
     setState(() {});
@@ -184,13 +167,10 @@ class _PlaygroundState extends State<_Playground>
 
   void _configure() {
     _reset();
-    unawaited(
-      _session.configure(enabled: _live, faceMode: _faceMode, front: _front),
-    );
+    unawaited(_session.configure(enabled: _live, faceMode: _faceMode, front: _front));
   }
 
-  int get _reps =>
-      _exercise == Exercise.burpees ? _burpees.reps : _counter.reps;
+  int get _reps => _exercise == Exercise.burpees ? _burpees.reps : _counter.reps;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -214,9 +194,7 @@ class _PlaygroundState extends State<_Playground>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          _faceMode
-                              ? 'A little more character.'
-                              : 'Good moves. Great bones.',
+                          _faceMode ? 'A little more character.' : 'Good moves. Great bones.',
                           style: Theme.of(context).textTheme.headlineLarge,
                         ),
                         const SizedBox(height: 8),
@@ -259,11 +237,7 @@ class _PlaygroundState extends State<_Playground>
 
                     if (constraints.maxWidth < 900) {
                       return Column(
-                        children: <Widget>[
-                          stage,
-                          const SizedBox(height: 20),
-                          controls,
-                        ],
+                        children: <Widget>[stage, const SizedBox(height: 20), controls],
                       );
                     }
 
@@ -295,34 +269,25 @@ class _PlaygroundState extends State<_Playground>
       Container(
         width: 46,
         height: 46,
-        decoration: BoxDecoration(
-          color: _green,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(color: _green, borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.bubble_chart_rounded, color: _lime, size: 30),
       ),
       const SizedBox(width: 10),
       Text('move!', style: Theme.of(context).textTheme.headlineMedium),
       const Spacer(),
       if (MediaQuery.sizeOf(context).width >= 600)
-        Text(
-          'THE MOTION PLAYGROUND',
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
+        Text('THE MOTION PLAYGROUND', style: Theme.of(context).textTheme.labelSmall),
       IconButton(
         onPressed: widget.onTheme,
         tooltip: widget.dark ? 'Use light theme' : 'Use dark theme',
-        icon: Icon(
-          widget.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-        ),
+        icon: Icon(widget.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
       ),
     ],
   );
 
   Widget _stage(BuildContext context) {
     final CameraController? camera = _session.camera;
-    final bool previewReady =
-        _live && camera != null && camera.value.isInitialized;
+    final bool previewReady = _live && camera != null && camera.value.isInitialized;
     final double aspect = previewReady ? _session.aspectRatio : 3 / 4;
     final bool burpees = _exercise == Exercise.burpees;
     final String feedback = !_live
@@ -354,13 +319,11 @@ class _PlaygroundState extends State<_Playground>
                         fit: StackFit.expand,
                         children: <Widget>[
                           if (previewReady) CameraPreview(camera),
-                          if (!_live && _faceMode)
-                            const CustomPaint(painter: _DemoHead()),
+                          if (!_live && _faceMode) const CustomPaint(painter: _DemoHead()),
                           AnimatedBuilder(
                             animation: _animation,
                             builder: (BuildContext context, Widget? child) {
-                              final double phase =
-                                  MediaQuery.disableAnimationsOf(context)
+                              final double phase = MediaQuery.disableAnimationsOf(context)
                                   ? .15
                                   : _animation.value;
                               final List<NormalizedLandmark> pose = _live
@@ -417,16 +380,13 @@ class _PlaygroundState extends State<_Playground>
                           color: _live ? _lime : Colors.white,
                         ),
                         _Badge(
-                          label: _faceMode
-                              ? '3D FACE PLAY'
-                              : _exercise.label.toUpperCase(),
+                          label: _faceMode ? '3D FACE PLAY' : _exercise.label.toUpperCase(),
                           color: Colors.white,
                         ),
                       ],
                     ),
                   ),
-                  if (_session.loading)
-                    const Center(child: CircularProgressIndicator()),
+                  if (_session.loading) const Center(child: CircularProgressIndicator()),
                   Positioned(
                     bottom: 22,
                     left: 20,
@@ -442,10 +402,7 @@ class _PlaygroundState extends State<_Playground>
         if (!_faceMode) ...<Widget>[
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            decoration: BoxDecoration(
-              color: _green,
-              borderRadius: BorderRadius.circular(22),
-            ),
+            decoration: BoxDecoration(color: _green, borderRadius: BorderRadius.circular(22)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -482,9 +439,7 @@ class _PlaygroundState extends State<_Playground>
                 setState(() => _live = !_live);
                 _configure();
               },
-              icon: Icon(
-                _live ? Icons.videocam_off_outlined : Icons.videocam_outlined,
-              ),
+              icon: Icon(_live ? Icons.videocam_off_outlined : Icons.videocam_outlined),
               label: Text(_live ? 'Use demo' : 'Start camera'),
             ),
             if (_live)
@@ -510,9 +465,7 @@ class _PlaygroundState extends State<_Playground>
                     _burpees.reps = burpeeReps;
                   });
                 },
-                icon: Icon(
-                  _paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                ),
+                icon: Icon(_paused ? Icons.play_arrow_rounded : Icons.pause_rounded),
                 label: Text(_paused ? 'Resume' : 'Pause'),
               ),
             if (!_faceMode)
@@ -522,26 +475,22 @@ class _PlaygroundState extends State<_Playground>
                 label: const Text('Reset set'),
               ),
             if (_live && !previewReady && !_session.loading)
-              OutlinedButton(
-                onPressed: _configure,
-                child: const Text('Retry camera'),
-              ),
+              OutlinedButton(onPressed: _configure, child: const Text('Retry camera')),
           ],
         ),
         const SizedBox(height: 10),
         Semantics(
           liveRegion: true,
           child: Text(
-            _live ? _session.status : 'Demo preview · switch on your camera to track real movement.',
+            _live
+                ? _session.status
+                : 'Demo preview · switch on your camera to track real movement.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
         if (_live && previewReady)
-          Text(
-            '${_session.latencyMs} ms inference',
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
+          Text('${_session.latencyMs} ms inference', style: Theme.of(context).textTheme.labelSmall),
       ],
     );
   }
@@ -575,7 +524,6 @@ class _PlaygroundState extends State<_Playground>
                     FaceAccessory.crown => 'A little main-character energy',
                     FaceAccessory.robotEars => 'Tune in to your inner robot',
                   }),
-
                   value: _accessories.contains(accessory),
                   onChanged: (bool? enabled) => setState(() {
                     _accessories = <FaceAccessory>{..._accessories};
@@ -592,31 +540,27 @@ class _PlaygroundState extends State<_Playground>
               ),
             ] else ...<Widget>[
               LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) =>
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: <Widget>[
-                        for (final Exercise exercise in Exercise.values)
-                          SizedBox(
-                            width: (constraints.maxWidth - 8) / 2,
-                            child: _ExerciseTile(
-                              exercise: exercise,
-                              selected: _exercise == exercise,
-                              onTap: () => setState(() {
-                                _exercise = exercise;
-                                _reset();
-                              }),
-                            ),
-                          ),
-                      ],
-                    ),
+                builder: (BuildContext context, BoxConstraints constraints) => Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: <Widget>[
+                    for (final Exercise exercise in Exercise.values)
+                      SizedBox(
+                        width: (constraints.maxWidth - 8) / 2,
+                        child: _ExerciseTile(
+                          exercise: exercise,
+                          selected: _exercise == exercise,
+                          onTap: () => setState(() {
+                            _exercise = exercise;
+                            _reset();
+                          }),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 18),
-              Text(
-                _exercise.cameraGuide,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
+              Text(_exercise.cameraGuide, style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 6),
               Text(_exercise.cue),
               const SizedBox(height: 12),
@@ -624,9 +568,7 @@ class _PlaygroundState extends State<_Playground>
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: _live
-                      ? (_exercise == Exercise.burpees
-                            ? _burpees.stage.index / 5
-                            : _counter.depth)
+                      ? (_exercise == Exercise.burpees ? _burpees.stage.index / 5 : _counter.depth)
                       : 0,
                   minHeight: 8,
                   backgroundColor: _green.withValues(alpha: .1),
@@ -665,10 +607,7 @@ class _PlaygroundState extends State<_Playground>
             Row(
               children: <Widget>[
                 const Expanded(
-                  child: Text(
-                    'Color pop',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
+                  child: Text('Color pop', style: TextStyle(fontWeight: FontWeight.w700)),
                 ),
                 for (final (Color color, String name) in <(Color, String)>[
                   (_orange, 'Coral'),
@@ -706,8 +645,7 @@ class _PlaygroundState extends State<_Playground>
                     value: _opacity,
                     min: .2,
                     label: '${(_opacity * 100).round()}%',
-                    onChanged: (double value) =>
-                        setState(() => _opacity = value),
+                    onChanged: (double value) => setState(() => _opacity = value),
                   ),
                 ),
                 Text('${(_opacity * 100).round()}%'),
@@ -725,10 +663,7 @@ class _PlaygroundState extends State<_Playground>
       const SizedBox(height: 18),
       Container(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: _lime,
-          borderRadius: BorderRadius.circular(22),
-        ),
+        decoration: BoxDecoration(color: _lime, borderRadius: BorderRadius.circular(22)),
         child: const Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -746,22 +681,16 @@ class _PlaygroundState extends State<_Playground>
     ],
   );
 
-  Widget _sectionTitle(BuildContext context, String number, String title) =>
-      Row(
-        children: <Widget>[
-          Text(
-            number,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-          ),
-        ],
-      );
+  Widget _sectionTitle(BuildContext context, String number, String title) => Row(
+    children: <Widget>[
+      Text(
+        number,
+        style: TextStyle(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.primary),
+      ),
+      const SizedBox(width: 10),
+      Expanded(child: Text(title, style: Theme.of(context).textTheme.titleLarge)),
+    ],
+  );
 }
 
 class _Panel extends StatelessWidget {
@@ -773,9 +702,7 @@ class _Panel extends StatelessWidget {
     color: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(26),
-      side: BorderSide(
-        color: Theme.of(context).dividerColor.withValues(alpha: .12),
-      ),
+      side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: .12)),
     ),
     child: Padding(padding: const EdgeInsets.all(22), child: child),
   );
@@ -789,10 +716,7 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: BorderRadius.circular(30),
-    ),
+    decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(30)),
     child: Text(
       label,
       textAlign: TextAlign.center,
@@ -807,11 +731,7 @@ class _Badge extends StatelessWidget {
 }
 
 class _ExerciseTile extends StatelessWidget {
-  const _ExerciseTile({
-    required this.exercise,
-    required this.selected,
-    required this.onTap,
-  });
+  const _ExerciseTile({required this.exercise, required this.selected, required this.onTap});
   final Exercise exercise;
   final bool selected;
   final VoidCallback onTap;
@@ -820,9 +740,7 @@ class _ExerciseTile extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     selected: selected,
     child: Material(
-      color: selected
-          ? _green
-          : Theme.of(context).colorScheme.surfaceContainerLow,
+      color: selected ? _green : Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -836,25 +754,19 @@ class _ExerciseTile extends StatelessWidget {
                 children: <Widget>[
                   Icon(
                     switch (exercise) {
-                      Exercise.squats || Exercise.lunges =>
-                        Icons.airline_seat_legroom_extra_rounded,
-                      Exercise.pressUps ||
-                      Exercise.curls => Icons.fitness_center_rounded,
-                      Exercise.burpees ||
-                      Exercise.starJumps => Icons.accessibility_new_rounded,
+                      Exercise.squats ||
+                      Exercise.lunges => Icons.airline_seat_legroom_extra_rounded,
+                      Exercise.pressUps || Exercise.curls => Icons.fitness_center_rounded,
+                      Exercise.burpees || Exercise.starJumps => Icons.accessibility_new_rounded,
                       Exercise.lateralRaises => Icons.open_with_rounded,
                       Exercise.highKnees => Icons.directions_run_rounded,
-                      Exercise.sitUps ||
-                      Exercise.sideBends => Icons.self_improvement_rounded,
+                      Exercise.sitUps || Exercise.sideBends => Icons.self_improvement_rounded,
                     },
-                    color: selected
-                        ? _lime
-                        : Theme.of(context).colorScheme.primary,
+                    color: selected ? _lime : Theme.of(context).colorScheme.primary,
                     size: 24,
                   ),
                   const Spacer(),
-                  if (selected)
-                    const Icon(Icons.check_circle, color: _lime, size: 16),
+                  if (selected) const Icon(Icons.check_circle, color: _lime, size: 16),
                 ],
               ),
               const SizedBox(height: 8),
@@ -870,9 +782,7 @@ class _ExerciseTile extends StatelessWidget {
               Text(
                 exercise.group,
                 style: TextStyle(
-                  color: selected
-                      ? _lime
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: selected ? _lime : Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 8,
                   letterSpacing: 1,
                 ),
@@ -939,11 +849,7 @@ class _DemoHead extends CustomPainter {
 
     for (final double x in <double>[.41, .59]) {
       canvas.drawOval(
-        Rect.fromCenter(
-          center: Offset(size.width * x, size.height * .44),
-          width: 10,
-          height: 16,
-        ),
+        Rect.fromCenter(center: Offset(size.width * x, size.height * .44), width: 10, height: 16),
         Paint()..color = _ink,
       );
     }

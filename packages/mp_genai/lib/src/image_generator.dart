@@ -60,35 +60,16 @@ final class EdgeConditionOptions {
     this.l2Gradient = false,
   }) {
     if (!threshold1.isFinite || threshold1 < 0) {
-      throw ArgumentError.value(
-        threshold1,
-        'threshold1',
-        'must be finite and non-negative',
-      );
+      throw ArgumentError.value(threshold1, 'threshold1', 'must be finite and non-negative');
     }
-
     if (!threshold2.isFinite || threshold2 < 0) {
-      throw ArgumentError.value(
-        threshold2,
-        'threshold2',
-        'must be finite and non-negative',
-      );
+      throw ArgumentError.value(threshold2, 'threshold2', 'must be finite and non-negative');
     }
-
     if (threshold2 < threshold1) {
-      throw ArgumentError.value(
-        threshold2,
-        'threshold2',
-        'must not be below threshold1',
-      );
+      throw ArgumentError.value(threshold2, 'threshold2', 'must not be below threshold1');
     }
-
     if (apertureSize != 3 && apertureSize != 5 && apertureSize != 7) {
-      throw ArgumentError.value(
-        apertureSize,
-        'apertureSize',
-        'must be 3, 5, or 7',
-      );
+      throw ArgumentError.value(apertureSize, 'apertureSize', 'must be 3, 5, or 7');
     }
   }
 
@@ -112,10 +93,7 @@ final class EdgeConditionOptions {
 @immutable
 final class DepthConditionOptions {
   /// Creates depth-condition options.
-  const DepthConditionOptions({
-    required this.pluginModel,
-    required this.depthModel,
-  });
+  const DepthConditionOptions({required this.pluginModel, required this.depthModel});
 
   /// ControlNet depth plugin model.
   final BaseOptions pluginModel;
@@ -130,9 +108,7 @@ final class ImageGeneratorConditionOptions {
   /// Creates a set of condition processors.
   ImageGeneratorConditionOptions({this.face, this.edge, this.depth}) {
     if (face == null && edge == null && depth == null) {
-      throw ArgumentError(
-        'At least one condition processor must be configured.',
-      );
+      throw ArgumentError('At least one condition processor must be configured.');
     }
   }
 
@@ -157,11 +133,7 @@ final class ImageGeneratorOptions {
     this.conditions,
   }) {
     if (modelDirectory.trim().isEmpty) {
-      throw ArgumentError.value(
-        modelDirectory,
-        'modelDirectory',
-        'must not be empty',
-      );
+      throw ArgumentError.value(modelDirectory, 'modelDirectory', 'must not be empty');
     }
   }
 
@@ -242,12 +214,7 @@ final class ImageGenerator implements MpTask {
   }) {
     _lifecycle.ensureOpen();
     _validateGenerationInput(prompt, iterations);
-    return _backend.generate(
-      prompt,
-      iterations: iterations,
-      seed: seed,
-      condition: condition,
-    );
+    return _backend.generate(prompt, iterations: iterations, seed: seed, condition: condition);
   }
 
   /// Stores inputs for iterative calls to [execute].
@@ -259,28 +226,18 @@ final class ImageGenerator implements MpTask {
   }) {
     _lifecycle.ensureOpen();
     _validateGenerationInput(prompt, iterations);
-    return _backend.setInputs(
-      prompt,
-      iterations: iterations,
-      seed: seed,
-      condition: condition,
-    );
+    return _backend.setInputs(prompt, iterations: iterations, seed: seed, condition: condition);
   }
 
   /// Executes the next iteration after [setInputs].
   Future<ImageGeneratorResult?> execute({bool showResult = true}) {
     _lifecycle.ensureOpen();
-
     return _backend.execute(showResult: showResult);
   }
 
   /// Creates a face, edge, or depth condition image without generating output.
-  Future<MpImage> createConditionImage(
-    MpImage image,
-    ImageGeneratorConditionType type,
-  ) {
+  Future<MpImage> createConditionImage(MpImage image, ImageGeneratorConditionType type) {
     _lifecycle.ensureOpen();
-
     return _backend.createConditionImage(image, type);
   }
 
@@ -295,7 +252,6 @@ void _validateGenerationInput(String prompt, int iterations) {
   if (prompt.trim().isEmpty) {
     throw ArgumentError.value(prompt, 'prompt', 'must not be empty');
   }
-
   if (iterations <= 0) {
     throw ArgumentError.value(iterations, 'iterations', 'must be positive');
   }
@@ -303,10 +259,6 @@ void _validateGenerationInput(String prompt, int iterations) {
 
 void _checkConfidence(double value, String name) {
   if (!value.isFinite || value < 0 || value > 1) {
-    throw ArgumentError.value(
-      value,
-      name,
-      'must be finite and between 0 and 1',
-    );
+    throw ArgumentError.value(value, name, 'must be finite and between 0 and 1');
   }
 }

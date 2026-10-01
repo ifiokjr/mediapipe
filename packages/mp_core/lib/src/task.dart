@@ -36,7 +36,6 @@ final class TaskLifecycle {
   bool markClosed() {
     if (_isClosed) return false;
     _isClosed = true;
-
     return true;
   }
 }
@@ -51,15 +50,9 @@ final class TimestampTracker {
   /// Accepts [timestampMs] when it is non-negative and strictly increasing.
   void add(int timestampMs) {
     if (timestampMs < 0) {
-      throw ArgumentError.value(
-        timestampMs,
-        'timestampMs',
-        'must not be negative',
-      );
+      throw ArgumentError.value(timestampMs, 'timestampMs', 'must not be negative');
     }
-
     final int? previous = _lastTimestampMs;
-
     if (previous != null && timestampMs <= previous) {
       throw ArgumentError.value(
         timestampMs,
@@ -67,7 +60,6 @@ final class TimestampTracker {
         'must be greater than the previous timestamp ($previous)',
       );
     }
-
     _lastTimestampMs = timestampMs;
   }
 }

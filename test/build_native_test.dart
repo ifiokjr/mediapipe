@@ -6,19 +6,15 @@ void main() {
   test('pins macOS native builds to the active Xcode toolchain', () async {
     final List<String> commands = <String>[];
 
-    final Map<String, String> environment =
-        await resolveMacOsToolchainEnvironment(
-          commandRunner: (String executable, List<String> arguments) async {
-            commands.add(<String>[executable, ...arguments].join(' '));
-            return switch ((executable, arguments)) {
-              ('xcode-select', ['--print-path']) =>
-                '/Applications/Xcode.app/Developer',
-              _ => throw StateError(
-                'Unexpected command: $executable $arguments',
-              ),
-            };
-          },
-        );
+    final Map<String, String> environment = await resolveMacOsToolchainEnvironment(
+      commandRunner: (String executable, List<String> arguments) async {
+        commands.add(<String>[executable, ...arguments].join(' '));
+        return switch ((executable, arguments)) {
+          ('xcode-select', ['--print-path']) => '/Applications/Xcode.app/Developer',
+          _ => throw StateError('Unexpected command: $executable $arguments'),
+        };
+      },
+    );
 
     expect(environment, <String, String>{
       'CC': '/usr/bin/clang',

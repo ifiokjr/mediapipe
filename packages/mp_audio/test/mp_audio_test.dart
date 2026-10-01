@@ -35,14 +35,9 @@ void main() {
 
     final Future<AudioClassifierResult> nextResult = classifier.results.first;
     await classifier.classifyAsync(_audio(), 5);
-    runtime.backend.controller.add(
-      AudioClassifierResult(const <ClassificationResult>[]),
-    );
+    runtime.backend.controller.add(AudioClassifierResult(const <ClassificationResult>[]));
 
-    expect(
-      await nextResult,
-      AudioClassifierResult(const <ClassificationResult>[]),
-    );
+    expect(await nextResult, AudioClassifierResult(const <ClassificationResult>[]));
     expect(runtime.backend.timestamps, <int>[5]);
     expect(() => classifier.classifyAsync(_audio(), 5), throwsArgumentError);
     expect(() => classifier.classify(_audio()), throwsStateError);
@@ -59,15 +54,11 @@ void main() {
     await classifier.close();
 
     expect(runtime.backend.closeCount, 1);
-    expect(
-      () => classifier.classify(_audio()),
-      throwsA(isA<MpTaskClosedError>()),
-    );
+    expect(() => classifier.classify(_audio()), throwsA(isA<MpTaskClosedError>()));
   });
 }
 
-BaseOptions _baseOptions() =>
-    BaseOptions(modelAsset: ModelAsset.path('model.tflite'));
+BaseOptions _baseOptions() => BaseOptions(modelAsset: ModelAsset.path('model.tflite'));
 
 AudioData _audio() => AudioData(
   channelCount: 1,
@@ -79,9 +70,8 @@ final class _FakeAudioRuntime implements AudioRuntime {
   final _FakeAudioClassifier backend = _FakeAudioClassifier();
 
   @override
-  Future<AudioClassifierBackend> createAudioClassifier(
-    AudioClassifierOptions options,
-  ) async => backend;
+  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async =>
+      backend;
 }
 
 final class _FakeAudioClassifier implements AudioClassifierBackend {
@@ -101,16 +91,12 @@ final class _FakeAudioClassifier implements AudioClassifierBackend {
   Future<AudioClassifierResult> classify(AudioData audio) async {
     classifyCount++;
     return AudioClassifierResult(<ClassificationResult>[
-      ClassificationResult(
-        classifications: const <Classifications>[],
-        timestampMs: 12,
-      ),
+      ClassificationResult(classifications: const <Classifications>[], timestampMs: 12),
     ]);
   }
 
   @override
-  Future<void> classifyAsync(AudioData audio, int timestampMs) async =>
-      timestamps.add(timestampMs);
+  Future<void> classifyAsync(AudioData audio, int timestampMs) async => timestamps.add(timestampMs);
 
   @override
   Future<void> close() async {

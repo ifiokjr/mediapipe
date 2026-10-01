@@ -7,10 +7,7 @@ import 'runtime.dart';
 @immutable
 final class TextClassifierOptions {
   /// Creates text classifier options.
-  const TextClassifierOptions({
-    required this.baseOptions,
-    this.classifierOptions,
-  });
+  const TextClassifierOptions({required this.baseOptions, this.classifierOptions});
 
   /// Model and hardware configuration.
   final BaseOptions baseOptions;
@@ -36,9 +33,7 @@ final class TextClassifier implements MpTask {
   static Future<TextClassifier> create(
     TextClassifierOptions options, {
     TextRuntime? runtime,
-  }) async => TextClassifier._(
-    await (runtime ?? defaultTextRuntime).createTextClassifier(options),
-  );
+  }) async => TextClassifier._(await (runtime ?? defaultTextRuntime).createTextClassifier(options));
 
   @override
   bool get isClosed => _lifecycle.isClosed;
@@ -46,7 +41,6 @@ final class TextClassifier implements MpTask {
   /// Classifies [text].
   Future<ClassificationResult> classify(String text) {
     _lifecycle.ensureOpen();
-
     return _backend.classify(text);
   }
 

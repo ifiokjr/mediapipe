@@ -39,9 +39,7 @@ void main() {
         if (entity is! File || !entity.path.endsWith('.dart')) continue;
         final String name = entity.uri.toString().substring(hookUri.length);
         if (!_allowedHookFile.hasMatch(name)) {
-          violations.add(
-            entity.uri.toString().substring(rootUri.toString().length),
-          );
+          violations.add(entity.uri.toString().substring(rootUri.toString().length));
         }
       }
     }
@@ -60,38 +58,25 @@ void main() {
 /// Resolves the repository root so the scan works from any working directory.
 Directory _repositoryRoot() {
   Directory directory = Directory.current.absolute;
-
   while (!File('${directory.path}/monochange.toml').existsSync()) {
     final Directory parent = directory.parent;
-
     if (parent.path == directory.path) {
-      throw StateError(
-        'Could not find monochange.toml above ${Directory.current.path}.',
-      );
+      throw StateError('Could not find monochange.toml above ${Directory.current.path}.');
     }
-
     directory = parent;
   }
-
   return directory;
 }
 
 Iterable<Directory> _hookDirectories(Directory directory) sync* {
-  for (final FileSystemEntity entity in directory.listSync(
-    followLinks: false,
-  )) {
+  for (final FileSystemEntity entity in directory.listSync(followLinks: false)) {
     if (entity is! Directory) continue;
-    final String name = entity.uri.pathSegments
-        .where((String segment) => segment.isNotEmpty)
-        .last;
-
+    final String name = entity.uri.pathSegments.where((String segment) => segment.isNotEmpty).last;
     if (name == 'hook') {
       yield entity;
       continue;
     }
-
     if (_unscannedDirectories.contains(name)) continue;
-
     yield* _hookDirectories(entity);
   }
 }

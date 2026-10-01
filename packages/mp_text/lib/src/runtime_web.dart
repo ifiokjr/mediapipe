@@ -12,12 +12,8 @@ import 'text_proofreader.dart';
 import 'text_summarizer.dart';
 
 final WebTaskAssets _defaultAssets = WebTaskAssets(
-  moduleUri: Uri.parse(
-    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-text@1.0.1/text_bundle.mjs',
-  ),
-  wasmRoot: Uri.parse(
-    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-text@1.0.1/wasm',
-  ),
+  moduleUri: Uri.parse('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-text@1.0.1/text_bundle.mjs'),
+  wasmRoot: Uri.parse('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-text@1.0.1/wasm'),
 );
 
 /// Creates the default web text runtime.
@@ -39,7 +35,6 @@ final class WebTextRuntime implements TextRuntime {
       'forTextTasks',
       <JSAny?>[assets.wasmRoot.toString().toJS],
     );
-
     return (fileset: await promise.toDart, module: module);
   }
 
@@ -64,52 +59,47 @@ final class WebTextRuntime implements TextRuntime {
   }
 
   @override
-  Future<LanguageDetectorBackend> createLanguageDetector(
-    LanguageDetectorOptions options,
-  ) async => _WebLanguageDetector(
-    await _create('LanguageDetector', <String, Object?>{
-      'baseOptions': await resolveWebBaseOptions(options.baseOptions),
-      ...webClassifierOptions(options.classifierOptions),
-    }),
-  );
+  Future<LanguageDetectorBackend> createLanguageDetector(LanguageDetectorOptions options) async =>
+      _WebLanguageDetector(
+        await _create('LanguageDetector', <String, Object?>{
+          'baseOptions': await resolveWebBaseOptions(options.baseOptions),
+          ...webClassifierOptions(options.classifierOptions),
+        }),
+      );
 
   @override
-  Future<TextClassifierBackend> createTextClassifier(
-    TextClassifierOptions options,
-  ) async => _WebTextClassifier(
-    await _create('TextClassifier', <String, Object?>{
-      'baseOptions': await resolveWebBaseOptions(options.baseOptions),
-      ...webClassifierOptions(options.classifierOptions),
-    }),
-  );
+  Future<TextClassifierBackend> createTextClassifier(TextClassifierOptions options) async =>
+      _WebTextClassifier(
+        await _create('TextClassifier', <String, Object?>{
+          'baseOptions': await resolveWebBaseOptions(options.baseOptions),
+          ...webClassifierOptions(options.classifierOptions),
+        }),
+      );
 
   @override
-  Future<TextEmbedderBackend> createTextEmbedder(
-    TextEmbedderOptions options,
-  ) async => _WebTextEmbedder(
-    await _create('TextEmbedder', <String, Object?>{
-      'baseOptions': await resolveWebBaseOptions(options.baseOptions),
-      ...webEmbedderOptions(options.embedderOptions),
-    }),
-  );
+  Future<TextEmbedderBackend> createTextEmbedder(TextEmbedderOptions options) async =>
+      _WebTextEmbedder(
+        await _create('TextEmbedder', <String, Object?>{
+          'baseOptions': await resolveWebBaseOptions(options.baseOptions),
+          ...webEmbedderOptions(options.embedderOptions),
+        }),
+      );
 
   @override
-  Future<TextProofreaderBackend> createTextProofreader(
-    TextProofreaderOptions options,
-  ) async => throw const MpException(
-    MpStatus.unimplemented,
-    'TextProofreader is not exported by @mediapipe/tasks-text.',
-    task: 'TextProofreader',
-  );
+  Future<TextProofreaderBackend> createTextProofreader(TextProofreaderOptions options) async =>
+      throw const MpException(
+        MpStatus.unimplemented,
+        'TextProofreader is not exported by @mediapipe/tasks-text.',
+        task: 'TextProofreader',
+      );
 
   @override
-  Future<TextSummarizerBackend> createTextSummarizer(
-    TextSummarizerOptions options,
-  ) async => throw const MpException(
-    MpStatus.unimplemented,
-    'TextSummarizer is not exported by @mediapipe/tasks-text.',
-    task: 'TextSummarizer',
-  );
+  Future<TextSummarizerBackend> createTextSummarizer(TextSummarizerOptions options) async =>
+      throw const MpException(
+        MpStatus.unimplemented,
+        'TextSummarizer is not exported by @mediapipe/tasks-text.',
+        task: 'TextSummarizer',
+      );
 }
 
 abstract base class _WebTextTask implements MpTask {
@@ -123,10 +113,7 @@ abstract base class _WebTextTask implements MpTask {
 
   void ensureOpen() {
     if (_isClosed) {
-      throw const MpException(
-        MpStatus.failedPrecondition,
-        'The web task is closed.',
-      );
+      throw const MpException(MpStatus.failedPrecondition, 'The web task is closed.');
     }
   }
 
@@ -138,23 +125,18 @@ abstract base class _WebTextTask implements MpTask {
   }
 }
 
-final class _WebLanguageDetector extends _WebTextTask
-    implements LanguageDetectorBackend {
+final class _WebLanguageDetector extends _WebTextTask implements LanguageDetectorBackend {
   _WebLanguageDetector(super.task);
 
   @override
   Future<LanguageDetectorResult> detect(String text) async {
     ensureOpen();
-    final JSAny? raw = callWebMethod<JSAny?>(task, 'detect', <JSAny?>[
-      text.toJS,
-    ]);
-    final Map<Object?, Object?> result =
-        webDartify(raw)! as Map<Object?, Object?>;
+    final JSAny? raw = callWebMethod<JSAny?>(task, 'detect', <JSAny?>[text.toJS]);
+    final Map<Object?, Object?> result = webDartify(raw)! as Map<Object?, Object?>;
     final List<Object?> languages = result['languages']! as List<Object?>;
     return LanguageDetectorResult(
       languages.map((Object? value) {
-        final Map<Object?, Object?> prediction =
-            value! as Map<Object?, Object?>;
+        final Map<Object?, Object?> prediction = value! as Map<Object?, Object?>;
         return LanguagePrediction(
           languageCode: prediction['languageCode']! as String,
           probability: (prediction['probability']! as num).toDouble(),
@@ -164,33 +146,24 @@ final class _WebLanguageDetector extends _WebTextTask
   }
 }
 
-final class _WebTextClassifier extends _WebTextTask
-    implements TextClassifierBackend {
+final class _WebTextClassifier extends _WebTextTask implements TextClassifierBackend {
   _WebTextClassifier(super.task);
 
   @override
   Future<ClassificationResult> classify(String text) async {
     ensureOpen();
-    final JSAny? raw = callWebMethod<JSAny?>(task, 'classify', <JSAny?>[
-      text.toJS,
-    ]);
-
+    final JSAny? raw = callWebMethod<JSAny?>(task, 'classify', <JSAny?>[text.toJS]);
     return webClassificationResult(webDartify(raw)! as Map<Object?, Object?>);
   }
 }
 
-final class _WebTextEmbedder extends _WebTextTask
-    implements TextEmbedderBackend {
+final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend {
   _WebTextEmbedder(super.task);
 
   @override
-  Future<EmbeddingResult> embed(
-    String text, {
-    TextEmbedderFormatContext? formatContext,
-  }) async {
+  Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) async {
     ensureOpen();
     final List<JSAny?> arguments = <JSAny?>[text.toJS];
-
     if (formatContext != null) {
       arguments.add(
         webJsify(<String, Object?>{
@@ -212,46 +185,31 @@ final class _WebTextEmbedder extends _WebTextTask
         }),
       );
     }
-
     final JSAny? raw = callWebMethod<JSAny?>(task, 'embed', arguments);
-    final Map<Object?, Object?> result =
-        webDartify(raw)! as Map<Object?, Object?>;
+    final Map<Object?, Object?> result = webDartify(raw)! as Map<Object?, Object?>;
     final List<Object?> embeddings = result['embeddings']! as List<Object?>;
     return EmbeddingResult(
       timestampMs: webOptionalInt(result['timestampMs']),
       embeddings: embeddings.map((Object? value) {
         final Map<Object?, Object?> embedding = value! as Map<Object?, Object?>;
         final int headIndex = (embedding['headIndex']! as num).toInt();
-        final String? headName = webEmptyToNull(
-          embedding['headName'] as String?,
-        );
-        if (embedding['floatEmbedding'] case final List<Object?> values
-            when values.isNotEmpty) {
+        final String? headName = webEmptyToNull(embedding['headName'] as String?);
+        if (embedding['floatEmbedding'] case final List<Object?> values when values.isNotEmpty) {
           return Embedding.float(
-            Float32List.fromList(
-              values.cast<num>().map((num value) => value.toDouble()).toList(),
-            ),
+            Float32List.fromList(values.cast<num>().map((num value) => value.toDouble()).toList()),
             headIndex: headIndex,
             headName: headName,
           );
         }
-
         final Object? quantized = embedding['quantizedEmbedding'];
         final Uint8List values = switch (quantized) {
           final Uint8List bytes => bytes,
           final List<Object?> bytes => Uint8List.fromList(
             bytes.cast<num>().map((e) => e.toInt()).toList(),
           ),
-          _ => throw const MpException(
-            MpStatus.internal,
-            'MediaPipe returned an empty embedding.',
-          ),
+          _ => throw const MpException(MpStatus.internal, 'MediaPipe returned an empty embedding.'),
         };
-        return Embedding.quantized(
-          values,
-          headIndex: headIndex,
-          headName: headName,
-        );
+        return Embedding.quantized(values, headIndex: headIndex, headName: headName);
       }),
     );
   }

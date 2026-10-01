@@ -46,55 +46,45 @@ void main() {
 
   setUp(() => runtime = _FakeGenAiRuntime());
 
-  test(
-    'stateless generation streams chunks and cleans up its session',
-    () async {
-      final LlmInference inference = await LlmInference.create(
-        LlmInferenceOptions(baseOptions: _baseOptions()),
-        runtime: runtime,
-      );
+  test('stateless generation streams chunks and cleans up its session', () async {
+    final LlmInference inference = await LlmInference.create(
+      LlmInferenceOptions(baseOptions: _baseOptions()),
+      runtime: runtime,
+    );
 
-      final LlmGeneration generation = await inference.generateResponse(
-        'Hello',
-      );
+    final LlmGeneration generation = await inference.generateResponse('Hello');
 
-      expect(
-        await generation.chunks
-            .map((LlmGenerationChunk chunk) => chunk.text)
-            .toList(),
-        <String>['Hi', ' there'],
-      );
-      expect(await generation.response, 'Hi there');
-      await Future<void>.delayed(Duration.zero);
-      expect(runtime.engine.lastSession?.queries, <String>['Hello']);
-      expect(runtime.engine.lastSession?.closeCount, 1);
-    },
-  );
+    expect(await generation.chunks.map((LlmGenerationChunk chunk) => chunk.text).toList(), <String>[
+      'Hi',
+      ' there',
+    ]);
+    expect(await generation.response, 'Hi there');
+    await Future<void>.delayed(Duration.zero);
+    expect(runtime.engine.lastSession?.queries, <String>['Hello']);
+    expect(runtime.engine.lastSession?.closeCount, 1);
+  });
 
-  test(
-    'stateful sessions forward multimodal inputs and clone context',
-    () async {
-      final LlmInference inference = await LlmInference.create(
-        LlmInferenceOptions(
-          baseOptions: _baseOptions(),
-          maxNumImages: 1,
-          visionModelOptions: const VisionModelOptions(),
-        ),
-        runtime: runtime,
-      );
-      final LlmSession session = await inference.createSession();
-      final Uint8List audio = Uint8List.fromList(<int>[82, 73, 70, 70]);
+  test('stateful sessions forward multimodal inputs and clone context', () async {
+    final LlmInference inference = await LlmInference.create(
+      LlmInferenceOptions(
+        baseOptions: _baseOptions(),
+        maxNumImages: 1,
+        visionModelOptions: const VisionModelOptions(),
+      ),
+      runtime: runtime,
+    );
+    final LlmSession session = await inference.createSession();
+    final Uint8List audio = Uint8List.fromList(<int>[82, 73, 70, 70]);
 
-      await session.addImage(_image());
-      await session.addAudio(audio);
-      audio[0] = 0;
-      final LlmSession cloned = await session.clone();
+    await session.addImage(_image());
+    await session.addAudio(audio);
+    audio[0] = 0;
+    final LlmSession cloned = await session.clone();
 
-      expect(runtime.engine.lastSession?.images, hasLength(1));
-      expect(runtime.engine.lastSession?.audio.single.first, 82);
-      expect(cloned.options.topK, 40);
-    },
-  );
+    expect(runtime.engine.lastSession?.images, hasLength(1));
+    expect(runtime.engine.lastSession?.audio.single.first, 82);
+    expect(cloned.options.topK, 40);
+  });
 
   test('engine and session options are validated', () async {
     expect(
@@ -126,15 +116,11 @@ void main() {
     await inference.close();
 
     expect(runtime.engine.closeCount, 1);
-    expect(
-      () => inference.sizeInTokens('closed'),
-      throwsA(isA<MpTaskClosedError>()),
-    );
+    expect(() => inference.sizeInTokens('closed'), throwsA(isA<MpTaskClosedError>()));
   });
 }
 
-BaseOptions _baseOptions() =>
-    BaseOptions(modelAsset: ModelAsset.path('model.task'));
+BaseOptions _baseOptions() => BaseOptions(modelAsset: ModelAsset.path('model.task'));
 
 MpImage _image() => MpImage.uint8(
   width: 1,
@@ -147,23 +133,19 @@ final class _FakeGenAiRuntime implements GenAiRuntime {
   final _FakeInferenceBackend engine = _FakeInferenceBackend();
 
   @override
-  Future<FunctionCallingBackend> createGenerativeModel(
-    GenerativeModelOptions options,
-  ) => throw UnimplementedError();
+  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) =>
+      throw UnimplementedError();
 
   @override
-  Future<ImageGeneratorBackend> createImageGenerator(
-    ImageGeneratorOptions options,
-  ) => throw UnimplementedError();
+  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) =>
+      throw UnimplementedError();
 
   @override
   Future<RagPipelineBackend> createRagPipeline(RagPipelineOptions options) =>
       throw UnimplementedError();
 
   @override
-  Future<LlmInferenceBackend> createLlmInference(
-    LlmInferenceOptions options,
-  ) async => engine;
+  Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) async => engine;
 }
 
 final class _FakeInferenceBackend implements LlmInferenceBackend {
@@ -200,16 +182,16 @@ final class _FakeSessionBackend implements LlmSessionBackend {
   Future<void> addImage(MpImage image) async => images.add(image);
 
   @override
-  Future<void> addAudio(Uint8List wavBytes) async =>
-      audio.add(Uint8List.fromList(wavBytes));
+  Future<void> addAudio(Uint8List wavBytes) async => audio.add(Uint8List.fromList(wavBytes));
 
   @override
   Future<LlmGeneration> generate() async {
-    final Stream<LlmGenerationChunk> chunks =
-        Stream<LlmGenerationChunk>.fromIterable(const <LlmGenerationChunk>[
-          LlmGenerationChunk(text: 'Hi', isDone: false),
-          LlmGenerationChunk(text: ' there', isDone: true),
-        ]);
+    final Stream<LlmGenerationChunk> chunks = Stream<LlmGenerationChunk>.fromIterable(
+      const <LlmGenerationChunk>[
+        LlmGenerationChunk(text: 'Hi', isDone: false),
+        LlmGenerationChunk(text: ' there', isDone: true),
+      ],
+    );
     return LlmGeneration(
       chunks: chunks,
       response: Future<String>.value('Hi there'),
@@ -228,7 +210,6 @@ final class _FakeSessionBackend implements LlmSessionBackend {
     clone.queries.addAll(queries);
     clone.images.addAll(images);
     clone.audio.addAll(audio.map(Uint8List.fromList));
-
     return clone;
   }
 

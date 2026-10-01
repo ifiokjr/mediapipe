@@ -19,15 +19,9 @@ void main() {
     test('rejects empty sources and invalid digests', () {
       expect(() => ModelAsset.path('  '), throwsArgumentError);
       expect(() => ModelAsset.bytes(Uint8List(0)), throwsArgumentError);
+      expect(() => ModelAsset.uri(Uri.parse('models/model.tflite')), throwsArgumentError);
       expect(
-        () => ModelAsset.uri(Uri.parse('models/model.tflite')),
-        throwsArgumentError,
-      );
-      expect(
-        () => ModelAsset.uri(
-          Uri.https('example.com', '/model.tflite'),
-          sha256: 'INVALID',
-        ),
+        () => ModelAsset.uri(Uri.https('example.com', '/model.tflite'), sha256: 'INVALID'),
         throwsArgumentError,
       );
     });
@@ -36,25 +30,17 @@ void main() {
   group('ClassifierOptions', () {
     test('copies category filters', () {
       final List<String> allowlist = <String>['cat'];
-      final ClassifierOptions options = ClassifierOptions(
-        categoryAllowlist: allowlist,
-      );
+      final ClassifierOptions options = ClassifierOptions(categoryAllowlist: allowlist);
 
       allowlist.add('dog');
 
       expect(options.categoryAllowlist, <String>['cat']);
-      expect(
-        () => options.categoryAllowlist.add('bird'),
-        throwsUnsupportedError,
-      );
+      expect(() => options.categoryAllowlist.add('bird'), throwsUnsupportedError);
     });
 
     test('validates filters and numeric bounds', () {
       expect(() => ClassifierOptions(maxResults: 0), throwsArgumentError);
-      expect(
-        () => ClassifierOptions(scoreThreshold: -0.1),
-        throwsArgumentError,
-      );
+      expect(() => ClassifierOptions(scoreThreshold: -0.1), throwsArgumentError);
       expect(() => ClassifierOptions(scoreThreshold: 1.1), throwsArgumentError);
       expect(
         () => ClassifierOptions(
@@ -75,10 +61,8 @@ void main() {
       throwsArgumentError,
     );
     expect(
-      () => BaseOptions(
-        modelAsset: ModelAsset.path('model.tflite'),
-        liteRtOptions: LiteRtOptions(),
-      ),
+      () =>
+          BaseOptions(modelAsset: ModelAsset.path('model.tflite'), liteRtOptions: LiteRtOptions()),
       throwsArgumentError,
     );
   });

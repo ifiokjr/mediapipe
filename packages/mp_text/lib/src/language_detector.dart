@@ -8,10 +8,7 @@ import 'runtime.dart';
 @immutable
 final class LanguageDetectorOptions {
   /// Creates language detector options.
-  const LanguageDetectorOptions({
-    required this.baseOptions,
-    this.classifierOptions,
-  });
+  const LanguageDetectorOptions({required this.baseOptions, this.classifierOptions});
 
   /// Model and hardware configuration.
   final BaseOptions baseOptions;
@@ -24,10 +21,7 @@ final class LanguageDetectorOptions {
 @immutable
 final class LanguagePrediction {
   /// Creates a language prediction.
-  const LanguagePrediction({
-    required this.languageCode,
-    required this.probability,
-  });
+  const LanguagePrediction({required this.languageCode, required this.probability});
 
   /// The predicted BCP-47 language code.
   final String languageCode;
@@ -63,14 +57,10 @@ final class LanguageDetectorResult {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is LanguageDetectorResult &&
-          const ListEquality<LanguagePrediction>().equals(
-            predictions,
-            other.predictions,
-          );
+          const ListEquality<LanguagePrediction>().equals(predictions, other.predictions);
 
   @override
-  int get hashCode =>
-      const ListEquality<LanguagePrediction>().hash(predictions);
+  int get hashCode => const ListEquality<LanguagePrediction>().hash(predictions);
 }
 
 /// Platform implementation used by [LanguageDetector].
@@ -90,9 +80,8 @@ final class LanguageDetector implements MpTask {
   static Future<LanguageDetector> create(
     LanguageDetectorOptions options, {
     TextRuntime? runtime,
-  }) async => LanguageDetector._(
-    await (runtime ?? defaultTextRuntime).createLanguageDetector(options),
-  );
+  }) async =>
+      LanguageDetector._(await (runtime ?? defaultTextRuntime).createLanguageDetector(options));
 
   @override
   bool get isClosed => _lifecycle.isClosed;
@@ -100,7 +89,6 @@ final class LanguageDetector implements MpTask {
   /// Detects the languages present in [text].
   Future<LanguageDetectorResult> detect(String text) {
     _lifecycle.ensureOpen();
-
     return _backend.detect(text);
   }
 

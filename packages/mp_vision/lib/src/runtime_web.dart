@@ -13,9 +13,7 @@ final WebTaskAssets _defaultAssets = WebTaskAssets(
   moduleUri: Uri.parse(
     'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/vision_bundle.mjs',
   ),
-  wasmRoot: Uri.parse(
-    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm',
-  ),
+  wasmRoot: Uri.parse('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm'),
 );
 
 /// Creates the default web vision runtime.
@@ -31,8 +29,7 @@ final class WebVisionRuntime implements VisionRuntime {
 
   Future<({JSObject fileset, JSObject module})>? _loaded;
 
-  Future<({JSObject fileset, JSObject module})> _load() =>
-      _loaded ??= _loadOnce();
+  Future<({JSObject fileset, JSObject module})> _load() => _loaded ??= _loadOnce();
 
   Future<({JSObject fileset, JSObject module})> _loadOnce() async {
     final JSObject module = await importWebTaskModule(assets.moduleUri);
@@ -42,7 +39,6 @@ final class WebVisionRuntime implements VisionRuntime {
       'forVisionTasks',
       <JSAny?>[assets.wasmRoot.toString().toJS],
     );
-
     return (fileset: await promise.toDart, module: module);
   }
 
@@ -66,13 +62,10 @@ final class WebVisionRuntime implements VisionRuntime {
     }
   }
 
-  Future<Map<String, Object?>> _base(VisionTaskOptions options) async =>
-      <String, Object?>{
-        'baseOptions': await resolveWebBaseOptions(options.baseOptions),
-        'runningMode': options.runningMode == VisionRunningMode.image
-            ? 'IMAGE'
-            : 'VIDEO',
-      };
+  Future<Map<String, Object?>> _base(VisionTaskOptions options) async => <String, Object?>{
+    'baseOptions': await resolveWebBaseOptions(options.baseOptions),
+    'runningMode': options.runningMode == VisionRunningMode.image ? 'IMAGE' : 'VIDEO',
+  };
 
   Future<VisionTaskBackend<T>> _task<T>({
     required String task,
@@ -82,29 +75,25 @@ final class WebVisionRuntime implements VisionRuntime {
     required T Function(JSAny? value) convert,
     Map<String, Object?> extraOptions = const <String, Object?>{},
   }) async => _WebVisionTask<T>(
-    await _create(task, <String, Object?>{
-      ...await _base(options),
-      ...extraOptions,
-    }),
+    await _create(task, <String, Object?>{...await _base(options), ...extraOptions}),
     imageMethod: imageMethod,
     videoMethod: videoMethod,
     convert: convert,
   );
 
   @override
-  Future<VisionTaskBackend<DetectionResult>> createFaceDetector(
-    FaceDetectorOptions options,
-  ) => _task<DetectionResult>(
-    task: 'FaceDetector',
-    options: options,
-    imageMethod: 'detect',
-    videoMethod: 'detectForVideo',
-    convert: webDetectionResult,
-    extraOptions: <String, Object?>{
-      'minDetectionConfidence': options.minDetectionConfidence,
-      'minSuppressionThreshold': options.minSuppressionThreshold,
-    },
-  );
+  Future<VisionTaskBackend<DetectionResult>> createFaceDetector(FaceDetectorOptions options) =>
+      _task<DetectionResult>(
+        task: 'FaceDetector',
+        options: options,
+        imageMethod: 'detect',
+        videoMethod: 'detectForVideo',
+        convert: webDetectionResult,
+        extraOptions: <String, Object?>{
+          'minDetectionConfidence': options.minDetectionConfidence,
+          'minSuppressionThreshold': options.minSuppressionThreshold,
+        },
+      );
 
   @override
   Future<VisionTaskBackend<FaceLandmarkerResult>> createFaceLandmarker(
@@ -121,8 +110,7 @@ final class WebVisionRuntime implements VisionRuntime {
       'minFacePresenceConfidence': options.minFacePresenceConfidence,
       'minTrackingConfidence': options.minTrackingConfidence,
       'outputFaceBlendshapes': options.outputFaceBlendshapes,
-      'outputFacialTransformationMatrixes':
-          options.outputFacialTransformationMatrixes,
+      'outputFacialTransformationMatrixes': options.outputFacialTransformationMatrixes,
     },
   );
 
@@ -140,11 +128,9 @@ final class WebVisionRuntime implements VisionRuntime {
       'minHandDetectionConfidence': options.minHandDetectionConfidence,
       'minHandPresenceConfidence': options.minHandPresenceConfidence,
       'minTrackingConfidence': options.minTrackingConfidence,
-      if (options.cannedGesturesClassifierOptions
-          case final ClassifierOptions value)
+      if (options.cannedGesturesClassifierOptions case final ClassifierOptions value)
         'cannedGesturesClassifierOptions': webClassifierOptions(value),
-      if (options.customGesturesClassifierOptions
-          case final ClassifierOptions value)
+      if (options.customGesturesClassifierOptions case final ClassifierOptions value)
         'customGesturesClassifierOptions': webClassifierOptions(value),
     },
   );
@@ -196,22 +182,20 @@ final class WebVisionRuntime implements VisionRuntime {
     options: options,
     imageMethod: 'classify',
     videoMethod: 'classifyForVideo',
-    convert: (JSAny? value) =>
-        webClassificationResult(webDartify(value)! as Map<Object?, Object?>),
+    convert: (JSAny? value) => webClassificationResult(webDartify(value)! as Map<Object?, Object?>),
     extraOptions: webClassifierOptions(options.classifierOptions),
   );
 
   @override
-  Future<VisionTaskBackend<EmbeddingResult>> createImageEmbedder(
-    ImageEmbedderOptions options,
-  ) => _task<EmbeddingResult>(
-    task: 'ImageEmbedder',
-    options: options,
-    imageMethod: 'embed',
-    videoMethod: 'embedForVideo',
-    convert: webEmbeddingResult,
-    extraOptions: webEmbedderOptions(options.embedderOptions),
-  );
+  Future<VisionTaskBackend<EmbeddingResult>> createImageEmbedder(ImageEmbedderOptions options) =>
+      _task<EmbeddingResult>(
+        task: 'ImageEmbedder',
+        options: options,
+        imageMethod: 'embed',
+        videoMethod: 'embedForVideo',
+        convert: webEmbeddingResult,
+        extraOptions: webEmbedderOptions(options.embedderOptions),
+      );
 
   @override
   Future<VisionTaskBackend<ImageSegmenterResult>> createImageSegmenter(
@@ -223,8 +207,7 @@ final class WebVisionRuntime implements VisionRuntime {
     videoMethod: 'segmentForVideo',
     convert: webImageSegmenterResult,
     extraOptions: <String, Object?>{
-      if (options.displayNamesLocale case final String locale)
-        'displayNamesLocale': locale,
+      if (options.displayNamesLocale case final String locale) 'displayNamesLocale': locale,
       'outputConfidenceMasks': options.outputConfidenceMasks,
       'outputCategoryMask': options.outputCategoryMask,
     },
@@ -234,34 +217,29 @@ final class WebVisionRuntime implements VisionRuntime {
   Future<InteractiveSegmenterBackend> createInteractiveSegmenter(
     InteractiveSegmenterOptions options,
   ) async {
-    final Map<String, Object?> baseOptions = await resolveWebBaseOptions(
-      options.baseOptions,
-    );
+    final Map<String, Object?> baseOptions = await resolveWebBaseOptions(options.baseOptions);
     return _WebInteractiveSegmenter(
-      createSplit: () => _create('InteractiveSegmenter', <String, Object?>{
+      createSplit: () =>
+          _create('InteractiveSegmenter', <String, Object?>{'baseOptions': baseOptions}),
+      createLegacy: () => _create('InteractiveSegmenterLegacy', <String, Object?>{
         'baseOptions': baseOptions,
+        'runningMode': 'IMAGE',
+        'outputConfidenceMasks': options.outputConfidenceMasks,
+        'outputCategoryMask': options.outputCategoryMask,
       }),
-      createLegacy: () =>
-          _create('InteractiveSegmenterLegacy', <String, Object?>{
-            'baseOptions': baseOptions,
-            'runningMode': 'IMAGE',
-            'outputConfidenceMasks': options.outputConfidenceMasks,
-            'outputCategoryMask': options.outputCategoryMask,
-          }),
     );
   }
 
   @override
-  Future<VisionTaskBackend<DetectionResult>> createObjectDetector(
-    ObjectDetectorOptions options,
-  ) => _task<DetectionResult>(
-    task: 'ObjectDetector',
-    options: options,
-    imageMethod: 'detect',
-    videoMethod: 'detectForVideo',
-    convert: webDetectionResult,
-    extraOptions: webClassifierOptions(options.classifierOptions),
-  );
+  Future<VisionTaskBackend<DetectionResult>> createObjectDetector(ObjectDetectorOptions options) =>
+      _task<DetectionResult>(
+        task: 'ObjectDetector',
+        options: options,
+        imageMethod: 'detect',
+        videoMethod: 'detectForVideo',
+        convert: webDetectionResult,
+        extraOptions: webClassifierOptions(options.classifierOptions),
+      );
 
   @override
   Future<VisionTaskBackend<PoseLandmarkerResult>> createPoseLandmarker(
@@ -307,27 +285,16 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
 
   void _ensureOpen() {
     if (_isClosed) {
-      throw const MpException(
-        MpStatus.failedPrecondition,
-        'The web vision task is closed.',
-      );
+      throw const MpException(MpStatus.failedPrecondition, 'The web vision task is closed.');
     }
   }
 
   @override
-  Future<T> processImage(
-    MpImage image,
-    ImageProcessingOptions? processingOptions,
-  ) {
+  Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) {
     _ensureOpen();
     final List<JSAny?> arguments = <JSAny?>[webImageData(image)];
-
-    if (processingOptions != null)
-      arguments.add(webJsify(_processingOptions(processingOptions)));
-
-    return Future<T>.value(
-      convert(callWebMethod<JSAny?>(_task, imageMethod, arguments)),
-    );
+    if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
+    return Future<T>.value(convert(callWebMethod<JSAny?>(_task, imageMethod, arguments)));
   }
 
   @override
@@ -337,17 +304,9 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
     ImageProcessingOptions? processingOptions,
   ) {
     _ensureOpen();
-    final List<JSAny?> arguments = <JSAny?>[
-      webImageData(image),
-      timestampMs.toJS,
-    ];
-
-    if (processingOptions != null)
-      arguments.add(webJsify(_processingOptions(processingOptions)));
-
-    return Future<T>.value(
-      convert(callWebMethod<JSAny?>(_task, videoMethod, arguments)),
-    );
+    final List<JSAny?> arguments = <JSAny?>[webImageData(image), timestampMs.toJS];
+    if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
+    return Future<T>.value(convert(callWebMethod<JSAny?>(_task, videoMethod, arguments)));
   }
 
   @override
@@ -357,21 +316,12 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
     ImageProcessingOptions? processingOptions,
   ) {
     _ensureOpen();
-
     return _pending = _pending
         .then((_) async {
-          final T result = await processVideo(
-            image,
-            timestampMs,
-            processingOptions,
-          );
+          final T result = await processVideo(image, timestampMs, processingOptions);
           if (!_isClosed) {
             _controller.add(
-              VisionLiveResult<T>(
-                result: result,
-                input: image,
-                timestampMs: timestampMs,
-              ),
+              VisionLiveResult<T>(result: result, input: image, timestampMs: timestampMs),
             );
           }
         })
@@ -391,10 +341,7 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
 }
 
 final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
-  _WebInteractiveSegmenter({
-    required this.createSplit,
-    required this.createLegacy,
-  });
+  _WebInteractiveSegmenter({required this.createSplit, required this.createLegacy});
 
   final Future<JSObject> Function() createSplit;
   final Future<JSObject> Function() createLegacy;
@@ -412,23 +359,15 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
     ImageProcessingOptions? processingOptions,
   ) {
     if (_isClosed) {
-      throw const MpException(
-        MpStatus.failedPrecondition,
-        'The interactive segmenter is closed.',
-      );
+      throw const MpException(MpStatus.failedPrecondition, 'The interactive segmenter is closed.');
     }
-
     return switch (prompt) {
       StrokePrompt(:final strokes) => _segmentStrokes(image, strokes),
-      KeypointPrompt() ||
-      ScribblePrompt() => _segmentLegacy(image, prompt, processingOptions),
+      KeypointPrompt() || ScribblePrompt() => _segmentLegacy(image, prompt, processingOptions),
     };
   }
 
-  Future<ImageSegmenterResult> _segmentStrokes(
-    MpImage image,
-    List<PromptStroke> strokes,
-  ) async {
+  Future<ImageSegmenterResult> _segmentStrokes(MpImage image, List<PromptStroke> strokes) async {
     final JSObject task = await (_split ??= createSplit());
     callWebMethod<JSAny?>(task, 'setImage', <JSAny?>[webImageData(image)]);
     final JSAny? mask = callWebMethod<JSAny?>(task, 'segment', <JSAny?>[
@@ -442,12 +381,7 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
                   BrushMode.lasso => 3,
                 },
                 'point': stroke.points
-                    .map(
-                      (PromptPoint point) => <String, double>{
-                        'x': point.x,
-                        'y': point.y,
-                      },
-                    )
+                    .map((PromptPoint point) => <String, double>{'x': point.x, 'y': point.y})
                     .toList(),
                 'isCompleted': stroke.isCompleted,
               },
@@ -455,7 +389,6 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
             .toList(),
       ),
     ]);
-
     return webSingleConfidenceMask(mask);
   }
 
@@ -465,34 +398,20 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
     ImageProcessingOptions? processingOptions,
   ) async {
     final JSObject task = await (_legacy ??= createLegacy());
-
     final Map<String, Object?> roi = switch (prompt) {
       KeypointPrompt(:final point) => <String, Object?>{
         'keypoint': <String, double>{'x': point.x, 'y': point.y},
       },
       ScribblePrompt(:final points) => <String, Object?>{
         'scribble': points
-            .map(
-              (PromptPoint point) => <String, double>{
-                'x': point.x,
-                'y': point.y,
-              },
-            )
+            .map((PromptPoint point) => <String, double>{'x': point.x, 'y': point.y})
             .toList(),
       },
-      StrokePrompt() => throw StateError(
-        'Signed strokes use the split segmenter.',
-      ),
+      StrokePrompt() => throw StateError('Signed strokes use the split segmenter.'),
     };
-
     final List<JSAny?> arguments = <JSAny?>[webImageData(image), webJsify(roi)];
-
-    if (processingOptions != null)
-      arguments.add(webJsify(_processingOptions(processingOptions)));
-
-    return webImageSegmenterResult(
-      callWebMethod<JSAny?>(task, 'segment', arguments),
-    );
+    if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
+    return webImageSegmenterResult(callWebMethod<JSAny?>(task, 'segment', arguments));
   }
 
   @override
@@ -501,21 +420,18 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
     _isClosed = true;
     final Future<JSObject>? split = _split;
     final Future<JSObject>? legacy = _legacy;
-
     if (split != null) callWebMethod<JSAny?>(await split, 'close');
-
     if (legacy != null) callWebMethod<JSAny?>(await legacy, 'close');
   }
 }
 
-Map<String, Object?> _processingOptions(ImageProcessingOptions options) =>
-    <String, Object?>{
-      'rotationDegrees': options.rotationDegrees,
-      if (options.regionOfInterest case final NormalizedRect roi)
-        'regionOfInterest': <String, double>{
-          'left': roi.left,
-          'top': roi.top,
-          'right': roi.right,
-          'bottom': roi.bottom,
-        },
-    };
+Map<String, Object?> _processingOptions(ImageProcessingOptions options) => <String, Object?>{
+  'rotationDegrees': options.rotationDegrees,
+  if (options.regionOfInterest case final NormalizedRect roi)
+    'regionOfInterest': <String, double>{
+      'left': roi.left,
+      'top': roi.top,
+      'right': roi.right,
+      'bottom': roi.bottom,
+    },
+};

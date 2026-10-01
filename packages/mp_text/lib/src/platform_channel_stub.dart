@@ -13,10 +13,9 @@ Future<TextProofreaderBackend> createPlatformTextProofreader(
 );
 
 /// Reports that summarization needs the Android or iOS Flutter plugin.
-Future<TextSummarizerBackend> createPlatformTextSummarizer(
-  TextSummarizerOptions options,
-) async => throw const MpException(
-  MpStatus.unimplemented,
-  'TextSummarizer requires the mp_text Android or iOS Flutter plugin.',
-  task: 'TextSummarizer',
-);
+Future<TextSummarizerBackend> createPlatformTextSummarizer(TextSummarizerOptions options) async =>
+    throw const MpException(
+      MpStatus.unimplemented,
+      'TextSummarizer requires the mp_text Android or iOS Flutter plugin.',
+      task: 'TextSummarizer',
+    );

@@ -9,13 +9,12 @@ import 'package:flutter/services.dart';
 final class MpCameraRotation {
   const MpCameraRotation._();
 
-  static const Map<DeviceOrientation, int> _deviceDegrees =
-      <DeviceOrientation, int>{
-        DeviceOrientation.portraitUp: 0,
-        DeviceOrientation.landscapeLeft: 90,
-        DeviceOrientation.portraitDown: 180,
-        DeviceOrientation.landscapeRight: 270,
-      };
+  static const Map<DeviceOrientation, int> _deviceDegrees = <DeviceOrientation, int>{
+    DeviceOrientation.portraitUp: 0,
+    DeviceOrientation.landscapeLeft: 90,
+    DeviceOrientation.portraitDown: 180,
+    DeviceOrientation.landscapeRight: 270,
+  };
 
   /// Returns the clockwise rotation required before inference.
   static int degrees(
@@ -30,8 +29,7 @@ final class MpCameraRotation {
     final int device = _deviceDegrees[orientation]!;
     return switch (camera.lensDirection) {
       CameraLensDirection.front => _normalize(sensor + device),
-      CameraLensDirection.back ||
-      CameraLensDirection.external => _normalize(sensor - device),
+      CameraLensDirection.back || CameraLensDirection.external => _normalize(sensor - device),
     };
   }
 

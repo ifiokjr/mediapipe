@@ -91,6 +91,5 @@ final class MpException implements Exception {
 /// An error thrown when a task is used after it has been closed.
 final class MpTaskClosedError extends StateError {
   /// Creates an error for [taskName].
-  MpTaskClosedError(String taskName)
-    : super('$taskName has already been closed.');
+  MpTaskClosedError(String taskName) : super('$taskName has already been closed.');
 }

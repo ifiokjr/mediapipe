@@ -23,32 +23,26 @@ final class MobileGenAiRuntime implements GenAiRuntime {
   const MobileGenAiRuntime();
 
   @override
-  Future<FunctionCallingBackend> createGenerativeModel(
-    GenerativeModelOptions options,
-  ) => _MobileFunctionCallingModel.create(options);
+  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) =>
+      _MobileFunctionCallingModel.create(options);
 
   @override
-  Future<ImageGeneratorBackend> createImageGenerator(
-    ImageGeneratorOptions options,
-  ) => _MobileImageGenerator.create(options);
+  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) =>
+      _MobileImageGenerator.create(options);
 
   @override
   Future<RagPipelineBackend> createRagPipeline(RagPipelineOptions options) =>
       _MobileRagPipeline.create(options);
 
   @override
-  Future<LlmInferenceBackend> createLlmInference(
-    LlmInferenceOptions options,
-  ) async {
-    final _ResolvedLlmConfiguration configuration =
-        await _resolveLlmConfiguration(options);
+  Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) async {
+    final _ResolvedLlmConfiguration configuration = await _resolveLlmConfiguration(options);
     try {
       final int handle = await _bridge.createTask(
         'llm.create',
         configuration.arguments,
         task: 'LlmInference',
       );
-
       return _MobileLlmInference(handle, configuration.resources);
     } on Object {
       await configuration.release();
@@ -67,23 +61,17 @@ final class _ResolvedLlmConfiguration {
       Future.wait(resources.map((_ModelLease resource) => resource.release()));
 }
 
-Future<_ResolvedLlmConfiguration> _resolveLlmConfiguration(
-  LlmInferenceOptions options,
-) async {
-  final _ModelLease model = await _resolveModelFile(
-    options.baseOptions.modelAsset,
-  );
+Future<_ResolvedLlmConfiguration> _resolveLlmConfiguration(LlmInferenceOptions options) async {
+  final _ModelLease model = await _resolveModelFile(options.baseOptions.modelAsset);
   final List<_ModelLease> resources = <_ModelLease>[model];
   try {
     final _ModelLease? visionEncoder = await _resolveOptionalModel(
       options.visionModelOptions?.encoder,
     );
-
     if (visionEncoder != null) resources.add(visionEncoder);
     final _ModelLease? visionAdapter = await _resolveOptionalModel(
       options.visionModelOptions?.adapter,
     );
-
     if (visionAdapter != null) resources.add(visionAdapter);
     return _ResolvedLlmConfiguration(<String, Object?>{
       'modelPath': model.path,
@@ -94,14 +82,10 @@ Future<_ResolvedLlmConfiguration> _resolveLlmConfiguration(
       'preferredBackend': options.preferredBackend.name,
       'visionEncoderPath': visionEncoder?.path,
       'visionAdapterPath': visionAdapter?.path,
-      'maxAudioSequenceLength':
-          options.audioModelOptions?.maxAudioSequenceLength,
+      'maxAudioSequenceLength': options.audioModelOptions?.maxAudioSequenceLength,
     }, resources);
   } on Object {
-    await Future.wait(
-      resources.map((_ModelLease resource) => resource.release()),
-    );
-
+    await Future.wait(resources.map((_ModelLease resource) => resource.release()));
     rethrow;
   }
 }
@@ -114,20 +98,16 @@ final class _ModelLease {
   var _references = 1;
 
   _ModelLease retain() {
-    if (_references <= 0)
-      throw StateError('Cannot retain a released model file.');
+    if (_references <= 0) throw StateError('Cannot retain a released model file.');
     _references++;
-
     return this;
   }
 
   Future<void> release() async {
     if (_references <= 0) return;
     _references--;
-
     if (_references != 0) return;
     final Directory? directory = temporaryDirectory;
-
     if (directory != null && directory.existsSync()) {
       directory.deleteSync(recursive: true);
     }
@@ -139,31 +119,18 @@ Future<_ModelLease?> _resolveOptionalModel(ModelAsset? asset) async =>
 
 Future<_ModelLease> _resolveModelFile(ModelAsset asset) async {
   final ModelAsset resolved = await native.resolveNativeModelAsset(asset);
-
   switch (resolved) {
     case ModelAssetPath(:final path):
       final File file = File(path).absolute;
-
       if (!file.existsSync()) {
-        throw MpException(
-          MpStatus.notFound,
-          'The model file does not exist: ${file.path}',
-        );
+        throw MpException(MpStatus.notFound, 'The model file does not exist: ${file.path}');
       }
       return _ModelLease(file.path);
     case ModelAssetBytes(:final bytes, :final name):
-      final Directory directory = await Directory.systemTemp.createTemp(
-        'mp_genai_model_',
-      );
-      final String rawName =
-          name?.split(RegExp(r'[/\\]')).lastOrNull ?? 'model.task';
-      final String safeName = rawName.replaceAll(
-        RegExp('[^A-Za-z0-9._-]'),
-        '_',
-      );
-      final File file = File(
-        '${directory.path}${Platform.pathSeparator}$safeName',
-      );
+      final Directory directory = await Directory.systemTemp.createTemp('mp_genai_model_');
+      final String rawName = name?.split(RegExp(r'[/\\]')).lastOrNull ?? 'model.task';
+      final String safeName = rawName.replaceAll(RegExp('[^A-Za-z0-9._-]'), '_');
+      final File file = File('${directory.path}${Platform.pathSeparator}$safeName');
       try {
         file.writeAsBytesSync(bytes, flush: true);
         return _ModelLease(file.path, directory);
@@ -193,7 +160,6 @@ abstract base class _MobileLlmTask implements MpTask {
 
   void ensureAvailable() {
     if (_closed) throw MpTaskClosedError(taskName);
-
     if (_busy) {
       throw MpException(
         MpStatus.failedPrecondition,
@@ -209,13 +175,8 @@ abstract base class _MobileLlmTask implements MpTask {
     // `Future.sync` turns a synchronous throw inside [operation] into a rejected
     // future so `whenComplete` always clears `_busy`. Calling `operation()`
     // directly would skip the cleanup and strand this task as permanently busy.
-    final Future<T> result = Future<T>.sync(operation)
-        .whenComplete(() => _busy = false);
-    _activeOperation = result.then<void>(
-      (_) {},
-      onError: (Object _, StackTrace _) {},
-    );
-
+    final Future<T> result = Future<T>.sync(operation).whenComplete(() => _busy = false);
+    _activeOperation = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
   }
 
@@ -230,42 +191,32 @@ abstract base class _MobileLlmTask implements MpTask {
   void markClosed() => _closed = true;
 }
 
-final class _MobileLlmInference extends _MobileLlmTask
-    implements LlmInferenceBackend {
-  _MobileLlmInference(int handle, this._resources)
-    : super(handle, 'LlmInference');
+final class _MobileLlmInference extends _MobileLlmTask implements LlmInferenceBackend {
+  _MobileLlmInference(int handle, this._resources) : super(handle, 'LlmInference');
 
   final List<_ModelLease> _resources;
 
   @override
-  Future<LlmSessionBackend> createSession(LlmSessionOptions options) =>
-      runExclusive(() async {
-        if (options.numResponses != 1) {
-          throw MpException(
-            MpStatus.unimplemented,
-            'Android MediaPipe LLM sessions support one response at a time.',
-            task: taskName,
-          );
-        }
-
-        final _ModelLease? lora = await _resolveOptionalModel(
-          options.loraAsset,
-        );
-        try {
-          final int sessionHandle = await _bridge.createTask(
-            'llm.createSession',
-            <String, Object?>{
-              'handle': handle,
-              ..._sessionOptionsMap(options, loraPath: lora?.path),
-            },
-            task: 'LlmSession',
-          );
-          return _MobileLlmSession(sessionHandle, lora);
-        } on Object {
-          await lora?.release();
-          rethrow;
-        }
-      });
+  Future<LlmSessionBackend> createSession(LlmSessionOptions options) => runExclusive(() async {
+    if (options.numResponses != 1) {
+      throw MpException(
+        MpStatus.unimplemented,
+        'Android MediaPipe LLM sessions support one response at a time.',
+        task: taskName,
+      );
+    }
+    final _ModelLease? lora = await _resolveOptionalModel(options.loraAsset);
+    try {
+      final int sessionHandle = await _bridge.createTask('llm.createSession', <String, Object?>{
+        'handle': handle,
+        ..._sessionOptionsMap(options, loraPath: lora?.path),
+      }, task: 'LlmSession');
+      return _MobileLlmSession(sessionHandle, lora);
+    } on Object {
+      await lora?.release();
+      rethrow;
+    }
+  });
 
   @override
   Future<int> sizeInTokens(String text) => runExclusive(
@@ -281,19 +232,14 @@ final class _MobileLlmInference extends _MobileLlmTask
     markClosed();
     await waitForActiveOperation();
     try {
-      await _bridge.invokeVoid('llm.close', <String, Object?>{
-        'handle': handle,
-      }, task: taskName);
+      await _bridge.invokeVoid('llm.close', <String, Object?>{'handle': handle}, task: taskName);
     } finally {
-      await Future.wait(
-        _resources.map((_ModelLease resource) => resource.release()),
-      );
+      await Future.wait(_resources.map((_ModelLease resource) => resource.release()));
     }
   }
 }
 
-final class _MobileLlmSession extends _MobileLlmTask
-    implements LlmSessionBackend {
+final class _MobileLlmSession extends _MobileLlmTask implements LlmSessionBackend {
   _MobileLlmSession(int handle, this._lora) : super(handle, 'LlmSession');
 
   final _ModelLease? _lora;
@@ -317,7 +263,6 @@ final class _MobileLlmSession extends _MobileLlmTask
         'data': data,
       }, task: taskName);
     }
-
     throw MpException(
       MpStatus.unimplemented,
       'Android LLM image input supports only 8-bit sRGB, sRGBA, or grayscale images.',
@@ -341,9 +286,8 @@ final class _MobileLlmSession extends _MobileLlmTask
     return LlmGeneration(
       chunks: operation.stream,
       response: operation.response,
-      cancel: () => _bridge.invokeVoid('llm.cancel', <String, Object?>{
-        'handle': handle,
-      }, task: taskName),
+      cancel: () =>
+          _bridge.invokeVoid('llm.cancel', <String, Object?>{'handle': handle}, task: taskName),
     );
   }
 
@@ -357,11 +301,9 @@ final class _MobileLlmSession extends _MobileLlmTask
 
   @override
   Future<LlmSessionBackend> clone() => runExclusive(() async {
-    final int cloneHandle = await _bridge.createTask(
-      'llm.cloneSession',
-      <String, Object?>{'handle': handle},
-      task: taskName,
-    );
+    final int cloneHandle = await _bridge.createTask('llm.cloneSession', <String, Object?>{
+      'handle': handle,
+    }, task: taskName);
     return _MobileLlmSession(cloneHandle, _lora?.retain());
   });
 
@@ -388,24 +330,19 @@ final class _MobileLlmSession extends _MobileLlmTask
   }
 }
 
-final class _MobileFunctionCallingModel extends _MobileLlmTask
-    implements FunctionCallingBackend {
-  _MobileFunctionCallingModel._(int handle, this._resources)
-    : super(handle, 'GenerativeModel');
+final class _MobileFunctionCallingModel extends _MobileLlmTask implements FunctionCallingBackend {
+  _MobileFunctionCallingModel._(int handle, this._resources) : super(handle, 'GenerativeModel');
 
   final List<_ModelLease> _resources;
 
-  static Future<_MobileFunctionCallingModel> create(
-    GenerativeModelOptions options,
-  ) async {
-    final _ResolvedLlmConfiguration configuration =
-        await _resolveLlmConfiguration(options.inferenceOptions);
+  static Future<_MobileFunctionCallingModel> create(GenerativeModelOptions options) async {
+    final _ResolvedLlmConfiguration configuration = await _resolveLlmConfiguration(
+      options.inferenceOptions,
+    );
     final List<_ModelLease> resources = configuration.resources;
     _ModelLease? lora;
     try {
-      final LlmSessionOptions sessionOptions =
-          options.sessionOptions ?? LlmSessionOptions();
-
+      final LlmSessionOptions sessionOptions = options.sessionOptions ?? LlmSessionOptions();
       if (sessionOptions.numResponses != 1) {
         throw const MpException(
           MpStatus.unimplemented,
@@ -413,23 +350,16 @@ final class _MobileFunctionCallingModel extends _MobileLlmTask
           task: 'GenerativeModel',
         );
       }
-
       lora = await _resolveOptionalModel(sessionOptions.loraAsset);
-
       if (lora != null) resources.add(lora);
-      final int handle = await _bridge.createTask(
-        'functionCalling.create',
-        <String, Object?>{
-          ...configuration.arguments,
-          ..._sessionOptionsMap(sessionOptions, loraPath: lora?.path),
-          'formatter': options.formatter.name,
-          'addPromptTemplate': options.addPromptTemplate,
-          'systemInstruction': ?_contentMap(options.systemInstruction),
-          'tools': options.tools.map(_toolMap).toList(growable: false),
-        },
-        task: 'GenerativeModel',
-      );
-
+      final int handle = await _bridge.createTask('functionCalling.create', <String, Object?>{
+        ...configuration.arguments,
+        ..._sessionOptionsMap(sessionOptions, loraPath: lora?.path),
+        'formatter': options.formatter.name,
+        'addPromptTemplate': options.addPromptTemplate,
+        'systemInstruction': ?_contentMap(options.systemInstruction),
+        'tools': options.tools.map(_toolMap).toList(growable: false),
+      }, task: 'GenerativeModel');
       return _MobileFunctionCallingModel._(handle, resources);
     } on Object {
       await configuration.release();
@@ -438,27 +368,24 @@ final class _MobileFunctionCallingModel extends _MobileLlmTask
   }
 
   @override
-  Future<GenerateContentResponse> generateContent(
-    List<GenAiContent> contents,
-  ) => runExclusive(() async {
-    final Map<Object?, Object?> result = await _bridge.invokeMap(
-      'functionCalling.generateContent',
-      <String, Object?>{
-        'handle': handle,
-        'contents': contents.map(_contentMap).toList(growable: false),
-      },
-      task: taskName,
-    );
-    return _readGenerateContentResponse(result, taskName);
-  });
+  Future<GenerateContentResponse> generateContent(List<GenAiContent> contents) =>
+      runExclusive(() async {
+        final Map<Object?, Object?> result = await _bridge.invokeMap(
+          'functionCalling.generateContent',
+          <String, Object?>{
+            'handle': handle,
+            'contents': contents.map(_contentMap).toList(growable: false),
+          },
+          task: taskName,
+        );
+        return _readGenerateContentResponse(result, taskName);
+      });
 
   @override
   Future<FunctionCallingChatBackend> startChat() => runExclusive(() async {
-    final int chatHandle = await _bridge.createTask(
-      'functionCalling.startChat',
-      <String, Object?>{'handle': handle},
-      task: 'FunctionCallingChat',
-    );
+    final int chatHandle = await _bridge.createTask('functionCalling.startChat', <String, Object?>{
+      'handle': handle,
+    }, task: 'FunctionCallingChat');
     return _MobileFunctionCallingChat(chatHandle);
   });
 
@@ -472,9 +399,7 @@ final class _MobileFunctionCallingModel extends _MobileLlmTask
         'handle': handle,
       }, task: taskName);
     } finally {
-      await Future.wait(
-        _resources.map((_ModelLease resource) => resource.release()),
-      );
+      await Future.wait(_resources.map((_ModelLease resource) => resource.release()));
     }
   }
 }
@@ -484,15 +409,14 @@ final class _MobileFunctionCallingChat extends _MobileLlmTask
   _MobileFunctionCallingChat(int handle) : super(handle, 'FunctionCallingChat');
 
   @override
-  Future<GenerateContentResponse> sendMessage(GenAiContent content) =>
-      runExclusive(() async {
-        final Map<Object?, Object?> result = await _bridge.invokeMap(
-          'functionCalling.sendMessage',
-          <String, Object?>{'handle': handle, 'content': _contentMap(content)},
-          task: taskName,
-        );
-        return _readGenerateContentResponse(result, taskName);
-      });
+  Future<GenerateContentResponse> sendMessage(GenAiContent content) => runExclusive(() async {
+    final Map<Object?, Object?> result = await _bridge.invokeMap(
+      'functionCalling.sendMessage',
+      <String, Object?>{'handle': handle, 'content': _contentMap(content)},
+      task: taskName,
+    );
+    return _readGenerateContentResponse(result, taskName);
+  });
 
   @override
   Future<ChatRewindResult> rewind() => runExclusive(() async {
@@ -504,10 +428,7 @@ final class _MobileFunctionCallingChat extends _MobileLlmTask
     final Object? sent = result['lastSent'];
     final Object? received = result['lastReceived'];
     if (sent is! Map<Object?, Object?> || received is! Map<Object?, Object?>) {
-      throw MpException(
-        MpStatus.internal,
-        '$taskName returned an invalid rewind result.',
-      );
+      throw MpException(MpStatus.internal, '$taskName returned an invalid rewind result.');
     }
     return ChatRewindResult(
       lastSent: _readContent(sent, taskName),
@@ -525,10 +446,7 @@ final class _MobileFunctionCallingChat extends _MobileLlmTask
     return result
         .map((Object? value) {
           if (value is! Map<Object?, Object?>) {
-            throw MpException(
-              MpStatus.internal,
-              '$taskName returned invalid history.',
-            );
+            throw MpException(MpStatus.internal, '$taskName returned invalid history.');
           }
           return _readContent(value, taskName);
         })
@@ -547,34 +465,25 @@ final class _MobileFunctionCallingChat extends _MobileLlmTask
 
   @override
   Future<FunctionCallingChatBackend> clone() => runExclusive(() async {
-    final int cloneHandle = await _bridge.createTask(
-      'functionCalling.cloneChat',
-      <String, Object?>{'handle': handle},
-      task: taskName,
-    );
+    final int cloneHandle = await _bridge.createTask('functionCalling.cloneChat', <String, Object?>{
+      'handle': handle,
+    }, task: taskName);
     return _MobileFunctionCallingChat(cloneHandle);
   });
 
   @override
-  Future<void> enableConstraint(FunctionCallingConstraint constraint) =>
-      runExclusive(
-        () => _bridge.invokeVoid(
-          'functionCalling.enableConstraint',
-          <String, Object?>{
-            'handle': handle,
-            'constraint': _constraintMap(constraint),
-          },
-          task: taskName,
-        ),
-      );
+  Future<void> enableConstraint(FunctionCallingConstraint constraint) => runExclusive(
+    () => _bridge.invokeVoid('functionCalling.enableConstraint', <String, Object?>{
+      'handle': handle,
+      'constraint': _constraintMap(constraint),
+    }, task: taskName),
+  );
 
   @override
   Future<void> disableConstraint() => runExclusive(
-    () => _bridge.invokeVoid(
-      'functionCalling.disableConstraint',
-      <String, Object?>{'handle': handle},
-      task: taskName,
-    ),
+    () => _bridge.invokeVoid('functionCalling.disableConstraint', <String, Object?>{
+      'handle': handle,
+    }, task: taskName),
   );
 
   @override
@@ -610,18 +519,15 @@ Map<String, Object?> _partMap(GenAiPart part) => switch (part) {
 };
 
 Map<String, Object?> _toolMap(FunctionTool tool) => <String, Object?>{
-  'declarations': tool.declarations
-      .map(_declarationMap)
-      .toList(growable: false),
+  'declarations': tool.declarations.map(_declarationMap).toList(growable: false),
 };
 
-Map<String, Object?> _declarationMap(FunctionDeclaration declaration) =>
-    <String, Object?>{
-      'name': declaration.name,
-      'description': declaration.description,
-      'parameters': ?_schemaMap(declaration.parameters),
-      'response': ?_schemaMap(declaration.response),
-    };
+Map<String, Object?> _declarationMap(FunctionDeclaration declaration) => <String, Object?>{
+  'name': declaration.name,
+  'description': declaration.description,
+  'parameters': ?_schemaMap(declaration.parameters),
+  'response': ?_schemaMap(declaration.response),
+};
 
 Map<String, Object?>? _schemaMap(FunctionSchema? schema) => schema == null
     ? null
@@ -646,53 +552,35 @@ Map<String, Object?>? _schemaMap(FunctionSchema? schema) => schema == null
         'propertyOrdering': schema.propertyOrdering,
       };
 
-Map<String, Object?> _constraintMap(FunctionCallingConstraint constraint) =>
-    switch (constraint) {
-      ToolCallOnlyConstraint(:final prefix, :final suffix) => <String, Object?>{
-        'kind': 'toolCallOnly',
-        'prefix': prefix,
-        'suffix': suffix,
-      },
-      TextAndOrConstraint(
-        :final stopPhrasePrefix,
-        :final stopPhraseSuffix,
-        :final constraintSuffix,
-      ) =>
-        <String, Object?>{
-          'kind': 'textAndOr',
-          'stopPhrasePrefix': stopPhrasePrefix,
-          'stopPhraseSuffix': stopPhraseSuffix,
-          'constraintSuffix': constraintSuffix,
-        },
-      TextUntilConstraint(:final stopPhrase, :final constraintSuffix) =>
-        <String, Object?>{
-          'kind': 'textUntil',
-          'stopPhrase': stopPhrase,
-          'constraintSuffix': constraintSuffix,
-        },
-    };
+Map<String, Object?> _constraintMap(FunctionCallingConstraint constraint) => switch (constraint) {
+  ToolCallOnlyConstraint(:final prefix, :final suffix) => <String, Object?>{
+    'kind': 'toolCallOnly',
+    'prefix': prefix,
+    'suffix': suffix,
+  },
+  TextAndOrConstraint(:final stopPhrasePrefix, :final stopPhraseSuffix, :final constraintSuffix) =>
+    <String, Object?>{
+      'kind': 'textAndOr',
+      'stopPhrasePrefix': stopPhrasePrefix,
+      'stopPhraseSuffix': stopPhraseSuffix,
+      'constraintSuffix': constraintSuffix,
+    },
+  TextUntilConstraint(:final stopPhrase, :final constraintSuffix) => <String, Object?>{
+    'kind': 'textUntil',
+    'stopPhrase': stopPhrase,
+    'constraintSuffix': constraintSuffix,
+  },
+};
 
-GenerateContentResponse _readGenerateContentResponse(
-  Map<Object?, Object?> result,
-  String task,
-) {
+GenerateContentResponse _readGenerateContentResponse(Map<Object?, Object?> result, String task) {
   final Object? rawCandidates = result['candidates'];
-
   if (rawCandidates is! List<Object?>) {
-    throw MpException(
-      MpStatus.internal,
-      '$task returned invalid candidates.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned invalid candidates.', task: task);
   }
   return GenerateContentResponse(
     rawCandidates.map((Object? value) {
       if (value is! Map<Object?, Object?>) {
-        throw MpException(
-          MpStatus.internal,
-          '$task returned an invalid candidate.',
-          task: task,
-        );
+        throw MpException(MpStatus.internal, '$task returned an invalid candidate.', task: task);
       }
       return GenAiCandidate(_readContent(value, task));
     }),
@@ -702,46 +590,26 @@ GenerateContentResponse _readGenerateContentResponse(
 GenAiContent _readContent(Map<Object?, Object?> value, String task) {
   final Object? role = value['role'];
   final Object? rawParts = value['parts'];
-
   if (role is! String || rawParts is! List<Object?>) {
-    throw MpException(
-      MpStatus.internal,
-      '$task returned invalid content.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned invalid content.', task: task);
   }
   return GenAiContent(
     role: role,
     parts: rawParts.map((Object? rawPart) {
       if (rawPart is! Map<Object?, Object?>) {
-        throw MpException(
-          MpStatus.internal,
-          '$task returned an invalid content part.',
-          task: task,
-        );
+        throw MpException(MpStatus.internal, '$task returned an invalid content part.', task: task);
       }
-
       final Object? name = rawPart['name'];
       final Object? rawValue = rawPart['value'];
       return switch (rawPart['kind']) {
-        'text' when rawPart['text'] is String => GenAiTextPart(
-          rawPart['text']! as String,
-        ),
-        'functionCall'
-            when name is String && rawValue is Map<Object?, Object?> =>
+        'text' when rawPart['text'] is String => GenAiTextPart(rawPart['text']! as String),
+        'functionCall' when name is String && rawValue is Map<Object?, Object?> =>
           GenAiFunctionCallPart(
-            FunctionCall(
-              name: name,
-              arguments: _stringKeyedMap(rawValue, task),
-            ),
+            FunctionCall(name: name, arguments: _stringKeyedMap(rawValue, task)),
           ),
-        'functionResponse'
-            when name is String && rawValue is Map<Object?, Object?> =>
+        'functionResponse' when name is String && rawValue is Map<Object?, Object?> =>
           GenAiFunctionResponsePart(
-            FunctionResponse(
-              name: name,
-              response: _stringKeyedMap(rawValue, task),
-            ),
+            FunctionResponse(name: name, response: _stringKeyedMap(rawValue, task)),
           ),
         _ => throw MpException(
           MpStatus.internal,
@@ -755,28 +623,18 @@ GenAiContent _readContent(Map<Object?, Object?> value, String task) {
 
 Map<String, Object?> _stringKeyedMap(Map<Object?, Object?> value, String task) {
   final Map<String, Object?> result = <String, Object?>{};
-
   for (final MapEntry<Object?, Object?> entry in value.entries) {
     if (entry.key is! String) {
-      throw MpException(
-        MpStatus.internal,
-        '$task returned a non-string object key.',
-        task: task,
-      );
+      throw MpException(MpStatus.internal, '$task returned a non-string object key.', task: task);
     }
-
     result[entry.key! as String] = _platformJson(entry.value, task);
   }
-
   return result;
 }
 
 Object? _platformJson(Object? value, String task) => switch (value) {
   null || bool() || String() || num() => value,
-  List<Object?>() =>
-    value
-        .map((Object? item) => _platformJson(item, task))
-        .toList(growable: false),
+  List<Object?>() => value.map((Object? item) => _platformJson(item, task)).toList(growable: false),
   Map<Object?, Object?>() => _stringKeyedMap(value, task),
   _ => throw MpException(
     MpStatus.internal,
@@ -785,28 +643,24 @@ Object? _platformJson(Object? value, String task) => switch (value) {
   ),
 };
 
-final class _MobileRagPipeline extends _MobileLlmTask
-    implements RagPipelineBackend {
-  _MobileRagPipeline._(int handle, this._resources)
-    : super(handle, 'RagPipeline');
+final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBackend {
+  _MobileRagPipeline._(int handle, this._resources) : super(handle, 'RagPipeline');
 
   final List<_ModelLease> _resources;
 
   static Future<_MobileRagPipeline> create(RagPipelineOptions options) async {
-    final _ResolvedLlmConfiguration configuration =
-        await _resolveLlmConfiguration(options.inferenceOptions);
+    final _ResolvedLlmConfiguration configuration = await _resolveLlmConfiguration(
+      options.inferenceOptions,
+    );
     final List<_ModelLease> resources = configuration.resources;
     Future<String> resolve(ModelAsset asset) async {
       final _ModelLease resource = await _resolveModelFile(asset);
       resources.add(resource);
-
       return resource.path;
     }
 
     try {
-      final LlmSessionOptions sessionOptions =
-          options.sessionOptions ?? LlmSessionOptions();
-
+      final LlmSessionOptions sessionOptions = options.sessionOptions ?? LlmSessionOptions();
       if (sessionOptions.numResponses != 1) {
         throw const MpException(
           MpStatus.unimplemented,
@@ -814,13 +668,8 @@ final class _MobileRagPipeline extends _MobileLlmTask
           task: 'RagPipeline',
         );
       }
-
-      final _ModelLease? lora = await _resolveOptionalModel(
-        sessionOptions.loraAsset,
-      );
-
+      final _ModelLease? lora = await _resolveOptionalModel(sessionOptions.loraAsset);
       if (lora != null) resources.add(lora);
-
       final Map<String, Object?> embedding = switch (options.embeddingModel) {
         GeckoEmbeddingModelOptions(
           model: final ModelAsset model,
@@ -830,9 +679,7 @@ final class _MobileRagPipeline extends _MobileLlmTask
           <String, Object?>{
             'kind': 'gecko',
             'modelPath': await resolve(model),
-            'tokenizerPath': tokenizer == null
-                ? null
-                : await resolve(tokenizer),
+            'tokenizerPath': tokenizer == null ? null : await resolve(tokenizer),
             'useGpu': useGpu,
           },
         GemmaEmbeddingModelOptions(
@@ -847,7 +694,6 @@ final class _MobileRagPipeline extends _MobileLlmTask
             'useGpu': useGpu,
           },
       };
-
       final Map<String, Object?> vectorStore = switch (options.vectorStore) {
         InMemoryVectorStoreOptions() => <String, Object?>{'kind': 'memory'},
         SqliteVectorStoreOptions(
@@ -878,19 +724,13 @@ final class _MobileRagPipeline extends _MobileLlmTask
                 .toList(growable: false),
           },
       };
-
-      final int handle = await _bridge.createTask(
-        'rag.create',
-        <String, Object?>{
-          ...configuration.arguments,
-          ..._sessionOptionsMap(sessionOptions, loraPath: lora?.path),
-          'embedding': embedding,
-          'vectorStore': vectorStore,
-          'promptTemplate': options.promptTemplate,
-        },
-        task: 'RagPipeline',
-      );
-
+      final int handle = await _bridge.createTask('rag.create', <String, Object?>{
+        ...configuration.arguments,
+        ..._sessionOptionsMap(sessionOptions, loraPath: lora?.path),
+        'embedding': embedding,
+        'vectorStore': vectorStore,
+        'promptTemplate': options.promptTemplate,
+      }, task: 'RagPipeline');
       return _MobileRagPipeline._(handle, resources);
     } on Object {
       await configuration.release();
@@ -915,80 +755,58 @@ final class _MobileRagPipeline extends _MobileLlmTask
   );
 
   @override
-  Future<List<RagRetrievalEntity>> retrieve(
-    String query,
-    RagRetrievalOptions options,
-  ) => runExclusive(() async {
-    final List<Object?> entities = await _bridge.invokeList(
-      'rag.retrieve',
-      <String, Object?>{
-        'handle': handle,
-        'query': query,
-        ..._ragRetrievalMap(options),
-      },
-      task: taskName,
-    );
-    return entities
-        .map((Object? raw) {
-          if (raw is! Map<Object?, Object?>) {
-            throw MpException(
-              MpStatus.internal,
-              '$taskName returned an invalid entity.',
-            );
-          }
-
-          final Object? text = raw['text'];
-          final Object? rawEmbedding = raw['embedding'];
-          final Object? rawMetadata = raw['metadata'];
-          if (text is! String ||
-              rawEmbedding is! List<Object?> ||
-              rawMetadata is! Map<Object?, Object?>) {
-            throw MpException(
-              MpStatus.internal,
-              '$taskName returned an invalid entity.',
-            );
-          }
-          final List<double> embedding = rawEmbedding
-              .map((Object? value) {
-                if (value is num) return value.toDouble();
-                throw MpException(
-                  MpStatus.internal,
-                  '$taskName returned an invalid embedding.',
-                );
-              })
-              .toList(growable: false);
-          return RagRetrievalEntity(
-            text: text,
-            embedding: embedding,
-            metadata: _stringKeyedMap(rawMetadata, taskName),
-          );
-        })
-        .toList(growable: false);
-  });
-
-  @override
-  Future<String> generate(String query, RagRetrievalOptions options) =>
-      runExclusive(
-        () => _bridge.invokeString('rag.generate', <String, Object?>{
+  Future<List<RagRetrievalEntity>> retrieve(String query, RagRetrievalOptions options) =>
+      runExclusive(() async {
+        final List<Object?> entities = await _bridge.invokeList('rag.retrieve', <String, Object?>{
           'handle': handle,
           'query': query,
           ..._ragRetrievalMap(options),
-        }, task: taskName),
-      );
+        }, task: taskName);
+        return entities
+            .map((Object? raw) {
+              if (raw is! Map<Object?, Object?>) {
+                throw MpException(MpStatus.internal, '$taskName returned an invalid entity.');
+              }
+              final Object? text = raw['text'];
+              final Object? rawEmbedding = raw['embedding'];
+              final Object? rawMetadata = raw['metadata'];
+              if (text is! String ||
+                  rawEmbedding is! List<Object?> ||
+                  rawMetadata is! Map<Object?, Object?>) {
+                throw MpException(MpStatus.internal, '$taskName returned an invalid entity.');
+              }
+              final List<double> embedding = rawEmbedding
+                  .map((Object? value) {
+                    if (value is num) return value.toDouble();
+                    throw MpException(
+                      MpStatus.internal,
+                      '$taskName returned an invalid embedding.',
+                    );
+                  })
+                  .toList(growable: false);
+              return RagRetrievalEntity(
+                text: text,
+                embedding: embedding,
+                metadata: _stringKeyedMap(rawMetadata, taskName),
+              );
+            })
+            .toList(growable: false);
+      });
 
   @override
-  Stream<RagGenerationChunk> generateStreaming(
-    String query,
-    RagRetrievalOptions options,
-  ) {
-    ensureAvailable();
-    final _RagStreamOperation operation = _bridge.startRagGeneration(
-      handle,
-      query,
-      options,
-    );
-    trackGeneration(operation.done);
+  Future<String> generate(String query, RagRetrievalOptions options) => runExclusive(
+    () => _bridge.invokeString('rag.generate', <String, Object?>{
+      'handle': handle,
+      'query': query,
+      ..._ragRetrievalMap(options),
+    }, task: taskName),
+  );
 
+  @override
+  Stream<RagGenerationChunk> generateStreaming(String query, RagRetrievalOptions options) {
+    ensureAvailable();
+    final _RagStreamOperation operation = _bridge.startRagGeneration(handle, query, options);
+    trackGeneration(operation.done);
     return operation.stream;
   }
 
@@ -998,13 +816,9 @@ final class _MobileRagPipeline extends _MobileLlmTask
     markClosed();
     await waitForActiveOperation();
     try {
-      await _bridge.invokeVoid('rag.close', <String, Object?>{
-        'handle': handle,
-      }, task: taskName);
+      await _bridge.invokeVoid('rag.close', <String, Object?>{'handle': handle}, task: taskName);
     } finally {
-      await Future.wait(
-        _resources.map((_ModelLease resource) => resource.release()),
-      );
+      await Future.wait(_resources.map((_ModelLease resource) => resource.release()));
     }
   }
 }
@@ -1015,25 +829,19 @@ Map<String, Object?> _ragDocumentMap(RagDocument document) => <String, Object?>{
   'embeddingText': document.embeddingText,
 };
 
-Map<String, Object?> _ragRetrievalMap(RagRetrievalOptions options) =>
-    <String, Object?>{
-      'topK': options.topK,
-      'minSimilarityScore': options.minSimilarityScore,
-      'task': options.task.name,
-    };
+Map<String, Object?> _ragRetrievalMap(RagRetrievalOptions options) => <String, Object?>{
+  'topK': options.topK,
+  'minSimilarityScore': options.minSimilarityScore,
+  'task': options.task.name,
+};
 
-final class _MobileImageGenerator extends _MobileLlmTask
-    implements ImageGeneratorBackend {
-  _MobileImageGenerator._(int handle, this._resources)
-    : super(handle, 'ImageGenerator');
+final class _MobileImageGenerator extends _MobileLlmTask implements ImageGeneratorBackend {
+  _MobileImageGenerator._(int handle, this._resources) : super(handle, 'ImageGenerator');
 
   final List<_ModelLease> _resources;
 
-  static Future<_MobileImageGenerator> create(
-    ImageGeneratorOptions options,
-  ) async {
+  static Future<_MobileImageGenerator> create(ImageGeneratorOptions options) async {
     final Directory modelDirectory = Directory(options.modelDirectory).absolute;
-
     if (!modelDirectory.existsSync()) {
       throw MpException(
         MpStatus.notFound,
@@ -1041,13 +849,11 @@ final class _MobileImageGenerator extends _MobileLlmTask
         task: 'ImageGenerator',
       );
     }
-
     final List<_ModelLease> resources = <_ModelLease>[];
     Future<String?> resolve(ModelAsset? asset) async {
       if (asset == null) return null;
       final _ModelLease resource = await _resolveModelFile(asset);
       resources.add(resource);
-
       return resource.path;
     }
 
@@ -1058,7 +864,6 @@ final class _MobileImageGenerator extends _MobileLlmTask
         'modelType': options.modelType.name,
         'loraWeightsPath': await resolve(options.loraWeights),
       };
-
       if (conditions?.face case final FaceConditionOptions face) {
         arguments['faceCondition'] = <String, Object?>{
           'pluginModelPath': await resolve(face.pluginModel.modelAsset),
@@ -1067,7 +872,6 @@ final class _MobileImageGenerator extends _MobileLlmTask
           'minFacePresenceConfidence': face.minFacePresenceConfidence,
         };
       }
-
       if (conditions?.edge case final EdgeConditionOptions edge) {
         arguments['edgeCondition'] = <String, Object?>{
           'pluginModelPath': await resolve(edge.pluginModel.modelAsset),
@@ -1077,25 +881,20 @@ final class _MobileImageGenerator extends _MobileLlmTask
           'l2Gradient': edge.l2Gradient,
         };
       }
-
       if (conditions?.depth case final DepthConditionOptions depth) {
         arguments['depthCondition'] = <String, Object?>{
           'pluginModelPath': await resolve(depth.pluginModel.modelAsset),
           'depthModelPath': await resolve(depth.depthModel.modelAsset),
         };
       }
-
       final int handle = await _bridge.createTask(
         'imageGenerator.create',
         arguments,
         task: 'ImageGenerator',
       );
-
       return _MobileImageGenerator._(handle, resources);
     } on Object {
-      await Future.wait(
-        resources.map((_ModelLease resource) => resource.release()),
-      );
+      await Future.wait(resources.map((_ModelLease resource) => resource.release()));
       rethrow;
     }
   }
@@ -1133,49 +932,37 @@ final class _MobileImageGenerator extends _MobileLlmTask
   );
 
   @override
-  Future<ImageGeneratorResult?> execute({required bool showResult}) =>
-      runExclusive(() async {
-        final Map<Object?, Object?>? result = await _bridge.invokeOptionalMap(
-          'imageGenerator.execute',
-          <String, Object?>{'handle': handle, 'showResult': showResult},
-          task: taskName,
-        );
-        return result == null ? null : _readResult(result);
-      });
-
-  @override
-  Future<MpImage> createConditionImage(
-    MpImage image,
-    ImageGeneratorConditionType type,
-  ) => runExclusive(() async {
-    final Map<Object?, Object?> result = await _bridge.invokeMap(
-      'imageGenerator.createConditionImage',
-      <String, Object?>{
-        'handle': handle,
-        'conditionType': type.name,
-        'image': _imageMap(image),
-      },
+  Future<ImageGeneratorResult?> execute({required bool showResult}) => runExclusive(() async {
+    final Map<Object?, Object?>? result = await _bridge.invokeOptionalMap(
+      'imageGenerator.execute',
+      <String, Object?>{'handle': handle, 'showResult': showResult},
       task: taskName,
     );
-    return _readImage(result, taskName);
+    return result == null ? null : _readResult(result);
   });
 
-  Future<ImageGeneratorResult> _invokeResult(
-    String method,
-    Map<String, Object?> arguments,
-  ) async {
-    final Map<Object?, Object?> result = await _bridge.invokeMap(
-      method,
-      arguments,
-      task: taskName,
-    );
+  @override
+  Future<MpImage> createConditionImage(MpImage image, ImageGeneratorConditionType type) =>
+      runExclusive(() async {
+        final Map<Object?, Object?> result = await _bridge.invokeMap(
+          'imageGenerator.createConditionImage',
+          <String, Object?>{
+            'handle': handle,
+            'conditionType': type.name,
+            'image': _imageMap(image),
+          },
+          task: taskName,
+        );
+        return _readImage(result, taskName);
+      });
 
+  Future<ImageGeneratorResult> _invokeResult(String method, Map<String, Object?> arguments) async {
+    final Map<Object?, Object?> result = await _bridge.invokeMap(method, arguments, task: taskName);
     return _readResult(result);
   }
 
   ImageGeneratorResult _readResult(Map<Object?, Object?> result) {
     final Object? generated = result['generatedImage'];
-
     if (generated is! Map<Object?, Object?>) {
       throw MpException(
         MpStatus.internal,
@@ -1183,10 +970,8 @@ final class _MobileImageGenerator extends _MobileLlmTask
         task: taskName,
       );
     }
-
     final Object? rawCondition = result['conditionImage'];
     final Object? timestamp = result['timestampMs'];
-
     if (timestamp is! num) {
       throw MpException(
         MpStatus.internal,
@@ -1213,25 +998,18 @@ final class _MobileImageGenerator extends _MobileLlmTask
         'handle': handle,
       }, task: taskName);
     } finally {
-      await Future.wait(
-        _resources.map((_ModelLease resource) => resource.release()),
-      );
+      await Future.wait(_resources.map((_ModelLease resource) => resource.release()));
     }
   }
 }
 
-Map<String, Object?>? _conditionMap(ImageGeneratorCondition? condition) =>
-    condition == null
+Map<String, Object?>? _conditionMap(ImageGeneratorCondition? condition) => condition == null
     ? null
-    : <String, Object?>{
-        'conditionType': condition.type.name,
-        'image': _imageMap(condition.image),
-      };
+    : <String, Object?>{'conditionType': condition.type.name, 'image': _imageMap(condition.image)};
 
 Map<String, Object?> _imageMap(MpImage image) {
   if (image case MpImageUint8(:final data)) {
-    if (image.format
-        case MpImageFormat.srgb || MpImageFormat.srgba || MpImageFormat.gray8) {
+    if (image.format case MpImageFormat.srgb || MpImageFormat.srgba || MpImageFormat.gray8) {
       return <String, Object?>{
         'width': image.width,
         'height': image.height,
@@ -1240,7 +1018,6 @@ Map<String, Object?> _imageMap(MpImage image) {
       };
     }
   }
-
   throw const MpException(
     MpStatus.unimplemented,
     'Android image generation supports only 8-bit sRGB, sRGBA, or grayscale images.',
@@ -1252,13 +1029,8 @@ MpImage _readImage(Map<Object?, Object?> value, String task) {
   final Object? width = value['width'];
   final Object? height = value['height'];
   final Object? data = value['data'];
-
   if (width is! num || height is! num || data is! Uint8List) {
-    throw MpException(
-      MpStatus.internal,
-      '$task returned invalid image data.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned invalid image data.', task: task);
   }
   return MpImage.uint8(
     width: width.toInt(),
@@ -1279,15 +1051,13 @@ Map<String, Object?> _sessionOptionsMap(
   'randomSeed': options.randomSeed,
   if (includeImmutable) 'loraPath': loraPath,
   if (includeImmutable)
-    if (options.graphOptions
-        case final LlmGraphOptions graph) ...<String, Object?>{
+    if (options.graphOptions case final LlmGraphOptions graph) ...<String, Object?>{
       'includeTokenCostCalculator': graph.includeTokenCostCalculator,
       'enableVisionModality': graph.enableVisionModality,
       'enableAudioModality': graph.enableAudioModality,
     },
   if (includeImmutable)
-    if (options.constraintHandle case final int handle)
-      'constraintHandle': handle,
+    if (options.constraintHandle case final int handle) 'constraintHandle': handle,
   if (includeImmutable)
     if (options.promptTemplates case final PromptTemplates templates)
       'promptTemplates': <String, Object?>{
@@ -1301,11 +1071,7 @@ Map<String, Object?> _sessionOptionsMap(
 };
 
 final class _GenerationOperation {
-  const _GenerationOperation({
-    required this.stream,
-    required this.response,
-    required this.done,
-  });
+  const _GenerationOperation({required this.stream, required this.response, required this.done});
 
   final Stream<LlmGenerationChunk> stream;
   final Future<String> response;
@@ -1321,8 +1087,7 @@ abstract interface class _PendingPlatformStream {
 }
 
 final class _PendingGeneration implements _PendingPlatformStream {
-  final StreamController<LlmGenerationChunk> controller =
-      StreamController<LlmGenerationChunk>();
+  final StreamController<LlmGenerationChunk> controller = StreamController<LlmGenerationChunk>();
   final Completer<String> response = Completer<String>();
   final StringBuffer text = StringBuffer();
   bool terminal = false;
@@ -1332,18 +1097,10 @@ final class _PendingGeneration implements _PendingPlatformStream {
     if (terminal) return;
     final Object? rawText = event['text'];
     final Object? rawDone = event['isDone'];
-
     if (rawText is! String || rawDone is! bool) {
-      fail(
-        const MpException(
-          MpStatus.internal,
-          'LlmSession returned an invalid stream event.',
-        ),
-      );
-
+      fail(const MpException(MpStatus.internal, 'LlmSession returned an invalid stream event.'));
       return;
     }
-
     text.write(rawText);
     controller.add(LlmGenerationChunk(text: rawText, isDone: rawDone));
   }
@@ -1374,8 +1131,7 @@ final class _RagStreamOperation {
 }
 
 final class _PendingRagGeneration implements _PendingPlatformStream {
-  final StreamController<RagGenerationChunk> controller =
-      StreamController<RagGenerationChunk>();
+  final StreamController<RagGenerationChunk> controller = StreamController<RagGenerationChunk>();
   final Completer<void> completion = Completer<void>();
   bool terminal = false;
 
@@ -1384,18 +1140,10 @@ final class _PendingRagGeneration implements _PendingPlatformStream {
     if (terminal) return;
     final Object? text = event['text'];
     final Object? isDone = event['isDone'];
-
     if (text is! String || isDone is! bool) {
-      fail(
-        const MpException(
-          MpStatus.internal,
-          'RagPipeline returned an invalid stream event.',
-        ),
-      );
-
+      fail(const MpException(MpStatus.internal, 'RagPipeline returned an invalid stream event.'));
       return;
     }
-
     controller.add(RagGenerationChunk(text: text, isDone: isDone));
   }
 
@@ -1419,14 +1167,10 @@ final class _PendingRagGeneration implements _PendingPlatformStream {
 
 final class _MobileGenAiBridge {
   _MobileGenAiBridge() {
-    _events.receiveBroadcastStream().listen(
-      _onEvent,
-      onError: _onEventChannelError,
-    );
+    _events.receiveBroadcastStream().listen(_onEvent, onError: _onEventChannelError);
   }
 
-  final Map<String, _PendingPlatformStream> _pending =
-      <String, _PendingPlatformStream>{};
+  final Map<String, _PendingPlatformStream> _pending = <String, _PendingPlatformStream>{};
   var _nextRequest = 0;
 
   Future<int> createTask(
@@ -1436,11 +1180,7 @@ final class _MobileGenAiBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result is num) return result.toInt();
-    throw MpException(
-      MpStatus.internal,
-      '$task creation returned an invalid handle.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task creation returned an invalid handle.', task: task);
   }
 
   Future<int> invokeInt(
@@ -1450,11 +1190,7 @@ final class _MobileGenAiBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result is num) return result.toInt();
-    throw MpException(
-      MpStatus.internal,
-      '$task returned a non-integer result.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned a non-integer result.', task: task);
   }
 
   Future<bool> invokeBool(
@@ -1464,11 +1200,7 @@ final class _MobileGenAiBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result is bool) return result;
-    throw MpException(
-      MpStatus.internal,
-      '$task returned a non-boolean result.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned a non-boolean result.', task: task);
   }
 
   Future<String> invokeString(
@@ -1478,11 +1210,7 @@ final class _MobileGenAiBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result is String) return result;
-    throw MpException(
-      MpStatus.internal,
-      '$task returned a non-string result.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned a non-string result.', task: task);
   }
 
   Future<List<Object?>> invokeList(
@@ -1492,11 +1220,7 @@ final class _MobileGenAiBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result is List<Object?>) return result;
-    throw MpException(
-      MpStatus.internal,
-      '$task returned an invalid list.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned an invalid list.', task: task);
   }
 
   Future<Map<Object?, Object?>> invokeMap(
@@ -1506,11 +1230,7 @@ final class _MobileGenAiBridge {
   }) async {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result case final Map<Object?, Object?> map) return map;
-    throw MpException(
-      MpStatus.internal,
-      '$task returned an invalid result.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned an invalid result.', task: task);
   }
 
   Future<Map<Object?, Object?>?> invokeOptionalMap(
@@ -1521,11 +1241,7 @@ final class _MobileGenAiBridge {
     final Object? result = await _invoke(method, arguments, task: task);
     if (result == null) return null;
     if (result case final Map<Object?, Object?> map) return map;
-    throw MpException(
-      MpStatus.internal,
-      '$task returned an invalid result.',
-      task: task,
-    );
+    throw MpException(MpStatus.internal, '$task returned an invalid result.', task: task);
   }
 
   Future<void> invokeVoid(
@@ -1537,8 +1253,7 @@ final class _MobileGenAiBridge {
   }
 
   _GenerationOperation startGeneration(int handle) {
-    final String requestId =
-        '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
+    final String requestId = '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
     final _PendingGeneration pending = _PendingGeneration();
     _pending[requestId] = pending;
     unawaited(
@@ -1553,20 +1268,12 @@ final class _MobileGenAiBridge {
     return _GenerationOperation(
       stream: pending.controller.stream,
       response: pending.response.future,
-      done: pending.response.future.then<void>(
-        (_) {},
-        onError: (Object _, StackTrace _) {},
-      ),
+      done: pending.response.future.then<void>((_) {}, onError: (Object _, StackTrace _) {}),
     );
   }
 
-  _RagStreamOperation startRagGeneration(
-    int handle,
-    String query,
-    RagRetrievalOptions options,
-  ) {
-    final String requestId =
-        '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
+  _RagStreamOperation startRagGeneration(int handle, String query, RagRetrievalOptions options) {
+    final String requestId = '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
     final _PendingRagGeneration pending = _PendingRagGeneration();
     _pending[requestId] = pending;
     unawaited(
@@ -1580,11 +1287,7 @@ final class _MobileGenAiBridge {
         return null;
       }),
     );
-
-    return _RagStreamOperation(
-      pending.controller.stream,
-      pending.completion.future,
-    );
+    return _RagStreamOperation(pending.controller.stream, pending.completion.future);
   }
 
   Future<Object?> _invoke(
@@ -1614,33 +1317,24 @@ final class _MobileGenAiBridge {
   void _onEvent(Object? rawEvent) {
     if (rawEvent is! Map<Object?, Object?>) return;
     final String? requestId = rawEvent['requestId'] as String?;
-
     if (requestId == null) return;
     final _PendingPlatformStream? pending = _pending[requestId];
-
     if (pending == null) return;
-
     switch (rawEvent['kind']) {
       case 'data':
         pending.add(rawEvent);
       case 'done':
         _pending.remove(requestId)?.complete();
       case 'error':
-        final String message =
-            rawEvent['message'] as String? ?? 'Generation failed.';
+        final String message = rawEvent['message'] as String? ?? 'Generation failed.';
         final String code = rawEvent['code'] as String? ?? 'internal';
-        _pending
-            .remove(requestId)
-            ?.fail(MpException(_statusFromPlatformCode(code), message));
+        _pending.remove(requestId)?.fail(MpException(_statusFromPlatformCode(code), message));
     }
   }
 
   void _onEventChannelError(Object error, StackTrace stackTrace) {
-    final List<_PendingPlatformStream> pending = _pending.values.toList(
-      growable: false,
-    );
+    final List<_PendingPlatformStream> pending = _pending.values.toList(growable: false);
     _pending.clear();
-
     for (final _PendingPlatformStream generation in pending) {
       generation.fail(error, stackTrace);
     }
