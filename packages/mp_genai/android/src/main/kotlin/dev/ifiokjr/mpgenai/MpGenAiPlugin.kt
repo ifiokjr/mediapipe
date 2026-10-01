@@ -245,7 +245,6 @@ class MpGenAiPlugin :
             call.argument<ByteArray>("data")
                 ?: throw IllegalArgumentException("data must be a byte array")
         val bitmap = data.toBitmap(width, height, format)
-
         executor.execute {
             val image = BitmapImageBuilder(bitmap).build()
             try {
@@ -675,7 +674,6 @@ class MpGenAiPlugin :
                 val chat = model.model.startChat()
                 val handle = nextHandle.getAndIncrement()
                 functionChats[handle] = FunctionChatHolder(chat, modelHandle)
-
                 result.successOnMain(handle)
             } catch (error: Throwable) {
                 result.errorOnMain(error)
@@ -828,8 +826,8 @@ class MpGenAiPlugin :
         executor.execute {
             try {
                 chats.forEach(ChatSession::close)
-
                 model.backend.close()
+
                 result.successOnMain(null)
             } catch (error: Throwable) {
                 result.errorOnMain(error)
