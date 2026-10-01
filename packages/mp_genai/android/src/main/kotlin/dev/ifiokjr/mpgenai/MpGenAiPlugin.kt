@@ -115,7 +115,6 @@ class MpGenAiPlugin :
                 "llm.addImage" -> addImage(call, result)
                 "llm.addAudio" -> addAudio(call, result)
                 "llm.generate" -> generate(call, result)
-
                 "llm.cancel" -> cancel(call, result)
                 "llm.cloneSession" -> cloneSession(call, result)
                 "llm.updateSession" -> updateSession(call, result)
@@ -183,7 +182,6 @@ class MpGenAiPlugin :
                 sessions[handle] = session
                 result.successOnMain(handle)
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
@@ -379,7 +377,6 @@ class MpGenAiPlugin :
                         .build()
                 }
                 result.successOnMain(null)
-
             } catch (error: Throwable) {
                 result.errorOnMain(error)
             }
@@ -399,7 +396,6 @@ class MpGenAiPlugin :
                 session.close()
                 result.successOnMain(null)
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
@@ -418,7 +414,6 @@ class MpGenAiPlugin :
                 engine.close()
                 result.successOnMain(null)
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
@@ -440,7 +435,6 @@ class MpGenAiPlugin :
                 val generator =
                     if (conditions == null) {
                         ImageGenerator.createFromOptions(applicationContext, options.build())
-
                     } else {
                         ImageGenerator.createFromOptions(
                             applicationContext,
@@ -486,7 +480,6 @@ class MpGenAiPlugin :
                     }
                 result.successOnMain(output.toDartResult())
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             } finally {
                 ownedImage?.close()
@@ -524,7 +517,6 @@ class MpGenAiPlugin :
                 result.successOnMain(null)
             } catch (error: Throwable) {
                 result.errorOnMain(error)
-
             } finally {
                 ownedImage?.close()
             }
@@ -559,7 +551,6 @@ class MpGenAiPlugin :
                 try {
                     result.successOnMain(output.toDartImage())
                 } finally {
-
                     output.close()
                 }
             } catch (error: Throwable) {
@@ -583,7 +574,6 @@ class MpGenAiPlugin :
                 generator.close()
                 result.successOnMain(null)
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
@@ -604,7 +594,6 @@ class MpGenAiPlugin :
             when (call.requiredString("formatter")) {
                 "gemma" -> GemmaFormatter(formatterOptions)
                 "llama" -> LlamaFormatter(formatterOptions)
-
                 "hammer" -> HammerFormatter(formatterOptions)
                 else -> throw IllegalArgumentException("Unknown function-calling formatter")
             }
@@ -645,7 +634,6 @@ class MpGenAiPlugin :
             } catch (error: Throwable) {
                 if (backend == null) {
                     runCatching { inference?.close() }
-
                 } else {
                     runCatching { backend.close() }
                 }
@@ -669,7 +657,6 @@ class MpGenAiPlugin :
             try {
                 result.successOnMain(model.generateContent(contents).toDartResponse())
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
@@ -821,7 +808,6 @@ class MpGenAiPlugin :
                 chat.chat.close()
                 result.successOnMain(null)
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
@@ -926,7 +912,6 @@ class MpGenAiPlugin :
                     ),
                 )
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
@@ -1024,7 +1009,6 @@ class MpGenAiPlugin :
                 pipeline.languageModel.close()
                 result.successOnMain(null)
             } catch (error: Throwable) {
-
                 result.errorOnMain(error)
             }
         }
