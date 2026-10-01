@@ -104,12 +104,14 @@ final class _FakeRagBackend implements RagPipelineBackend {
   @override
   Future<bool> record(RagDocument document) async {
     documents.add(document);
+
     return true;
   }
 
   @override
   Future<bool> recordAll(List<RagDocument> documents) async {
     this.documents.addAll(documents);
+
     return true;
   }
 
@@ -128,6 +130,7 @@ final class _FakeRagBackend implements RagPipelineBackend {
   @override
   Future<String> generate(String query, RagRetrievalOptions options) async {
     lastOptions = options;
+
     return 'Observed locally.';
   }
 

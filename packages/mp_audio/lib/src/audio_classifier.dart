@@ -86,6 +86,7 @@ final class AudioClassifier implements MpTask {
   /// dropped rather than retained.
   Stream<AudioClassifierResult> get results {
     _lifecycle.ensureOpen();
+
     return _backend.results;
   }
 
@@ -93,6 +94,7 @@ final class AudioClassifier implements MpTask {
   Future<AudioClassifierResult> classify(AudioData audio) {
     _lifecycle.ensureOpen();
     _requireMode(AudioRunningMode.audioClips, 'classify');
+
     return _backend.classify(audio);
   }
 
@@ -101,6 +103,7 @@ final class AudioClassifier implements MpTask {
     _lifecycle.ensureOpen();
     _requireMode(AudioRunningMode.audioStream, 'classifyAsync');
     _timestamps.add(timestampMs);
+
     return _backend.classifyAsync(audio, timestampMs);
   }
 

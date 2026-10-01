@@ -110,6 +110,7 @@ void main() {
         case 'rag.close':
           return null;
       }
+
       throw PlatformException(code: 'unimplemented', message: call.method);
     });
   });
@@ -303,6 +304,7 @@ LlmInferenceOptions _inferenceOptions(File model) =>
 File _temporaryFile(String prefix, String name) {
   final Directory directory = Directory.systemTemp.createTempSync(prefix);
   addTearDown(() => directory.deleteSync(recursive: true));
+
   return File('${directory.path}${Platform.pathSeparator}$name')..writeAsBytesSync(<int>[1]);
 }
 

@@ -21,6 +21,7 @@ Future<TextProofreaderBackend> createPlatformTextProofreader(TextProofreaderOpti
       'modelPath': model.path,
       'maxTokens': options.maxTokens,
     }, task: 'TextProofreader');
+
     return _MobileTextProofreader(handle, model);
   } on Object {
     await model.close();
@@ -37,6 +38,7 @@ Future<TextSummarizerBackend> createPlatformTextSummarizer(TextSummarizerOptions
       'maxTokens': options.maxTokens,
       'mode': options.mode.name,
     }, task: 'TextSummarizer');
+
     return _MobileTextSummarizer(handle, model);
   } on Object {
     await model.close();
@@ -52,6 +54,7 @@ final class _ResolvedModelFile {
 
   Future<void> close() async {
     final Directory? directory = temporaryDirectory;
+
     if (directory != null && directory.existsSync()) {
       directory.deleteSync(recursive: true);
     }
@@ -60,9 +63,11 @@ final class _ResolvedModelFile {
 
 Future<_ResolvedModelFile> _resolveModelFile(ModelAsset asset) async {
   final ModelAsset resolved = await native.resolveNativeModelAsset(asset);
+
   switch (resolved) {
     case ModelAssetPath(:final path):
       final File file = File(path).absolute;
+
       if (!file.existsSync()) {
         throw MpException(MpStatus.notFound, 'The model file does not exist: ${file.path}');
       }
@@ -103,6 +108,7 @@ abstract base class _MobileTextTask implements MpTask {
 
   void ensureAvailable() {
     if (_closed) throw MpTaskClosedError(taskName);
+
     if (_busy) {
       throw MpException(
         MpStatus.failedPrecondition,
@@ -120,6 +126,7 @@ abstract base class _MobileTextTask implements MpTask {
     // directly would skip the cleanup and strand this task as permanently busy.
     final Future<T> result = Future<T>.sync(operation).whenComplete(() => _busy = false);
     _activeOperation = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+
     return result;
   }
 
@@ -133,7 +140,9 @@ abstract base class _MobileTextTask implements MpTask {
       _busy = false;
       rethrow;
     }
+
     _activeOperation = result.done.whenComplete(() => _busy = false);
+
     return result.stream;
   }
 
@@ -254,6 +263,7 @@ final class _TypedPendingStream<T> implements _PendingStream {
   void fail(Object error, [StackTrace? stackTrace]) {
     if (completion.isCompleted) return;
     completion.complete();
+
     if (!_streamClosed) {
       _streamClosed = true;
       controller.addError(error, stackTrace);
@@ -265,6 +275,7 @@ final class _TypedPendingStream<T> implements _PendingStream {
   void close() {
     if (completion.isCompleted) return;
     completion.complete();
+
     if (!_streamClosed) {
       _streamClosed = true;
       unawaited(controller.close());
@@ -356,9 +367,12 @@ final class _MobileTextBridge {
   void _onEvent(Object? rawEvent) {
     if (rawEvent is! Map<Object?, Object?>) return;
     final String? requestId = rawEvent['requestId'] as String?;
+
     if (requestId == null) return;
     final _PendingStream? pending = _pending[requestId];
+
     if (pending == null) return;
+
     switch (rawEvent['kind']) {
       case 'data':
         pending.add(rawEvent);
@@ -374,6 +388,7 @@ final class _MobileTextBridge {
   void _onEventChannelError(Object error, StackTrace stackTrace) {
     final List<_PendingStream> pending = _pending.values.toList(growable: false);
     _pending.clear();
+
     for (final _PendingStream stream in pending) {
       stream.fail(error, stackTrace);
     }
@@ -382,26 +397,31 @@ final class _MobileTextBridge {
 
 String _requiredString(Map<Object?, Object?> map, String key, String task) {
   final Object? value = map[key];
+
   if (value is String) return value;
   throw MpException(MpStatus.internal, '$task returned a non-string $key.', task: task);
 }
 
 bool _requiredBool(Map<Object?, Object?> map, String key, String task) {
   final Object? value = map[key];
+
   if (value is bool) return value;
   throw MpException(MpStatus.internal, '$task returned a non-boolean $key.', task: task);
 }
 
 List<TextCorrection> _readCorrections(Object? raw, String task) {
   if (raw == null) return const <TextCorrection>[];
+
   if (raw is! List<Object?>) {
     throw MpException(MpStatus.internal, '$task returned invalid corrections.', task: task);
   }
+
   return raw
       .map((Object? value) {
         if (value is! Map<Object?, Object?>) {
           throw MpException(MpStatus.internal, '$task returned an invalid correction.', task: task);
         }
+
         final String type = _requiredString(value, 'type', task);
         return TextCorrection(
           type: switch (type) {
@@ -414,6 +434,7 @@ List<TextCorrection> _readCorrections(Object? raw, String task) {
               task: task,
             ),
           },
+
           text: _requiredString(value, 'text', task),
         );
       })

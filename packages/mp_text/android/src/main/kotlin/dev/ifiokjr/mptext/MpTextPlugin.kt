@@ -213,6 +213,7 @@ class MpTextPlugin :
                 val handle = nextHandle.getAndIncrement()
                 summarizers[handle] = summarizer
                 result.successOnMain(handle)
+
             } catch (error: Throwable) {
                 result.errorOnMain(error)
             }

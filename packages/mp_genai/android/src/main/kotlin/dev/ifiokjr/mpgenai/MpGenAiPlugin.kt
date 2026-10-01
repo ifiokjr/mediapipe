@@ -17,6 +17,7 @@ import com.google.ai.edge.localagents.core.proto.Type
 import com.google.ai.edge.localagents.fc.ChatSession
 import com.google.ai.edge.localagents.fc.GemmaFormatter
 import com.google.ai.edge.localagents.fc.GenerativeModel
+
 import com.google.ai.edge.localagents.fc.HammerFormatter
 import com.google.ai.edge.localagents.fc.LlamaFormatter
 import com.google.ai.edge.localagents.fc.LlmInferenceBackend
@@ -125,6 +126,7 @@ class MpGenAiPlugin :
                 "imageGenerator.create" -> createImageGenerator(call, result)
                 "imageGenerator.generate" -> generateImage(call, result)
                 "imageGenerator.setInputs" -> setImageGeneratorInputs(call, result)
+
                 "imageGenerator.execute" -> executeImageGenerator(call, result)
                 "imageGenerator.createConditionImage" -> createConditionImage(call, result)
                 "imageGenerator.close" -> closeImageGenerator(call, result)
