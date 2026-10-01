@@ -14,6 +14,7 @@ const int pubDevBatchSize = 4;
 
 Future<void> main(List<String> arguments) async {
   final String version = _readOption(arguments, '--version');
+
   if (!RegExp(r'^\d+\.\d+\.\d+([+-][0-9A-Za-z.-]+)?$').hasMatch(version)) {
     throw FormatException('Invalid package version: $version');
   }
@@ -35,12 +36,14 @@ Future<void> main(List<String> arguments) async {
             uri: uri,
           );
         }
+
         final Object? decoded = jsonDecode(await utf8.decodeStream(response));
         if (decoded case {'versions': final List<Object?> versions}) {
           return versions.whereType<Map<String, Object?>>().any(
             (Map<String, Object?> release) => release['version'] == expectedVersion,
           );
         }
+
         throw const FormatException('pub.dev returned an invalid package response.');
       },
     );
@@ -54,6 +57,7 @@ Future<void> main(List<String> arguments) async {
     stdout.writeln(jsonEncode(result));
 
     final String? githubOutput = Platform.environment['GITHUB_OUTPUT'];
+
     if (githubOutput != null && githubOutput.isNotEmpty) {
       File(githubOutput).writeAsStringSync(
         'count=${batch.length}\n'
@@ -75,16 +79,20 @@ Future<List<String>> pendingPackages({
   required VersionExists versionExists,
 }) async {
   final List<String> pending = <String>[];
+
   for (final String packageName in packageNames) {
     if (!await versionExists(packageName, version)) pending.add(packageName);
   }
+
   return pending;
 }
 
 String _readOption(List<String> arguments, String name) {
   final int index = arguments.indexOf(name);
+
   if (index == -1 || index + 1 >= arguments.length) {
     throw FormatException('Missing required option $name.');
   }
+
   return arguments[index + 1];
 }

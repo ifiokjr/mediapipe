@@ -89,6 +89,7 @@ final class LanguageDetector implements MpTask {
   /// Detects the languages present in [text].
   Future<LanguageDetectorResult> detect(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.detect(text);
   }
 

@@ -10,6 +10,7 @@ import 'rag.dart';
 import 'runtime_stub.dart'
     if (dart.library.io) 'runtime_native.dart'
     if (dart.library.js_interop) 'runtime_web.dart'
+
     as platform;
 
 /// Native or web engine implementation used by [LlmInference].

@@ -294,6 +294,7 @@ class _PlaygroundState extends State<_Playground>
         ? 'Meet your movement buddy.'
         : _paused
         ? 'Set paused'
+
         : _faceMode
         ? 'Make it your own.'
         : burpees
@@ -524,6 +525,7 @@ class _PlaygroundState extends State<_Playground>
                     FaceAccessory.crown => 'A little main-character energy',
                     FaceAccessory.robotEars => 'Tune in to your inner robot',
                   }),
+
                   value: _accessories.contains(accessory),
                   onChanged: (bool? enabled) => setState(() {
                     _accessories = <FaceAccessory>{..._accessories};

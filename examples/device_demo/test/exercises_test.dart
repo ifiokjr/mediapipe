@@ -89,6 +89,7 @@ void main() {
       pose[index] = const NormalizedLandmark(x: 1.2, y: .5, z: 0, visibility: 1);
       expect(movementDepth(exercise, pose, 1), isNull);
     }
+
     expect(movementDepth(Exercise.squats, <NormalizedLandmark>[], 1), isNull);
     expect(movementDepth(Exercise.squats, _rest(Exercise.squats), 0), isNull);
   });
@@ -118,6 +119,7 @@ void main() {
       _set(plank, 25 + side, .65, .5);
       _set(plank, 27 + side, .85, .5);
     }
+
     final List<NormalizedLandmark> jump = stand
         .map(
           (NormalizedLandmark p) => NormalizedLandmark(x: p.x, y: p.y - .08, z: 0, visibility: 1),

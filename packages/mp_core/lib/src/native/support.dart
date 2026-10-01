@@ -17,6 +17,7 @@ Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
     if (uri.scheme == 'file') {
       return ModelAsset.path(uri.toFilePath());
     }
+
     if (uri.scheme != 'https') {
       throw const MpException(
         MpStatus.invalidArgument,
@@ -28,36 +29,45 @@ Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
     try {
       final HttpClientRequest request = await client.getUrl(uri);
       final HttpClientResponse response = await request.close();
+
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw MpException(
           MpStatus.unavailable,
           'Downloading the model failed with HTTP ${response.statusCode}.',
         );
       }
+
       final BytesBuilder bytes = BytesBuilder(copy: false);
       var length = 0;
+
       await for (final List<int> chunk in response) {
         length += chunk.length;
+
         if (length > _maximumRemoteModelBytes) {
           throw const MpException(
             MpStatus.resourceExhausted,
             'The remote model exceeds the 512 MiB safety limit.',
           );
         }
+
         bytes.add(chunk);
       }
+
       final Uint8List result = bytes.takeBytes();
+
       if (expectedSha256 != null && sha256.convert(result).toString() != expectedSha256) {
         throw const MpException(
           MpStatus.dataLoss,
           'The downloaded model does not match its SHA-256 digest.',
         );
       }
+
       return ModelAsset.bytes(result, name: uri.pathSegments.lastOrNull);
     } finally {
       client.close(force: true);
     }
   }
+
   return asset;
 }
 
@@ -82,9 +92,11 @@ final class NativeScope {
   ffi.Pointer<ffi.Pointer<ffi.Char>> strings(List<String> values) {
     if (values.isEmpty) return ffi.nullptr;
     final ffi.Pointer<ffi.Pointer<ffi.Char>> result = _arena<ffi.Pointer<ffi.Char>>(values.length);
+
     for (var index = 0; index < values.length; index += 1) {
       result[index] = string(values[index]);
     }
+
     return result;
   }
 
@@ -92,6 +104,7 @@ final class NativeScope {
   ffi.Pointer<ffi.Pointer<ffi.Char>> errorOutput() {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> result = _arena<ffi.Pointer<ffi.Char>>();
     result.value = ffi.nullptr;
+
     return result;
   }
 
@@ -99,11 +112,13 @@ final class NativeScope {
   void check(bindings.MpStatus status, ffi.Pointer<ffi.Pointer<ffi.Char>> errorOutput) {
     final ffi.Pointer<ffi.Char> error = errorOutput.value;
     String? message;
+
     if (error != ffi.nullptr) {
       message = error.cast<Utf8>().toDartString();
       bindings.MpErrorFree(error);
       errorOutput.value = ffi.nullptr;
     }
+
     if (status != bindings.MpStatus.kMpOk) {
       throw MpException(
         MpStatus.fromCode(status.value),
@@ -148,6 +163,7 @@ final class NativeScope {
           'Resolve URI-backed model assets before creating native options.',
         );
     }
+
     return result;
   }
 
@@ -184,6 +200,7 @@ final class NativeScope {
     result.ref
       ..has_region_of_interest = value.regionOfInterest == null ? 0 : 1
       ..rotation_degrees = value.rotationDegrees;
+
     if (value.regionOfInterest case final NormalizedRect rectangle) {
       result.ref.region_of_interest
         ..left = rectangle.left
@@ -191,6 +208,7 @@ final class NativeScope {
         ..right = rectangle.right
         ..bottom = rectangle.bottom;
     }
+
     return result;
   }
 
@@ -198,12 +216,15 @@ final class NativeScope {
   bindings.MpImagePtr image(MpImage image) {
     final ffi.Pointer<bindings.MpImagePtr> output = _arena<bindings.MpImagePtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = errorOutput();
+
     final bindings.MpStatus status = switch (image) {
       MpImageUint8(:final data) => _createUint8Image(image, data, output, error),
       MpImageUint16(:final data) => _createUint16Image(image, data, output, error),
       MpImageFloat32(:final data) => _createFloatImage(image, data, output, error),
     };
+
     check(status, error);
+
     return output.value;
   }
 
@@ -383,11 +404,13 @@ List<Landmark> landmarksFromNative(bindings.MpLandmarks value) =>
 /// Converts a native column-major matrix into the public row-major format.
 MpMatrix matrixFromNative(bindings.MpMatrix value) {
   final Float32List rowMajor = Float32List(value.rows * value.cols);
+
   for (var column = 0; column < value.cols; column += 1) {
     for (var row = 0; row < value.rows; row += 1) {
       rowMajor[row * value.cols + column] = value.data[column * value.rows + row];
     }
   }
+
   return MpMatrix(rows: value.rows, columns: value.cols, values: rowMajor);
 }
 
@@ -400,6 +423,7 @@ MpImage imageFromNative(bindings.MpImagePtr image, {String? task}) {
     final bindings.MpImageFormat format = bindings.MpImageGetFormat(image);
     final int samples = width * height * bindings.MpImageGetChannels(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
+
     return switch (format) {
       bindings.MpImageFormat.kMpImageFormatSrgb ||
       bindings.MpImageFormat.kMpImageFormatSrgba ||

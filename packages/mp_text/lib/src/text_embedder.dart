@@ -94,6 +94,7 @@ final class TextEmbedder implements MpTask {
   /// Extracts embeddings from [text].
   Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) {
     _lifecycle.ensureOpen();
+
     return _backend.embed(text, formatContext: formatContext);
   }
 

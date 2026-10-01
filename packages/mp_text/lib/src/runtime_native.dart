@@ -12,6 +12,7 @@ import 'runtime.dart';
 import 'text_classifier.dart';
 import 'text_embedder.dart';
 import 'text_proofreader.dart';
+
 import 'text_summarizer.dart';
 
 /// Creates the MediaPipe C runtime used on native Dart and Flutter platforms.
@@ -37,6 +38,7 @@ final class _NativeTextRuntime implements TextRuntime {
       baseOptions: await _resolveBaseOptions(options.baseOptions),
       classifierOptions: options.classifierOptions,
     );
+
     return _NativeTextClassifier(await _spawnTextWorker(_TextTaskKind.textClassifier, resolved));
   }
 
@@ -46,6 +48,7 @@ final class _NativeTextRuntime implements TextRuntime {
       baseOptions: await _resolveBaseOptions(options.baseOptions),
       embedderOptions: options.embedderOptions,
     );
+
     return _NativeTextEmbedder(await _spawnTextWorker(_TextTaskKind.textEmbedder, resolved));
   }
 
@@ -160,6 +163,7 @@ Future<native.NativeTaskIsolate> _spawnTextWorker(_TextTaskKind kind, Object opt
 
 native.NativeTaskWorkerHandler _createTextWorker(Object? initialMessage) {
   final _TextWorkerInit initialization = initialMessage! as _TextWorkerInit;
+
   final int address = switch (initialization.kind) {
     _TextTaskKind.languageDetector => _createLanguageDetector(
       initialization.options as LanguageDetectorOptions,
@@ -171,6 +175,7 @@ native.NativeTaskWorkerHandler _createTextWorker(Object? initialMessage) {
       initialization.options as TextEmbedderOptions,
     ),
   };
+
   return (Object? command) {
     if (command is _TextClose) {
       switch (initialization.kind) {
@@ -185,7 +190,9 @@ native.NativeTaskWorkerHandler _createTextWorker(Object? initialMessage) {
           return null;
       }
     }
+
     final _TextRequest request = command! as _TextRequest;
+
     return switch (initialization.kind) {
       _TextTaskKind.languageDetector => _detectLanguage(address, request.text),
       _TextTaskKind.textClassifier => _classifyText(address, request.text),
@@ -200,6 +207,7 @@ final class _SerialQueue {
   Future<T> run<T>(Future<T> Function() action) {
     final Future<T> operation = _tail.then((_) => action());
     _tail = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+
     return operation;
   }
 }
@@ -222,7 +230,9 @@ int _createLanguageDetector(LanguageDetectorOptions options) {
         .allocator<native.MpLanguageDetectorPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(native.MpLanguageDetectorCreate(nativeOptions, output, error), error);
+
     return output.value.address;
+
   } finally {
     scope.release();
   }
@@ -254,6 +264,7 @@ LanguageDetectorResult _detectLanguage(int address, String text) {
         );
       }, growable: false),
     );
+
   } finally {
     if (ownsResult) native.MpLanguageDetectorCloseResult(result);
     scope.release();
@@ -288,7 +299,9 @@ int _createTextClassifier(TextClassifierOptions options) {
         .allocator<native.MpTextClassifierPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(native.MpTextClassifierCreate(nativeOptions, output, error), error);
+
     return output.value.address;
+
   } finally {
     scope.release();
   }
@@ -311,7 +324,9 @@ ClassificationResult _classifyText(int address, String text) {
       error,
     );
     ownsResult = true;
+
     return native.classificationResultFromNative(result.ref);
+
   } finally {
     if (ownsResult) native.MpTextClassifierCloseResult(result);
     scope.release();
@@ -346,7 +361,9 @@ int _createTextEmbedder(TextEmbedderOptions options) {
         .allocator<native.MpTextEmbedderPtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(native.MpTextEmbedderCreate(nativeOptions, output, error), error);
+
     return output.value.address;
+
   } finally {
     scope.release();
   }
@@ -367,6 +384,7 @@ EmbeddingResult _embedText(int address, String text, TextEmbedderFormatContext? 
         role: _embeddingRole(value.role),
       ),
     };
+
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       native.MpTextEmbedderEmbed(
@@ -379,6 +397,7 @@ EmbeddingResult _embedText(int address, String text, TextEmbedderFormatContext? 
       error,
     );
     ownsResult = true;
+
     return native.embeddingResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpTextEmbedderCloseResult(result);

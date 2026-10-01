@@ -35,6 +35,7 @@ final class WebTextRuntime implements TextRuntime {
       'forTextTasks',
       <JSAny?>[assets.wasmRoot.toString().toJS],
     );
+
     return (fileset: await promise.toDart, module: module);
   }
 
@@ -153,6 +154,7 @@ final class _WebTextClassifier extends _WebTextTask implements TextClassifierBac
   Future<ClassificationResult> classify(String text) async {
     ensureOpen();
     final JSAny? raw = callWebMethod<JSAny?>(task, 'classify', <JSAny?>[text.toJS]);
+
     return webClassificationResult(webDartify(raw)! as Map<Object?, Object?>);
   }
 }
@@ -164,6 +166,7 @@ final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend
   Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) async {
     ensureOpen();
     final List<JSAny?> arguments = <JSAny?>[text.toJS];
+
     if (formatContext != null) {
       arguments.add(
         webJsify(<String, Object?>{
@@ -185,6 +188,7 @@ final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend
         }),
       );
     }
+
     final JSAny? raw = callWebMethod<JSAny?>(task, 'embed', arguments);
     final Map<Object?, Object?> result = webDartify(raw)! as Map<Object?, Object?>;
     final List<Object?> embeddings = result['embeddings']! as List<Object?>;
@@ -201,6 +205,7 @@ final class _WebTextEmbedder extends _WebTextTask implements TextEmbedderBackend
             headName: headName,
           );
         }
+
         final Object? quantized = embedding['quantizedEmbedding'];
         final Uint8List values = switch (quantized) {
           final Uint8List bytes => bytes,

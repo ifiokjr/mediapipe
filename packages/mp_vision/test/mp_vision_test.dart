@@ -123,6 +123,7 @@ final class _FakeVisionBackend<T> implements VisionTaskBackend<T> {
   @override
   Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) async {
     imageCount++;
+
     return output;
   }
 
@@ -133,6 +134,7 @@ final class _FakeVisionBackend<T> implements VisionTaskBackend<T> {
     ImageProcessingOptions? processingOptions,
   ) async {
     videoTimestamps.add(timestampMs);
+
     return output;
   }
 

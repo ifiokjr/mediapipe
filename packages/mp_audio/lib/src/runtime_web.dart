@@ -99,12 +99,14 @@ final class _WebAudioClassifier implements AudioClassifierBackend {
   @override
   Future<void> classifyAsync(AudioData audio, int timestampMs) {
     _ensureOpen();
+
     if (_runningMode != AudioRunningMode.audioStream) {
       throw const MpException(
         MpStatus.failedPrecondition,
         'classifyAsync requires audioStream mode.',
       );
     }
+
     return _pending = _pending
         .then((_) async {
           final AudioClassifierResult result = await classify(audio);
@@ -138,12 +140,16 @@ final class _WebAudioClassifier implements AudioClassifierBackend {
 Float32List _toMono(AudioData audio) {
   if (audio.channelCount == 1) return Float32List.fromList(audio.samples);
   final Float32List mono = Float32List(audio.frameCount);
+
   for (int frame = 0; frame < audio.frameCount; frame += 1) {
     double sum = 0;
+
     for (int channel = 0; channel < audio.channelCount; channel += 1) {
       sum += audio.samples[(frame * audio.channelCount) + channel];
     }
+
     mono[frame] = sum / audio.channelCount;
   }
+
   return mono;
 }

@@ -43,6 +43,7 @@ final class MobileGenAiRuntime implements GenAiRuntime {
         configuration.arguments,
         task: 'LlmInference',
       );
+
       return _MobileLlmInference(handle, configuration.resources);
     } on Object {
       await configuration.release();
@@ -68,10 +69,12 @@ Future<_ResolvedLlmConfiguration> _resolveLlmConfiguration(LlmInferenceOptions o
     final _ModelLease? visionEncoder = await _resolveOptionalModel(
       options.visionModelOptions?.encoder,
     );
+
     if (visionEncoder != null) resources.add(visionEncoder);
     final _ModelLease? visionAdapter = await _resolveOptionalModel(
       options.visionModelOptions?.adapter,
     );
+
     if (visionAdapter != null) resources.add(visionAdapter);
     return _ResolvedLlmConfiguration(<String, Object?>{
       'modelPath': model.path,
@@ -86,6 +89,7 @@ Future<_ResolvedLlmConfiguration> _resolveLlmConfiguration(LlmInferenceOptions o
     }, resources);
   } on Object {
     await Future.wait(resources.map((_ModelLease resource) => resource.release()));
+
     rethrow;
   }
 }
@@ -100,14 +104,17 @@ final class _ModelLease {
   _ModelLease retain() {
     if (_references <= 0) throw StateError('Cannot retain a released model file.');
     _references++;
+
     return this;
   }
 
   Future<void> release() async {
     if (_references <= 0) return;
     _references--;
+
     if (_references != 0) return;
     final Directory? directory = temporaryDirectory;
+
     if (directory != null && directory.existsSync()) {
       directory.deleteSync(recursive: true);
     }
@@ -119,9 +126,11 @@ Future<_ModelLease?> _resolveOptionalModel(ModelAsset? asset) async =>
 
 Future<_ModelLease> _resolveModelFile(ModelAsset asset) async {
   final ModelAsset resolved = await native.resolveNativeModelAsset(asset);
+
   switch (resolved) {
     case ModelAssetPath(:final path):
       final File file = File(path).absolute;
+
       if (!file.existsSync()) {
         throw MpException(MpStatus.notFound, 'The model file does not exist: ${file.path}');
       }
@@ -160,6 +169,7 @@ abstract base class _MobileLlmTask implements MpTask {
 
   void ensureAvailable() {
     if (_closed) throw MpTaskClosedError(taskName);
+
     if (_busy) {
       throw MpException(
         MpStatus.failedPrecondition,
@@ -177,6 +187,7 @@ abstract base class _MobileLlmTask implements MpTask {
     // directly would skip the cleanup and strand this task as permanently busy.
     final Future<T> result = Future<T>.sync(operation).whenComplete(() => _busy = false);
     _activeOperation = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+
     return result;
   }
 
@@ -205,6 +216,7 @@ final class _MobileLlmInference extends _MobileLlmTask implements LlmInferenceBa
         task: taskName,
       );
     }
+
     final _ModelLease? lora = await _resolveOptionalModel(options.loraAsset);
     try {
       final int sessionHandle = await _bridge.createTask('llm.createSession', <String, Object?>{
@@ -263,6 +275,7 @@ final class _MobileLlmSession extends _MobileLlmTask implements LlmSessionBacken
         'data': data,
       }, task: taskName);
     }
+
     throw MpException(
       MpStatus.unimplemented,
       'Android LLM image input supports only 8-bit sRGB, sRGBA, or grayscale images.',
@@ -343,6 +356,7 @@ final class _MobileFunctionCallingModel extends _MobileLlmTask implements Functi
     _ModelLease? lora;
     try {
       final LlmSessionOptions sessionOptions = options.sessionOptions ?? LlmSessionOptions();
+
       if (sessionOptions.numResponses != 1) {
         throw const MpException(
           MpStatus.unimplemented,
@@ -350,7 +364,9 @@ final class _MobileFunctionCallingModel extends _MobileLlmTask implements Functi
           task: 'GenerativeModel',
         );
       }
+
       lora = await _resolveOptionalModel(sessionOptions.loraAsset);
+
       if (lora != null) resources.add(lora);
       final int handle = await _bridge.createTask('functionCalling.create', <String, Object?>{
         ...configuration.arguments,
@@ -360,8 +376,10 @@ final class _MobileFunctionCallingModel extends _MobileLlmTask implements Functi
         'systemInstruction': ?_contentMap(options.systemInstruction),
         'tools': options.tools.map(_toolMap).toList(growable: false),
       }, task: 'GenerativeModel');
+
       return _MobileFunctionCallingModel._(handle, resources);
     } on Object {
+
       await configuration.release();
       rethrow;
     }
@@ -574,6 +592,7 @@ Map<String, Object?> _constraintMap(FunctionCallingConstraint constraint) => swi
 
 GenerateContentResponse _readGenerateContentResponse(Map<Object?, Object?> result, String task) {
   final Object? rawCandidates = result['candidates'];
+
   if (rawCandidates is! List<Object?>) {
     throw MpException(MpStatus.internal, '$task returned invalid candidates.', task: task);
   }
@@ -590,6 +609,7 @@ GenerateContentResponse _readGenerateContentResponse(Map<Object?, Object?> resul
 GenAiContent _readContent(Map<Object?, Object?> value, String task) {
   final Object? role = value['role'];
   final Object? rawParts = value['parts'];
+
   if (role is! String || rawParts is! List<Object?>) {
     throw MpException(MpStatus.internal, '$task returned invalid content.', task: task);
   }
@@ -599,6 +619,7 @@ GenAiContent _readContent(Map<Object?, Object?> value, String task) {
       if (rawPart is! Map<Object?, Object?>) {
         throw MpException(MpStatus.internal, '$task returned an invalid content part.', task: task);
       }
+
       final Object? name = rawPart['name'];
       final Object? rawValue = rawPart['value'];
       return switch (rawPart['kind']) {
@@ -623,12 +644,15 @@ GenAiContent _readContent(Map<Object?, Object?> value, String task) {
 
 Map<String, Object?> _stringKeyedMap(Map<Object?, Object?> value, String task) {
   final Map<String, Object?> result = <String, Object?>{};
+
   for (final MapEntry<Object?, Object?> entry in value.entries) {
     if (entry.key is! String) {
       throw MpException(MpStatus.internal, '$task returned a non-string object key.', task: task);
     }
+
     result[entry.key! as String] = _platformJson(entry.value, task);
   }
+
   return result;
 }
 
@@ -656,11 +680,13 @@ final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBack
     Future<String> resolve(ModelAsset asset) async {
       final _ModelLease resource = await _resolveModelFile(asset);
       resources.add(resource);
+
       return resource.path;
     }
 
     try {
       final LlmSessionOptions sessionOptions = options.sessionOptions ?? LlmSessionOptions();
+
       if (sessionOptions.numResponses != 1) {
         throw const MpException(
           MpStatus.unimplemented,
@@ -668,8 +694,11 @@ final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBack
           task: 'RagPipeline',
         );
       }
+
       final _ModelLease? lora = await _resolveOptionalModel(sessionOptions.loraAsset);
+
       if (lora != null) resources.add(lora);
+
       final Map<String, Object?> embedding = switch (options.embeddingModel) {
         GeckoEmbeddingModelOptions(
           model: final ModelAsset model,
@@ -694,6 +723,7 @@ final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBack
             'useGpu': useGpu,
           },
       };
+
       final Map<String, Object?> vectorStore = switch (options.vectorStore) {
         InMemoryVectorStoreOptions() => <String, Object?>{'kind': 'memory'},
         SqliteVectorStoreOptions(
@@ -724,6 +754,7 @@ final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBack
                 .toList(growable: false),
           },
       };
+
       final int handle = await _bridge.createTask('rag.create', <String, Object?>{
         ...configuration.arguments,
         ..._sessionOptionsMap(sessionOptions, loraPath: lora?.path),
@@ -731,6 +762,7 @@ final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBack
         'vectorStore': vectorStore,
         'promptTemplate': options.promptTemplate,
       }, task: 'RagPipeline');
+
       return _MobileRagPipeline._(handle, resources);
     } on Object {
       await configuration.release();
@@ -767,6 +799,7 @@ final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBack
               if (raw is! Map<Object?, Object?>) {
                 throw MpException(MpStatus.internal, '$taskName returned an invalid entity.');
               }
+
               final Object? text = raw['text'];
               final Object? rawEmbedding = raw['embedding'];
               final Object? rawMetadata = raw['metadata'];
@@ -807,6 +840,7 @@ final class _MobileRagPipeline extends _MobileLlmTask implements RagPipelineBack
     ensureAvailable();
     final _RagStreamOperation operation = _bridge.startRagGeneration(handle, query, options);
     trackGeneration(operation.done);
+
     return operation.stream;
   }
 
@@ -842,6 +876,7 @@ final class _MobileImageGenerator extends _MobileLlmTask implements ImageGenerat
 
   static Future<_MobileImageGenerator> create(ImageGeneratorOptions options) async {
     final Directory modelDirectory = Directory(options.modelDirectory).absolute;
+
     if (!modelDirectory.existsSync()) {
       throw MpException(
         MpStatus.notFound,
@@ -849,11 +884,13 @@ final class _MobileImageGenerator extends _MobileLlmTask implements ImageGenerat
         task: 'ImageGenerator',
       );
     }
+
     final List<_ModelLease> resources = <_ModelLease>[];
     Future<String?> resolve(ModelAsset? asset) async {
       if (asset == null) return null;
       final _ModelLease resource = await _resolveModelFile(asset);
       resources.add(resource);
+
       return resource.path;
     }
 
@@ -864,6 +901,7 @@ final class _MobileImageGenerator extends _MobileLlmTask implements ImageGenerat
         'modelType': options.modelType.name,
         'loraWeightsPath': await resolve(options.loraWeights),
       };
+
       if (conditions?.face case final FaceConditionOptions face) {
         arguments['faceCondition'] = <String, Object?>{
           'pluginModelPath': await resolve(face.pluginModel.modelAsset),
@@ -872,6 +910,7 @@ final class _MobileImageGenerator extends _MobileLlmTask implements ImageGenerat
           'minFacePresenceConfidence': face.minFacePresenceConfidence,
         };
       }
+
       if (conditions?.edge case final EdgeConditionOptions edge) {
         arguments['edgeCondition'] = <String, Object?>{
           'pluginModelPath': await resolve(edge.pluginModel.modelAsset),
@@ -881,17 +920,20 @@ final class _MobileImageGenerator extends _MobileLlmTask implements ImageGenerat
           'l2Gradient': edge.l2Gradient,
         };
       }
+
       if (conditions?.depth case final DepthConditionOptions depth) {
         arguments['depthCondition'] = <String, Object?>{
           'pluginModelPath': await resolve(depth.pluginModel.modelAsset),
           'depthModelPath': await resolve(depth.depthModel.modelAsset),
         };
       }
+
       final int handle = await _bridge.createTask(
         'imageGenerator.create',
         arguments,
         task: 'ImageGenerator',
       );
+
       return _MobileImageGenerator._(handle, resources);
     } on Object {
       await Future.wait(resources.map((_ModelLease resource) => resource.release()));
@@ -958,11 +1000,13 @@ final class _MobileImageGenerator extends _MobileLlmTask implements ImageGenerat
 
   Future<ImageGeneratorResult> _invokeResult(String method, Map<String, Object?> arguments) async {
     final Map<Object?, Object?> result = await _bridge.invokeMap(method, arguments, task: taskName);
+
     return _readResult(result);
   }
 
   ImageGeneratorResult _readResult(Map<Object?, Object?> result) {
     final Object? generated = result['generatedImage'];
+
     if (generated is! Map<Object?, Object?>) {
       throw MpException(
         MpStatus.internal,
@@ -970,8 +1014,10 @@ final class _MobileImageGenerator extends _MobileLlmTask implements ImageGenerat
         task: taskName,
       );
     }
+
     final Object? rawCondition = result['conditionImage'];
     final Object? timestamp = result['timestampMs'];
+
     if (timestamp is! num) {
       throw MpException(
         MpStatus.internal,
@@ -1018,6 +1064,7 @@ Map<String, Object?> _imageMap(MpImage image) {
       };
     }
   }
+
   throw const MpException(
     MpStatus.unimplemented,
     'Android image generation supports only 8-bit sRGB, sRGBA, or grayscale images.',
@@ -1029,6 +1076,7 @@ MpImage _readImage(Map<Object?, Object?> value, String task) {
   final Object? width = value['width'];
   final Object? height = value['height'];
   final Object? data = value['data'];
+
   if (width is! num || height is! num || data is! Uint8List) {
     throw MpException(MpStatus.internal, '$task returned invalid image data.', task: task);
   }
@@ -1097,10 +1145,13 @@ final class _PendingGeneration implements _PendingPlatformStream {
     if (terminal) return;
     final Object? rawText = event['text'];
     final Object? rawDone = event['isDone'];
+
     if (rawText is! String || rawDone is! bool) {
       fail(const MpException(MpStatus.internal, 'LlmSession returned an invalid stream event.'));
+
       return;
     }
+
     text.write(rawText);
     controller.add(LlmGenerationChunk(text: rawText, isDone: rawDone));
   }
@@ -1140,10 +1191,13 @@ final class _PendingRagGeneration implements _PendingPlatformStream {
     if (terminal) return;
     final Object? text = event['text'];
     final Object? isDone = event['isDone'];
+
     if (text is! String || isDone is! bool) {
       fail(const MpException(MpStatus.internal, 'RagPipeline returned an invalid stream event.'));
+
       return;
     }
+
     controller.add(RagGenerationChunk(text: text, isDone: isDone));
   }
 
@@ -1287,6 +1341,7 @@ final class _MobileGenAiBridge {
         return null;
       }),
     );
+
     return _RagStreamOperation(pending.controller.stream, pending.completion.future);
   }
 
@@ -1317,9 +1372,12 @@ final class _MobileGenAiBridge {
   void _onEvent(Object? rawEvent) {
     if (rawEvent is! Map<Object?, Object?>) return;
     final String? requestId = rawEvent['requestId'] as String?;
+
     if (requestId == null) return;
     final _PendingPlatformStream? pending = _pending[requestId];
+
     if (pending == null) return;
+
     switch (rawEvent['kind']) {
       case 'data':
         pending.add(rawEvent);
@@ -1335,6 +1393,7 @@ final class _MobileGenAiBridge {
   void _onEventChannelError(Object error, StackTrace stackTrace) {
     final List<_PendingPlatformStream> pending = _pending.values.toList(growable: false);
     _pending.clear();
+
     for (final _PendingPlatformStream generation in pending) {
       generation.fail(error, stackTrace);
     }

@@ -85,6 +85,7 @@ class TrackingOverlay extends CustomPainter {
     }
 
     if (pose.length >= 33) _drawSkeleton(canvas, size);
+
     if (face.length >= 468) _drawFace(canvas, size);
 
     if (showPoints) {
@@ -105,11 +106,13 @@ class TrackingOverlay extends CustomPainter {
     bool visible(int i) => (pose[i].visibility ?? 0) >= .6;
     final double width = ((p(11) - p(12)).distance * .075).clamp(4.0, 18.0);
     const Color ink = Color(0xFF222E2D);
+
     final Color fill = switch (style) {
       SkeletonStyle.cartoon => const Color(0xFFFFF7DB),
       SkeletonStyle.neon => accent,
       SkeletonStyle.robot => const Color(0xFFB9D5D0),
     };
+
     final List<(int, int)> bones = <(int, int)>[
       (11, 12),
       (11, 13),
@@ -249,6 +252,7 @@ class TrackingOverlay extends CustomPainter {
       Radius.circular(radius * .7),
     );
     canvas.drawRRect(skull.inflate(3), Paint()..color = ink);
+
     canvas.drawRRect(skull, Paint()..color = fill);
     canvas.drawOval(
       Rect.fromCenter(
@@ -457,6 +461,7 @@ List<NormalizedLandmark> demoPose(double phase) {
   points[11] = (.36, .32);
   points[12] = (.64, .32);
   points[13] = (.23, .43 + wave);
+
   points[14] = (.77, .43 - wave);
   points[15] = (.18, .29 + wave * 2);
   points[16] = (.82, .29 - wave * 2);
@@ -465,6 +470,7 @@ List<NormalizedLandmark> demoPose(double phase) {
   points[25] = (.32, .73);
   points[26] = (.68, .73);
   points[27] = (.3, .9);
+
   points[28] = (.7, .9);
   points[31] = (.24, .92);
   points[32] = (.76, .92);

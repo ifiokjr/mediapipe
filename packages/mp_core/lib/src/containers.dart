@@ -208,6 +208,7 @@ double cosineSimilarity(Embedding first, Embedding second) {
   if (first.type != second.type) {
     throw ArgumentError('Embeddings must have the same representation.');
   }
+
   if (first.length != second.length) {
     throw ArgumentError('Embeddings must have the same number of dimensions.');
   }
@@ -219,16 +220,20 @@ double cosineSimilarity(Embedding first, Embedding second) {
   double secondMagnitude = 0;
   final Iterator<num> firstIterator = firstValues.iterator;
   final Iterator<num> secondIterator = secondValues.iterator;
+
   while (firstIterator.moveNext() && secondIterator.moveNext()) {
+
     final double firstValue = firstIterator.current.toDouble();
     final double secondValue = secondIterator.current.toDouble();
     dot += firstValue * secondValue;
     firstMagnitude += firstValue * firstValue;
     secondMagnitude += secondValue * secondValue;
   }
+
   if (firstMagnitude == 0 || secondMagnitude == 0) {
     throw ArgumentError('Cosine similarity is undefined for a zero vector.');
   }
+
   return dot / (math.sqrt(firstMagnitude) * math.sqrt(secondMagnitude));
 }
 
@@ -238,6 +243,7 @@ final class BoundingBox {
   /// Creates a bounding box.
   BoundingBox({required this.left, required this.top, required this.width, required this.height}) {
     if (width < 0) throw ArgumentError.value(width, 'width', 'must not be negative');
+
     if (height < 0) throw ArgumentError.value(height, 'height', 'must not be negative');
   }
 
@@ -462,9 +468,11 @@ final class MpMatrix {
   MpMatrix({required this.rows, required this.columns, required Float32List values})
     : values = Float32List.fromList(values) {
     if (rows <= 0) throw ArgumentError.value(rows, 'rows', 'must be greater than zero');
+
     if (columns <= 0) {
       throw ArgumentError.value(columns, 'columns', 'must be greater than zero');
     }
+
     if (values.length != rows * columns) {
       throw ArgumentError.value(values.length, 'values.length', 'must equal rows * columns');
     }
@@ -483,6 +491,7 @@ final class MpMatrix {
   double at(int row, int column) {
     RangeError.checkValueInInterval(row, 0, rows - 1, 'row');
     RangeError.checkValueInInterval(column, 0, columns - 1, 'column');
+
     return values[row * columns + column];
   }
 
