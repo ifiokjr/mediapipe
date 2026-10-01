@@ -132,6 +132,7 @@ final class ModelAssetUri extends ModelAsset {
     if (!uri.hasScheme) {
       throw ArgumentError.value(uri, 'uri', 'must be absolute');
     }
+
     if (sha256 != null && !RegExp(r'^[a-f0-9]{64}$').hasMatch(sha256!)) {
       throw ArgumentError.value(sha256, 'sha256', 'must be a lowercase SHA-256 digest');
     }
@@ -198,9 +199,11 @@ final class ClassifierOptions {
     if (maxResults != null && maxResults! <= 0) {
       throw ArgumentError.value(maxResults, 'maxResults', 'must be greater than zero');
     }
+
     if (scoreThreshold != null && (scoreThreshold! < 0 || scoreThreshold! > 1)) {
       throw ArgumentError.value(scoreThreshold, 'scoreThreshold', 'must be between 0 and 1');
     }
+
     if (this.categoryAllowlist.isNotEmpty && this.categoryDenylist.isNotEmpty) {
       throw ArgumentError('categoryAllowlist and categoryDenylist are mutually exclusive.');
     }

@@ -58,6 +58,7 @@ void main() {
                 });
                 return;
               }
+
               await _sendEvent(messenger, <String, Object?>{
                 'kind': 'data',
                 'requestId': requestId,
@@ -90,6 +91,7 @@ void main() {
         case 'summarizer.close':
           return null;
       }
+
       throw PlatformException(code: 'unimplemented', message: call.method);
     });
   });

@@ -53,7 +53,9 @@ final class NativeTarget {
         '${supportedNames.join(', ')}.',
       );
     }
+
     final List<String> segments = name.split('-');
+
     return NativeTarget._(name, segments.first, segments.last);
   }
 
@@ -61,11 +63,13 @@ final class NativeTarget {
     final String architecture = Platform.isWindows
         ? (Platform.environment['PROCESSOR_ARCHITECTURE'] ?? '').toLowerCase()
         : (await Process.run('uname', const <String>['-m'])).stdout.toString().trim();
+
     final String normalizedArchitecture = switch (architecture) {
       'arm64' || 'aarch64' => 'arm64',
       'x86_64' || 'amd64' => 'x64',
       _ => throw UnsupportedError('Unsupported host architecture: $architecture'),
     };
+
     final String os = Platform.isMacOS
         ? 'macos'
         : Platform.isLinux
@@ -73,6 +77,7 @@ final class NativeTarget {
         : Platform.isWindows
         ? 'windows'
         : throw UnsupportedError('Unsupported host OS: ${Platform.operatingSystem}');
+
     return parse('$os-$normalizedArchitecture');
   }
 }

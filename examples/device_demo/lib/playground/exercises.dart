@@ -150,7 +150,9 @@ double? movementDepth(Exercise exercise, List<NormalizedLandmark> pose, double a
       .abs();
 
   if (exercise == Exercise.pressUps && torso > torsoX * .6) return null;
+
   if (exercise == Exercise.curls && torso < torsoX) return null;
+
   final double depth = switch (exercise) {
     Exercise.squats => (170 - knees) / 75,
     Exercise.lunges => (165 - math.min(angle(23, 25, 27), angle(24, 26, 28))) / 70,
@@ -223,6 +225,7 @@ final class RepCounter {
 
     if (value == null || !value.isFinite || (previous != null && timestampMs - previous > 700)) {
       _loseTracking();
+
       return;
     }
 
@@ -338,6 +341,7 @@ final class BurpeeCounter {
       stage = BurpeeStage.ready;
       _floor = null;
       _stageSince = null;
+
       return;
     }
 
@@ -351,6 +355,7 @@ final class BurpeeCounter {
     final bool plank = !upright && (shoulderY - hipY).abs() < torsoX * .6 && bend < .25;
 
     if (_stageSince != null && timestamp - _stageSince! < 100) return;
+
     final bool advance = switch (stage) {
       BurpeeStage.ready => standing,
       BurpeeStage.crouch || BurpeeStage.returnCrouch => crouched,

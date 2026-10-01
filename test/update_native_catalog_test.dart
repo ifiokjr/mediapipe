@@ -54,5 +54,6 @@ Future<File> _writeArchive(Directory directory, String target, {String? manifest
     );
   final File file = File.fromUri(directory.uri.resolve('mediapipe-v1.0.0-$target.zip'));
   await file.writeAsBytes(ZipEncoder().encodeBytes(archive, modified: DateTime.utc(1980)));
+
   return file;
 }

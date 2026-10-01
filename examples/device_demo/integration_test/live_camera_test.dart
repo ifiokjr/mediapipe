@@ -54,6 +54,7 @@ Future<void> _waitForInference(WidgetTester tester) async {
     if (find.textContaining('Tracking interrupted:').evaluate().isNotEmpty) {
       fail('Frame inference failed.');
     }
+
     if (DateTime.now().isAfter(deadline)) fail('Camera opened but no result arrived.');
     await tester.pump(const Duration(milliseconds: 100));
   }

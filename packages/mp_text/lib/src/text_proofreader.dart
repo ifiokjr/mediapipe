@@ -16,6 +16,7 @@ final class TextProofreaderOptions {
         'TextProofreader supports only the CPU delegate',
       );
     }
+
     if (maxTokens case final int value when value <= 0) {
       throw ArgumentError.value(value, 'maxTokens', 'must be greater than zero');
     }
@@ -135,12 +136,14 @@ final class TextProofreader implements MpTask {
   /// Corrects [text] and waits for the complete result.
   Future<TextProofreaderResult> proofread(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.proofread(text);
   }
 
   /// Corrects [text] and emits incremental output.
   Stream<TextProofreaderChunk> proofreadStreaming(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.proofreadStreaming(text);
   }
 
