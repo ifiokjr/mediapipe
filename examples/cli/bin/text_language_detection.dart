@@ -22,7 +22,9 @@ Future<void> main() async {
 
   final LanguageDetector detector = await LanguageDetector.create(
     LanguageDetectorOptions(
-      baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.languageDetector)),
+      baseOptions: BaseOptions(
+        modelAsset: await cache.model(MpExampleModels.languageDetector),
+      ),
     ),
   );
 

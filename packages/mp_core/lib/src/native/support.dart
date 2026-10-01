@@ -25,7 +25,8 @@ Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
       );
     }
 
-    final HttpClient client = HttpClient()..connectionTimeout = const Duration(seconds: 30);
+    final HttpClient client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 30);
     try {
       final HttpClientRequest request = await client.getUrl(uri);
       final HttpClientResponse response = await request.close();
@@ -55,7 +56,8 @@ Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
 
       final Uint8List result = bytes.takeBytes();
 
-      if (expectedSha256 != null && sha256.convert(result).toString() != expectedSha256) {
+      if (expectedSha256 != null &&
+          sha256.convert(result).toString() != expectedSha256) {
         throw const MpException(
           MpStatus.dataLoss,
           'The downloaded model does not match its SHA-256 digest.',
@@ -85,13 +87,15 @@ final class NativeScope {
   ffi.Allocator get allocator => _arena;
 
   /// Converts a Dart string to a scoped UTF-8 C string.
-  ffi.Pointer<ffi.Char> string(String? value) =>
-      value == null ? ffi.nullptr : value.toNativeUtf8(allocator: _arena).cast<ffi.Char>();
+  ffi.Pointer<ffi.Char> string(String? value) => value == null
+      ? ffi.nullptr
+      : value.toNativeUtf8(allocator: _arena).cast<ffi.Char>();
 
   /// Allocates a scoped C string array.
   ffi.Pointer<ffi.Pointer<ffi.Char>> strings(List<String> values) {
     if (values.isEmpty) return ffi.nullptr;
-    final ffi.Pointer<ffi.Pointer<ffi.Char>> result = _arena<ffi.Pointer<ffi.Char>>(values.length);
+    final ffi.Pointer<ffi.Pointer<ffi.Char>> result =
+        _arena<ffi.Pointer<ffi.Char>>(values.length);
 
     for (var index = 0; index < values.length; index += 1) {
       result[index] = string(values[index]);
@@ -102,14 +106,18 @@ final class NativeScope {
 
   /// Allocates the error output expected by MediaPipe C functions.
   ffi.Pointer<ffi.Pointer<ffi.Char>> errorOutput() {
-    final ffi.Pointer<ffi.Pointer<ffi.Char>> result = _arena<ffi.Pointer<ffi.Char>>();
+    final ffi.Pointer<ffi.Pointer<ffi.Char>> result =
+        _arena<ffi.Pointer<ffi.Char>>();
     result.value = ffi.nullptr;
 
     return result;
   }
 
   /// Converts a native status and owned error message to [MpException].
-  void check(bindings.MpStatus status, ffi.Pointer<ffi.Pointer<ffi.Char>> errorOutput) {
+  void check(
+    bindings.MpStatus status,
+    ffi.Pointer<ffi.Pointer<ffi.Char>> errorOutput,
+  ) {
     final ffi.Pointer<ffi.Char> error = errorOutput.value;
     String? message;
 
@@ -130,7 +138,8 @@ final class NativeScope {
 
   /// Allocates native base options backed by this scope.
   ffi.Pointer<bindings.MpBaseOptions> baseOptions(BaseOptions options) {
-    final ffi.Pointer<bindings.MpBaseOptions> result = _arena<bindings.MpBaseOptions>();
+    final ffi.Pointer<bindings.MpBaseOptions> result =
+        _arena<bindings.MpBaseOptions>();
     final bindings.MpBaseOptions value = result.ref;
     value
       ..model_asset_buffer = ffi.nullptr
@@ -168,7 +177,9 @@ final class NativeScope {
   }
 
   /// Allocates native classifier options backed by this scope.
-  ffi.Pointer<bindings.MpClassifierOptions> classifierOptions(ClassifierOptions? options) {
+  ffi.Pointer<bindings.MpClassifierOptions> classifierOptions(
+    ClassifierOptions? options,
+  ) {
     final ClassifierOptions value = options ?? ClassifierOptions();
     return bindings.MpClassifierOptions.$allocate(
       _arena,
@@ -183,12 +194,13 @@ final class NativeScope {
   }
 
   /// Allocates native embedding options backed by this scope.
-  ffi.Pointer<bindings.MpEmbedderOptions> embedderOptions(EmbedderOptions options) =>
-      bindings.MpEmbedderOptions.$allocate(
-        _arena,
-        l2_normalize: options.l2Normalize,
-        quantize: options.quantize,
-      );
+  ffi.Pointer<bindings.MpEmbedderOptions> embedderOptions(
+    EmbedderOptions options,
+  ) => bindings.MpEmbedderOptions.$allocate(
+    _arena,
+    l2_normalize: options.l2Normalize,
+    quantize: options.quantize,
+  );
 
   /// Allocates native image-processing options backed by this scope.
   ffi.Pointer<bindings.MpImageProcessingOptions> imageProcessingOptions(
@@ -214,13 +226,29 @@ final class NativeScope {
 
   /// Copies [image] into an owned MediaPipe native image.
   bindings.MpImagePtr image(MpImage image) {
-    final ffi.Pointer<bindings.MpImagePtr> output = _arena<bindings.MpImagePtr>();
+    final ffi.Pointer<bindings.MpImagePtr> output =
+        _arena<bindings.MpImagePtr>();
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = errorOutput();
 
     final bindings.MpStatus status = switch (image) {
-      MpImageUint8(:final data) => _createUint8Image(image, data, output, error),
-      MpImageUint16(:final data) => _createUint16Image(image, data, output, error),
-      MpImageFloat32(:final data) => _createFloatImage(image, data, output, error),
+      MpImageUint8(:final data) => _createUint8Image(
+        image,
+        data,
+        output,
+        error,
+      ),
+      MpImageUint16(:final data) => _createUint16Image(
+        image,
+        data,
+        output,
+        error,
+      ),
+      MpImageFloat32(:final data) => _createFloatImage(
+        image,
+        data,
+        output,
+        error,
+      ),
     };
 
     check(status, error);
@@ -302,20 +330,25 @@ Category categoryFromNative(bindings.MpCategory value) => Category(
 );
 
 /// Converts a native classification result before its owner is released.
-ClassificationResult classificationResultFromNative(bindings.MpClassificationResult value) {
-  final List<Classifications> heads = List<Classifications>.generate(value.classifications_count, (
-    int headIndex,
-  ) {
-    final bindings.MpClassifications head = value.classifications[headIndex];
-    return Classifications(
-      categories: List<Category>.generate(
-        head.categories_count,
-        (int categoryIndex) => categoryFromNative(head.categories[categoryIndex]),
-      ),
-      headIndex: head.head_index,
-      headName: nativeString(head.head_name),
-    );
-  }, growable: false);
+ClassificationResult classificationResultFromNative(
+  bindings.MpClassificationResult value,
+) {
+  final List<Classifications> heads = List<Classifications>.generate(
+    value.classifications_count,
+    (int headIndex) {
+      final bindings.MpClassifications head = value.classifications[headIndex];
+      return Classifications(
+        categories: List<Category>.generate(
+          head.categories_count,
+          (int categoryIndex) =>
+              categoryFromNative(head.categories[categoryIndex]),
+        ),
+        headIndex: head.head_index,
+        headName: nativeString(head.head_name),
+      );
+    },
+    growable: false,
+  );
   return ClassificationResult(
     classifications: heads,
     timestampMs: value.has_timestamp_ms ? value.timestamp_ms : null,
@@ -323,69 +356,76 @@ ClassificationResult classificationResultFromNative(bindings.MpClassificationRes
 }
 
 /// Converts one native category list before its owner is released.
-List<Category> categoriesFromNative(bindings.MpCategories value) => List<Category>.generate(
-  value.categories_count,
-  (int index) => categoryFromNative(value.categories[index]),
-  growable: false,
-);
-
-/// Converts one native classifications head before its owner is released.
-Classifications classificationsFromNative(bindings.MpClassifications value) => Classifications(
-  categories: List<Category>.generate(
-    value.categories_count,
-    (int index) => categoryFromNative(value.categories[index]),
-    growable: false,
-  ),
-  headIndex: value.head_index,
-  headName: nativeString(value.head_name),
-);
-
-/// Converts a native detection result before its owner is released.
-DetectionResult detectionResultFromNative(bindings.MpDetectionResult value, {int? timestampMs}) =>
-    DetectionResult(
-      detections: List<Detection>.generate(value.detections_count, (int index) {
-        final bindings.MpDetection detection = value.detections[index];
-        return Detection(
-          categories: List<Category>.generate(
-            detection.categories_count,
-            (int categoryIndex) => categoryFromNative(detection.categories[categoryIndex]),
-            growable: false,
-          ),
-          boundingBox: BoundingBox(
-            left: detection.bounding_box.left,
-            top: detection.bounding_box.top,
-            width: detection.bounding_box.right - detection.bounding_box.left,
-            height: detection.bounding_box.bottom - detection.bounding_box.top,
-          ),
-          keypoints: List<NormalizedKeypoint>.generate(detection.keypoints_count, (
-            int keypointIndex,
-          ) {
-            final bindings.MpNormalizedKeypoint keypoint = detection.keypoints[keypointIndex];
-            return NormalizedKeypoint(
-              x: keypoint.x,
-              y: keypoint.y,
-              label: nativeString(keypoint.label),
-              score: keypoint.has_score ? keypoint.score : null,
-            );
-          }, growable: false),
-        );
-      }, growable: false),
-      timestampMs: timestampMs,
+List<Category> categoriesFromNative(bindings.MpCategories value) =>
+    List<Category>.generate(
+      value.categories_count,
+      (int index) => categoryFromNative(value.categories[index]),
+      growable: false,
     );
 
+/// Converts one native classifications head before its owner is released.
+Classifications classificationsFromNative(bindings.MpClassifications value) =>
+    Classifications(
+      categories: List<Category>.generate(
+        value.categories_count,
+        (int index) => categoryFromNative(value.categories[index]),
+        growable: false,
+      ),
+      headIndex: value.head_index,
+      headName: nativeString(value.head_name),
+    );
+
+/// Converts a native detection result before its owner is released.
+DetectionResult detectionResultFromNative(
+  bindings.MpDetectionResult value, {
+  int? timestampMs,
+}) => DetectionResult(
+  detections: List<Detection>.generate(value.detections_count, (int index) {
+    final bindings.MpDetection detection = value.detections[index];
+    return Detection(
+      categories: List<Category>.generate(
+        detection.categories_count,
+        (int categoryIndex) =>
+            categoryFromNative(detection.categories[categoryIndex]),
+        growable: false,
+      ),
+      boundingBox: BoundingBox(
+        left: detection.bounding_box.left,
+        top: detection.bounding_box.top,
+        width: detection.bounding_box.right - detection.bounding_box.left,
+        height: detection.bounding_box.bottom - detection.bounding_box.top,
+      ),
+      keypoints: List<NormalizedKeypoint>.generate(detection.keypoints_count, (
+        int keypointIndex,
+      ) {
+        final bindings.MpNormalizedKeypoint keypoint =
+            detection.keypoints[keypointIndex];
+        return NormalizedKeypoint(
+          x: keypoint.x,
+          y: keypoint.y,
+          label: nativeString(keypoint.label),
+          score: keypoint.has_score ? keypoint.score : null,
+        );
+      }, growable: false),
+    );
+  }, growable: false),
+  timestampMs: timestampMs,
+);
+
 /// Converts one native normalized-landmark list before its owner is released.
-List<NormalizedLandmark> normalizedLandmarksFromNative(bindings.MpNormalizedLandmarks value) =>
-    List<NormalizedLandmark>.generate(value.landmarks_count, (int index) {
-      final bindings.MpNormalizedLandmark landmark = value.landmarks[index];
-      return NormalizedLandmark(
-        x: landmark.x,
-        y: landmark.y,
-        z: landmark.z,
-        visibility: landmark.has_visibility ? landmark.visibility : null,
-        presence: landmark.has_presence ? landmark.presence : null,
-        name: nativeString(landmark.name),
-      );
-    }, growable: false);
+List<NormalizedLandmark> normalizedLandmarksFromNative(
+  bindings.MpNormalizedLandmarks value,
+) => List<NormalizedLandmark>.generate(value.landmarks_count, (int index) {
+  final bindings.MpNormalizedLandmark landmark = value.landmarks[index];
+  return NormalizedLandmark(
+    x: landmark.x,
+    y: landmark.y,
+    z: landmark.z,
+    visibility: landmark.has_visibility ? landmark.visibility : null,
+    presence: landmark.has_presence ? landmark.presence : null,
+    name: nativeString(landmark.name),
+  );
+}, growable: false);
 
 /// Converts one native world-landmark list before its owner is released.
 List<Landmark> landmarksFromNative(bindings.MpLandmarks value) =>
@@ -407,7 +447,8 @@ MpMatrix matrixFromNative(bindings.MpMatrix value) {
 
   for (var column = 0; column < value.cols; column += 1) {
     for (var row = 0; row < value.rows; row += 1) {
-      rowMajor[row * value.cols + column] = value.data[column * value.rows + row];
+      rowMajor[row * value.cols + column] =
+          value.data[column * value.rows + row];
     }
   }
 
@@ -478,7 +519,8 @@ MpImage _uint8ImageFromNative(
   int samples,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error,
 ) {
-  final ffi.Pointer<ffi.Pointer<ffi.Uint8>> output = scope.allocator<ffi.Pointer<ffi.Uint8>>();
+  final ffi.Pointer<ffi.Pointer<ffi.Uint8>> output = scope
+      .allocator<ffi.Pointer<ffi.Uint8>>();
   scope.check(bindings.MpImageDataUint8(image, output, error), error);
   return MpImage.uint8(
     width: width,
@@ -497,7 +539,8 @@ MpImage _uint16ImageFromNative(
   int samples,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error,
 ) {
-  final ffi.Pointer<ffi.Pointer<ffi.Uint16>> output = scope.allocator<ffi.Pointer<ffi.Uint16>>();
+  final ffi.Pointer<ffi.Pointer<ffi.Uint16>> output = scope
+      .allocator<ffi.Pointer<ffi.Uint16>>();
   scope.check(bindings.MpImageDataUint16(image, output, error), error);
   return MpImage.uint16(
     width: width,
@@ -516,7 +559,8 @@ MpImage _floatImageFromNative(
   int samples,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error,
 ) {
-  final ffi.Pointer<ffi.Pointer<ffi.Float>> output = scope.allocator<ffi.Pointer<ffi.Float>>();
+  final ffi.Pointer<ffi.Pointer<ffi.Float>> output = scope
+      .allocator<ffi.Pointer<ffi.Float>>();
   scope.check(bindings.MpImageDataFloat32(image, output, error), error);
   return MpImage.float32(
     width: width,
@@ -528,24 +572,32 @@ MpImage _floatImageFromNative(
 
 /// Converts a native embedding result before its owner is released.
 EmbeddingResult embeddingResultFromNative(bindings.MpEmbeddingResult value) {
-  final List<Embedding> embeddings = List<Embedding>.generate(value.embeddings_count, (int index) {
-    final bindings.MpEmbedding embedding = value.embeddings[index];
-    final String? headName = nativeString(embedding.head_name);
-    if (embedding.float_embedding != ffi.nullptr) {
-      return Embedding.float(
-        Float32List.fromList(embedding.float_embedding.asTypedList(embedding.values_count)),
+  final List<Embedding> embeddings = List<Embedding>.generate(
+    value.embeddings_count,
+    (int index) {
+      final bindings.MpEmbedding embedding = value.embeddings[index];
+      final String? headName = nativeString(embedding.head_name);
+      if (embedding.float_embedding != ffi.nullptr) {
+        return Embedding.float(
+          Float32List.fromList(
+            embedding.float_embedding.asTypedList(embedding.values_count),
+          ),
+          headIndex: embedding.head_index,
+          headName: headName,
+        );
+      }
+      return Embedding.quantized(
+        Uint8List.fromList(
+          embedding.quantized_embedding.cast<ffi.Uint8>().asTypedList(
+            embedding.values_count,
+          ),
+        ),
         headIndex: embedding.head_index,
         headName: headName,
       );
-    }
-    return Embedding.quantized(
-      Uint8List.fromList(
-        embedding.quantized_embedding.cast<ffi.Uint8>().asTypedList(embedding.values_count),
-      ),
-      headIndex: embedding.head_index,
-      headName: headName,
-    );
-  }, growable: false);
+    },
+    growable: false,
+  );
   return EmbeddingResult(
     embeddings: embeddings,
     timestampMs: value.has_timestamp_ms ? value.timestamp_ms : null,
@@ -574,21 +626,22 @@ bindings.MpImageFormat _imageFormat(MpImageFormat format) => switch (format) {
   MpImageFormat.float32x4 => bindings.MpImageFormat.kMpImageFormatVec32F4,
 };
 
-MpImageFormat _dartImageFormat(bindings.MpImageFormat format) => switch (format) {
-  bindings.MpImageFormat.kMpImageFormatSrgb => MpImageFormat.srgb,
-  bindings.MpImageFormat.kMpImageFormatSrgba => MpImageFormat.srgba,
-  bindings.MpImageFormat.kMpImageFormatGray8 => MpImageFormat.gray8,
-  bindings.MpImageFormat.kMpImageFormatGray16 => MpImageFormat.gray16,
-  bindings.MpImageFormat.kMpImageFormatSrgb48 => MpImageFormat.srgb48,
-  bindings.MpImageFormat.kMpImageFormatSrgba64 => MpImageFormat.srgba64,
-  bindings.MpImageFormat.kMpImageFormatVec32F1 => MpImageFormat.float32x1,
-  bindings.MpImageFormat.kMpImageFormatVec32F2 => MpImageFormat.float32x2,
-  bindings.MpImageFormat.kMpImageFormatVec32F4 => MpImageFormat.float32x4,
-  bindings.MpImageFormat.kMpImageFormatUnknown => throw const MpException(
-    MpStatus.dataLoss,
-    'The native task returned an image with an unknown format.',
-  ),
-};
+MpImageFormat _dartImageFormat(bindings.MpImageFormat format) =>
+    switch (format) {
+      bindings.MpImageFormat.kMpImageFormatSrgb => MpImageFormat.srgb,
+      bindings.MpImageFormat.kMpImageFormatSrgba => MpImageFormat.srgba,
+      bindings.MpImageFormat.kMpImageFormatGray8 => MpImageFormat.gray8,
+      bindings.MpImageFormat.kMpImageFormatGray16 => MpImageFormat.gray16,
+      bindings.MpImageFormat.kMpImageFormatSrgb48 => MpImageFormat.srgb48,
+      bindings.MpImageFormat.kMpImageFormatSrgba64 => MpImageFormat.srgba64,
+      bindings.MpImageFormat.kMpImageFormatVec32F1 => MpImageFormat.float32x1,
+      bindings.MpImageFormat.kMpImageFormatVec32F2 => MpImageFormat.float32x2,
+      bindings.MpImageFormat.kMpImageFormatVec32F4 => MpImageFormat.float32x4,
+      bindings.MpImageFormat.kMpImageFormatUnknown => throw const MpException(
+        MpStatus.dataLoss,
+        'The native task returned an image with an unknown format.',
+      ),
+    };
 
 bindings.MpHostEnvironment _hostEnvironment() => switch (MpPlatform.current) {
   MpPlatform.android => bindings.MpHostEnvironment.MP_HOST_ENVIRONMENT_ANDROID,

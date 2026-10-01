@@ -23,7 +23,9 @@ void main() {
       condition: condition,
     );
     await generator.setInputs('a second drawing', iterations: 10, seed: 8);
-    final ImageGeneratorResult? executed = await generator.execute(showResult: false);
+    final ImageGeneratorResult? executed = await generator.execute(
+      showResult: false,
+    );
     final MpImage processed = await generator.createConditionImage(
       _image(),
       ImageGeneratorConditionType.depth,
@@ -35,16 +37,26 @@ void main() {
     expect(runtime.backend.lastPrompt, 'a second drawing');
     expect(runtime.backend.lastIterations, 10);
     expect(runtime.backend.lastSeed, 8);
-    expect(runtime.backend.lastCondition?.type, ImageGeneratorConditionType.edge);
+    expect(
+      runtime.backend.lastCondition?.type,
+      ImageGeneratorConditionType.edge,
+    );
     expect(runtime.backend.showResult, isFalse);
     expect(runtime.backend.conditionType, ImageGeneratorConditionType.depth);
   });
 
   test('validates options and generation inputs', () async {
-    expect(() => ImageGeneratorOptions(modelDirectory: ' '), throwsArgumentError);
+    expect(
+      () => ImageGeneratorOptions(modelDirectory: ' '),
+      throwsArgumentError,
+    );
     expect(ImageGeneratorConditionOptions.new, throwsArgumentError);
     expect(
-      () => EdgeConditionOptions(pluginModel: _baseOptions(), threshold1: 2, threshold2: 1),
+      () => EdgeConditionOptions(
+        pluginModel: _baseOptions(),
+        threshold1: 2,
+        threshold2: 1,
+      ),
       throwsArgumentError,
     );
     expect(
@@ -60,8 +72,14 @@ void main() {
       ImageGeneratorOptions(modelDirectory: '/models/diffusion'),
       runtime: _FakeImageRuntime(),
     );
-    expect(() => generator.generate('', iterations: 1, seed: 0), throwsArgumentError);
-    expect(() => generator.generate('valid', iterations: 0, seed: 0), throwsArgumentError);
+    expect(
+      () => generator.generate('', iterations: 1, seed: 0),
+      throwsArgumentError,
+    );
+    expect(
+      () => generator.generate('valid', iterations: 0, seed: 0),
+      throwsArgumentError,
+    );
   });
 
   test('close is idempotent and guards later work', () async {
@@ -79,7 +97,8 @@ void main() {
   });
 }
 
-BaseOptions _baseOptions() => BaseOptions(modelAsset: ModelAsset.path('/models/control.task'));
+BaseOptions _baseOptions() =>
+    BaseOptions(modelAsset: ModelAsset.path('/models/control.task'));
 
 MpImage _image() => MpImage.uint8(
   width: 1,
@@ -92,12 +111,14 @@ final class _FakeImageRuntime implements GenAiRuntime {
   final _FakeImageBackend backend = _FakeImageBackend();
 
   @override
-  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) =>
-      throw UnimplementedError();
+  Future<FunctionCallingBackend> createGenerativeModel(
+    GenerativeModelOptions options,
+  ) => throw UnimplementedError();
 
   @override
-  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) async =>
-      backend;
+  Future<ImageGeneratorBackend> createImageGenerator(
+    ImageGeneratorOptions options,
+  ) async => backend;
 
   @override
   Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) =>
@@ -154,7 +175,10 @@ final class _FakeImageBackend implements ImageGeneratorBackend {
   }
 
   @override
-  Future<MpImage> createConditionImage(MpImage image, ImageGeneratorConditionType type) async {
+  Future<MpImage> createConditionImage(
+    MpImage image,
+    ImageGeneratorConditionType type,
+  ) async {
     conditionType = type;
 
     return image;
@@ -164,5 +188,7 @@ final class _FakeImageBackend implements ImageGeneratorBackend {
   Future<void> close() async => closeCount++;
 }
 
-ImageGeneratorResult _result() =>
-    ImageGeneratorResult(generatedImage: _image(), timestamp: const Duration(milliseconds: 7));
+ImageGeneratorResult _result() => ImageGeneratorResult(
+  generatedImage: _image(),
+  timestamp: const Duration(milliseconds: 7),
+);

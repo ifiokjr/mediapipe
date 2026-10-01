@@ -33,7 +33,9 @@ Future<void> _classifyClip(MpAssetCache cache, AudioData audio) async {
   stdout.writeln('\n== Clip classification ==');
   final AudioClassifier classifier = await AudioClassifier.create(
     AudioClassifierOptions(
-      baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.audioClassifier)),
+      baseOptions: BaseOptions(
+        modelAsset: await cache.model(MpExampleModels.audioClassifier),
+      ),
       classifierOptions: ClassifierOptions(maxResults: 5, scoreThreshold: 0.05),
     ),
   );
@@ -67,35 +69,43 @@ Future<void> _classifyStream(MpAssetCache cache, AudioData audio) async {
   try {
     classifier = await AudioClassifier.create(
       AudioClassifierOptions(
-        baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.audioClassifier)),
+        baseOptions: BaseOptions(
+          modelAsset: await cache.model(MpExampleModels.audioClassifier),
+        ),
         runningMode: AudioRunningMode.audioStream,
       ),
     );
   } on MpException catch (error) {
     stdout.writeln('  ${error.status.name}: ${error.message}');
-    stdout.writeln('  Fall back to clip mode, or run the browser adapter for streaming.');
+    stdout.writeln(
+      '  Fall back to clip mode, or run the browser adapter for streaming.',
+    );
     return;
   }
 
-  final StreamSubscription<AudioClassifierResult> subscription = classifier.results.listen((
-    AudioClassifierResult result,
-  ) {
-    final Classifications? head = result.classifications.isEmpty
-        ? null
-        : result.classifications.first.classifications.firstOrNull;
-    final Category? top = head?.categories.firstOrNull;
-    stdout.writeln(
-      '  t=${result.classifications.firstOrNull?.timestampMs}ms '
-      '${top?.displayName ?? top?.categoryName ?? '-'} '
-      '${(top?.score ?? 0).toStringAsFixed(3)}',
-    );
-  }, onError: (Object error) => stderr.writeln('  stream error: $error'));
+  final StreamSubscription<AudioClassifierResult> subscription = classifier
+      .results
+      .listen((AudioClassifierResult result) {
+        final Classifications? head = result.classifications.isEmpty
+            ? null
+            : result.classifications.first.classifications.firstOrNull;
+        final Category? top = head?.categories.firstOrNull;
+        stdout.writeln(
+          '  t=${result.classifications.firstOrNull?.timestampMs}ms '
+          '${top?.displayName ?? top?.categoryName ?? '-'} '
+          '${(top?.score ?? 0).toStringAsFixed(3)}',
+        );
+      }, onError: (Object error) => stderr.writeln('  stream error: $error'));
 
   try {
     // Timestamps must strictly increase across the whole stream, so the clock
     // advances by the duration of each chunk rather than by wall time.
     var timestampMs = 0;
-    for (var offset = 0; offset < audio.samples.length; offset += _chunkSamples) {
+    for (
+      var offset = 0;
+      offset < audio.samples.length;
+      offset += _chunkSamples
+    ) {
       final int end = (offset + _chunkSamples).clamp(0, audio.samples.length);
       await classifier.classifyAsync(
         AudioData(

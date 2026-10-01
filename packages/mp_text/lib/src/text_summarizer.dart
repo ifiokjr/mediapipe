@@ -30,7 +30,11 @@ final class TextSummarizerOptions {
     }
 
     if (maxTokens case final int value when value <= 0) {
-      throw ArgumentError.value(value, 'maxTokens', 'must be greater than zero');
+      throw ArgumentError.value(
+        value,
+        'maxTokens',
+        'must be greater than zero',
+      );
     }
   }
 
@@ -57,7 +61,8 @@ final class TextSummarizerResult {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is TextSummarizerResult && summary == other.summary;
+      identical(this, other) ||
+      other is TextSummarizerResult && summary == other.summary;
 
   @override
   int get hashCode => summary.hashCode;
@@ -96,7 +101,9 @@ final class TextSummarizer implements MpTask {
   static Future<TextSummarizer> create(
     TextSummarizerOptions options, {
     TextRuntime? runtime,
-  }) async => TextSummarizer._(await (runtime ?? defaultTextRuntime).createTextSummarizer(options));
+  }) async => TextSummarizer._(
+    await (runtime ?? defaultTextRuntime).createTextSummarizer(options),
+  );
 
   @override
   bool get isClosed => _lifecycle.isClosed;

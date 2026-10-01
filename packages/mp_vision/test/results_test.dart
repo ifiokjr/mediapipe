@@ -69,13 +69,20 @@ void main() {
       // But it differs from a result that carries scores.
       expect(
         empty,
-        isNot(equals(ImageSegmenterResult(qualityScores: Float32List.fromList(<double>[0.5])))),
+        isNot(
+          equals(
+            ImageSegmenterResult(
+              qualityScores: Float32List.fromList(<double>[0.5]),
+            ),
+          ),
+        ),
       );
     });
   });
 
   group('PoseLandmarkerResult equality', () {
-    NormalizedLandmark landmark(double x) => NormalizedLandmark(x: x, y: 0, z: 0);
+    NormalizedLandmark landmark(double x) =>
+        NormalizedLandmark(x: x, y: 0, z: 0);
 
     test('compares nested landmarks and masks', () {
       final PoseLandmarkerResult first = PoseLandmarkerResult(
@@ -111,7 +118,10 @@ void main() {
     test('PromptPoint compares by coordinates', () {
       expect(PromptPoint(0.25, 0.75), equals(PromptPoint(0.25, 0.75)));
       expect(PromptPoint(0.25, 0.75), isNot(equals(PromptPoint(0.75, 0.25))));
-      expect(PromptPoint(0.25, 0.75).hashCode, equals(PromptPoint(0.25, 0.75).hashCode));
+      expect(
+        PromptPoint(0.25, 0.75).hashCode,
+        equals(PromptPoint(0.25, 0.75).hashCode),
+      );
     });
 
     test('PromptStroke compares mode, points, and completion', () {
@@ -154,7 +164,10 @@ void main() {
     test('rejects out-of-range coordinates and empty strokes', () {
       expect(() => PromptPoint(1.5, 0), throwsArgumentError);
       expect(
-        () => PromptStroke(brushMode: BrushMode.positive, points: const <PromptPoint>[]),
+        () => PromptStroke(
+          brushMode: BrushMode.positive,
+          points: const <PromptPoint>[],
+        ),
         throwsArgumentError,
       );
     });

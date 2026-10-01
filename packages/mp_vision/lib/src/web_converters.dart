@@ -13,8 +13,10 @@ DetectionResult webDetectionResult(JSAny? value) {
   final List<Object?> detections = result['detections']! as List<Object?>;
   return DetectionResult(
     detections: detections.map((Object? detectionValue) {
-      final Map<Object?, Object?> detection = detectionValue! as Map<Object?, Object?>;
-      final Map<Object?, Object?>? box = detection['boundingBox'] as Map<Object?, Object?>?;
+      final Map<Object?, Object?> detection =
+          detectionValue! as Map<Object?, Object?>;
+      final Map<Object?, Object?>? box =
+          detection['boundingBox'] as Map<Object?, Object?>?;
       return Detection(
         categories: _categories(detection['categories']),
         boundingBox: BoundingBox(
@@ -24,7 +26,8 @@ DetectionResult webDetectionResult(JSAny? value) {
           height: (box?['height'] as num?)?.toInt() ?? 0,
         ),
         keypoints: _list(detection['keypoints']).map((Object? keypointValue) {
-          final Map<Object?, Object?> keypoint = keypointValue! as Map<Object?, Object?>;
+          final Map<Object?, Object?> keypoint =
+              keypointValue! as Map<Object?, Object?>;
           return NormalizedKeypoint(
             x: (keypoint['x']! as num).toDouble(),
             y: (keypoint['y']! as num).toDouble(),
@@ -43,18 +46,21 @@ FaceLandmarkerResult webFaceLandmarkerResult(JSAny? value) {
   return FaceLandmarkerResult(
     faceLandmarks: _normalizedLandmarkGroups(result['faceLandmarks']),
     faceBlendshapes: _classifications(result['faceBlendshapes']),
-    facialTransformationMatrixes: _list(result['facialTransformationMatrixes']).map((
-      Object? matrixValue,
-    ) {
-      final Map<Object?, Object?> matrix = matrixValue! as Map<Object?, Object?>;
-      return MpMatrix(
-        rows: (matrix['rows']! as num).toInt(),
-        columns: (matrix['columns']! as num).toInt(),
-        values: Float32List.fromList(
-          _list(matrix['data']).cast<num>().map((num item) => item.toDouble()).toList(),
-        ),
-      );
-    }),
+    facialTransformationMatrixes: _list(result['facialTransformationMatrixes'])
+        .map((Object? matrixValue) {
+          final Map<Object?, Object?> matrix =
+              matrixValue! as Map<Object?, Object?>;
+          return MpMatrix(
+            rows: (matrix['rows']! as num).toInt(),
+            columns: (matrix['columns']! as num).toInt(),
+            values: Float32List.fromList(
+              _list(matrix['data'])
+                  .cast<num>()
+                  .map((num item) => item.toDouble())
+                  .toList(),
+            ),
+          );
+        }),
   );
 }
 
@@ -84,15 +90,29 @@ HolisticLandmarkerResult webHolisticLandmarkerResult(JSAny? value) {
   final JSObject result = value! as JSObject;
   final List<JSObject> masks = _objectArray(result['poseSegmentationMasks']);
   return HolisticLandmarkerResult(
-    faceLandmarks: _normalizedLandmarkGroups(_property(result, 'faceLandmarks')),
+    faceLandmarks: _normalizedLandmarkGroups(
+      _property(result, 'faceLandmarks'),
+    ),
     faceBlendshapes: _classifications(_property(result, 'faceBlendshapes')),
-    poseLandmarks: _normalizedLandmarkGroups(_property(result, 'poseLandmarks')),
-    poseWorldLandmarks: _landmarkGroups(_property(result, 'poseWorldLandmarks')),
+    poseLandmarks: _normalizedLandmarkGroups(
+      _property(result, 'poseLandmarks'),
+    ),
+    poseWorldLandmarks: _landmarkGroups(
+      _property(result, 'poseWorldLandmarks'),
+    ),
     poseSegmentationMasks: masks.map(_copyFloatMask),
-    leftHandLandmarks: _normalizedLandmarkGroups(_property(result, 'leftHandLandmarks')),
-    leftHandWorldLandmarks: _landmarkGroups(_property(result, 'leftHandWorldLandmarks')),
-    rightHandLandmarks: _normalizedLandmarkGroups(_property(result, 'rightHandLandmarks')),
-    rightHandWorldLandmarks: _landmarkGroups(_property(result, 'rightHandWorldLandmarks')),
+    leftHandLandmarks: _normalizedLandmarkGroups(
+      _property(result, 'leftHandLandmarks'),
+    ),
+    leftHandWorldLandmarks: _landmarkGroups(
+      _property(result, 'leftHandWorldLandmarks'),
+    ),
+    rightHandLandmarks: _normalizedLandmarkGroups(
+      _property(result, 'rightHandLandmarks'),
+    ),
+    rightHandWorldLandmarks: _landmarkGroups(
+      _property(result, 'rightHandWorldLandmarks'),
+    ),
   );
 }
 
@@ -102,12 +122,16 @@ EmbeddingResult webEmbeddingResult(JSAny? value) {
   return EmbeddingResult(
     timestampMs: webOptionalInt(result['timestampMs']),
     embeddings: _list(result['embeddings']).map((Object? embeddingValue) {
-      final Map<Object?, Object?> embedding = embeddingValue! as Map<Object?, Object?>;
+      final Map<Object?, Object?> embedding =
+          embeddingValue! as Map<Object?, Object?>;
       final int headIndex = (embedding['headIndex']! as num).toInt();
       final String? headName = webEmptyToNull(embedding['headName'] as String?);
-      if (embedding['floatEmbedding'] case final List<Object?> values when values.isNotEmpty) {
+      if (embedding['floatEmbedding'] case final List<Object?> values
+          when values.isNotEmpty) {
         return Embedding.float(
-          Float32List.fromList(values.cast<num>().map((num item) => item.toDouble()).toList()),
+          Float32List.fromList(
+            values.cast<num>().map((num item) => item.toDouble()).toList(),
+          ),
           headIndex: headIndex,
           headName: headName,
         );
@@ -117,9 +141,16 @@ EmbeddingResult webEmbeddingResult(JSAny? value) {
         final List<Object?> bytes => Uint8List.fromList(
           bytes.cast<num>().map((num item) => item.toInt()).toList(),
         ),
-        _ => throw const MpException(MpStatus.internal, 'MediaPipe returned an empty embedding.'),
+        _ => throw const MpException(
+          MpStatus.internal,
+          'MediaPipe returned an empty embedding.',
+        ),
       };
-      return Embedding.quantized(quantized, headIndex: headIndex, headName: headName);
+      return Embedding.quantized(
+        quantized,
+        headIndex: headIndex,
+        headName: headName,
+      );
     }),
   );
 }
@@ -128,7 +159,9 @@ EmbeddingResult webEmbeddingResult(JSAny? value) {
 ImageSegmenterResult webImageSegmenterResult(JSAny? value) {
   final JSObject result = value! as JSObject;
   try {
-    final List<JSObject> confidenceMasks = _objectArray(result['confidenceMasks']);
+    final List<JSObject> confidenceMasks = _objectArray(
+      result['confidenceMasks'],
+    );
     final JSAny? categoryMask = result['categoryMask'];
     final Object? scores = _property(result, 'qualityScores');
     return ImageSegmenterResult(
@@ -139,7 +172,10 @@ ImageSegmenterResult webImageSegmenterResult(JSAny? value) {
       qualityScores: scores == null
           ? null
           : Float32List.fromList(
-              (scores as List<Object?>).cast<num>().map((num item) => item.toDouble()).toList(),
+              (scores as List<Object?>)
+                  .cast<num>()
+                  .map((num item) => item.toDouble())
+                  .toList(),
             ),
     );
   } finally {
@@ -151,7 +187,9 @@ ImageSegmenterResult webImageSegmenterResult(JSAny? value) {
 ImageSegmenterResult webSingleConfidenceMask(JSAny? value) {
   final JSObject mask = value! as JSObject;
   try {
-    return ImageSegmenterResult(confidenceMasks: <MpImage>[_copyFloatMask(mask)]);
+    return ImageSegmenterResult(
+      confidenceMasks: <MpImage>[_copyFloatMask(mask)],
+    );
   } finally {
     callWebMethod<JSAny?>(mask, 'close');
   }
@@ -164,18 +202,22 @@ PoseLandmarkerResult webPoseLandmarkerResult(JSAny? value) {
     return PoseLandmarkerResult(
       landmarks: _normalizedLandmarkGroups(_property(result, 'landmarks')),
       worldLandmarks: _landmarkGroups(_property(result, 'worldLandmarks')),
-      segmentationMasks: _objectArray(result['segmentationMasks']).map(_copyFloatMask),
+      segmentationMasks: _objectArray(result['segmentationMasks'])
+          .map(_copyFloatMask),
     );
   } finally {
     callWebMethod<JSAny?>(result, 'close');
   }
 }
 
-Map<Object?, Object?> _map(JSAny? value) => webDartify(value)! as Map<Object?, Object?>;
+Map<Object?, Object?> _map(JSAny? value) =>
+    webDartify(value)! as Map<Object?, Object?>;
 
-Object? _property(JSObject object, String property) => webDartify(object[property]);
+Object? _property(JSObject object, String property) =>
+    webDartify(object[property]);
 
-List<Object?> _list(Object? value) => value == null ? const <Object?>[] : value as List<Object?>;
+List<Object?> _list(Object? value) =>
+    value == null ? const <Object?>[] : value as List<Object?>;
 
 Category _category(Object? value) {
   final Map<Object?, Object?> category = value! as Map<Object?, Object?>;
@@ -187,9 +229,11 @@ Category _category(Object? value) {
   );
 }
 
-List<Category> _categories(Object? value) => _list(value).map(_category).toList();
+List<Category> _categories(Object? value) =>
+    _list(value).map(_category).toList();
 
-List<List<Category>> _categoryGroups(Object? value) => _list(value).map(_categories).toList();
+List<List<Category>> _categoryGroups(Object? value) =>
+    _list(value).map(_categories).toList();
 
 Classifications _classification(Object? value) {
   final Map<Object?, Object?> classification = value! as Map<Object?, Object?>;
@@ -200,7 +244,8 @@ Classifications _classification(Object? value) {
   );
 }
 
-List<Classifications> _classifications(Object? value) => _list(value).map(_classification).toList();
+List<Classifications> _classifications(Object? value) =>
+    _list(value).map(_classification).toList();
 
 NormalizedLandmark _normalizedLandmark(Object? value) {
   final Map<Object?, Object?> landmark = value! as Map<Object?, Object?>;
@@ -215,7 +260,9 @@ NormalizedLandmark _normalizedLandmark(Object? value) {
 }
 
 List<List<NormalizedLandmark>> _normalizedLandmarkGroups(Object? value) =>
-    _list(value).map((Object? group) => _list(group).map(_normalizedLandmark).toList()).toList();
+    _list(value)
+        .map((Object? group) => _list(group).map(_normalizedLandmark).toList())
+        .toList();
 
 Landmark _landmark(Object? value) {
   final Map<Object?, Object?> landmark = value! as Map<Object?, Object?>;
@@ -230,7 +277,9 @@ Landmark _landmark(Object? value) {
 }
 
 List<List<Landmark>> _landmarkGroups(Object? value) =>
-    _list(value).map((Object? group) => _list(group).map(_landmark).toList()).toList();
+    _list(value)
+        .map((Object? group) => _list(group).map(_landmark).toList())
+        .toList();
 
 List<JSObject> _objectArray(JSAny? value) {
   if (value.isUndefinedOrNull) return const <JSObject>[];
@@ -239,10 +288,14 @@ List<JSObject> _objectArray(JSAny? value) {
   return values.map((JSAny? item) => item! as JSObject).toList();
 }
 
-int _objectInt(JSObject object, String property) => (webDartify(object[property])! as num).toInt();
+int _objectInt(JSObject object, String property) =>
+    (webDartify(object[property])! as num).toInt();
 
 MpImage _copyFloatMask(JSObject mask) {
-  final JSFloat32Array values = callWebMethod<JSFloat32Array>(mask, 'getAsFloat32Array');
+  final JSFloat32Array values = callWebMethod<JSFloat32Array>(
+    mask,
+    'getAsFloat32Array',
+  );
   return MpImage.float32(
     width: _objectInt(mask, 'width'),
     height: _objectInt(mask, 'height'),
@@ -252,7 +305,10 @@ MpImage _copyFloatMask(JSObject mask) {
 }
 
 MpImage _copyUint8Mask(JSObject mask) {
-  final JSUint8Array values = callWebMethod<JSUint8Array>(mask, 'getAsUint8Array');
+  final JSUint8Array values = callWebMethod<JSUint8Array>(
+    mask,
+    'getAsUint8Array',
+  );
   return MpImage.uint8(
     width: _objectInt(mask, 'width'),
     height: _objectInt(mask, 'height'),

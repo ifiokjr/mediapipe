@@ -21,7 +21,9 @@ Future<void> main() async {
   final MpAssetCache cache = MpAssetCache.defaults();
   final FaceDetector detector = await FaceDetector.create(
     FaceDetectorOptions(
-      baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.faceDetector)),
+      baseOptions: BaseOptions(
+        modelAsset: await cache.model(MpExampleModels.faceDetector),
+      ),
       minDetectionConfidence: 0.4,
     ),
   );
@@ -29,12 +31,16 @@ Future<void> main() async {
   try {
     final Uint8List imageBytes = await cache.bytes(MpExampleInputs.catsAndDogs);
     final MpImage image = mpImageFromBytes(imageBytes);
-    stdout.writeln('Input: ${image.width}x${image.height} ${image.format.name}');
+    stdout.writeln(
+      'Input: ${image.width}x${image.height} ${image.format.name}',
+    );
 
     final DetectionResult result = await detector.detect(image);
     stdout.writeln('Faces detected: ${result.detections.length}');
     for (final Detection detection in result.detections) {
-      final Category? top = detection.categories.isEmpty ? null : detection.categories.first;
+      final Category? top = detection.categories.isEmpty
+          ? null
+          : detection.categories.first;
       final BoundingBox box = detection.boundingBox;
       stdout.writeln(
         '  ${top?.displayName ?? top?.categoryName ?? 'face'} '

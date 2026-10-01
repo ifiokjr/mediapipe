@@ -47,7 +47,9 @@ void main(List<String> arguments) {
       );
     }
 
-    for (final RegExpMatch match in RegExp(r'href="([^"]+)"').allMatches(html)) {
+    for (final RegExpMatch match in RegExp(
+      r'href="([^"]+)"',
+    ).allMatches(html)) {
       final String href = match.group(1)!;
       if (href.startsWith('http://') ||
           href.startsWith('https://') ||
@@ -65,7 +67,9 @@ void main(List<String> arguments) {
       final bool isAbsolute = path.startsWith('/');
 
       if (isAbsolute && !_withinBase(path, basePath)) {
-        failures.add('/$pageRoute: "$href" is root-absolute and escapes $basePath.');
+        failures.add(
+          '/$pageRoute: "$href" is root-absolute and escapes $basePath.',
+        );
         continue;
       }
 
@@ -76,7 +80,9 @@ void main(List<String> arguments) {
       if (assets.contains(target)) continue;
 
       if (!routes.contains(target)) {
-        failures.add('/$pageRoute: "$href" resolves to /$target, which was not built.');
+        failures.add(
+          '/$pageRoute: "$href" resolves to /$target, which was not built.',
+        );
         continue;
       }
 
@@ -86,7 +92,9 @@ void main(List<String> arguments) {
       // plus fragment still resolves correctly in a browser, but it hides the
       // destination from a crawler and defeats active-route highlighting.
       if (hasFragment && target != pageRoute) {
-        failures.add('/$pageRoute: "$href" crosses to a fragment on another page; link the page.');
+        failures.add(
+          '/$pageRoute: "$href" crosses to a fragment on another page; link the page.',
+        );
       }
     }
   }
@@ -122,7 +130,8 @@ String _basePath(Directory root) {
   if (!file.existsSync()) return '/';
   final Object? decoded = jsonDecode(file.readAsStringSync());
 
-  if (decoded is! Map<String, Object?> || decoded['docs'] is! String) return '/';
+  if (decoded is! Map<String, Object?> || decoded['docs'] is! String)
+    return '/';
   final String path = Uri.parse(decoded['docs']! as String).path;
 
   if (path.isEmpty || path == '/') return '/';
@@ -222,9 +231,13 @@ Set<String> _contentRoutes(Directory content) {
 
     if (withoutExtension == 'index') {
       routes.add('');
-
     } else if (withoutExtension.endsWith('/index')) {
-      routes.add(withoutExtension.substring(0, withoutExtension.length - '/index'.length));
+      routes.add(
+        withoutExtension.substring(
+          0,
+          withoutExtension.length - '/index'.length,
+        ),
+      );
     } else {
       routes.add(withoutExtension);
     }

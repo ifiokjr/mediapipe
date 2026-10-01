@@ -10,7 +10,6 @@ import 'rag.dart';
 import 'runtime_stub.dart'
     if (dart.library.io) 'runtime_native.dart'
     if (dart.library.js_interop) 'runtime_web.dart'
-
     as platform;
 
 /// Native or web engine implementation used by [LlmInference].
@@ -68,7 +67,10 @@ abstract interface class ImageGeneratorBackend implements MpTask {
   Future<ImageGeneratorResult?> execute({required bool showResult});
 
   /// Creates a processed condition image.
-  Future<MpImage> createConditionImage(MpImage image, ImageGeneratorConditionType type);
+  Future<MpImage> createConditionImage(
+    MpImage image,
+    ImageGeneratorConditionType type,
+  );
 }
 
 /// Native structured-generation implementation used by [GenerativeModel].
@@ -113,13 +115,19 @@ abstract interface class RagPipelineBackend implements MpTask {
   Future<bool> recordAll(List<RagDocument> documents);
 
   /// Retrieves semantically similar documents.
-  Future<List<RagRetrievalEntity>> retrieve(String query, RagRetrievalOptions options);
+  Future<List<RagRetrievalEntity>> retrieve(
+    String query,
+    RagRetrievalOptions options,
+  );
 
   /// Retrieves context and generates a complete response.
   Future<String> generate(String query, RagRetrievalOptions options);
 
   /// Retrieves context and streams a response.
-  Stream<RagGenerationChunk> generateStreaming(String query, RagRetrievalOptions options);
+  Stream<RagGenerationChunk> generateStreaming(
+    String query,
+    RagRetrievalOptions options,
+  );
 }
 
 /// Platform adapter capable of loading MediaPipe generative AI engines.
@@ -128,10 +136,14 @@ abstract interface class GenAiRuntime {
   Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options);
 
   /// Creates an image-generator backend.
-  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options);
+  Future<ImageGeneratorBackend> createImageGenerator(
+    ImageGeneratorOptions options,
+  );
 
   /// Creates a structured generation and function-calling backend.
-  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options);
+  Future<FunctionCallingBackend> createGenerativeModel(
+    GenerativeModelOptions options,
+  );
 
   /// Creates a retrieval-augmented generation backend.
   Future<RagPipelineBackend> createRagPipeline(RagPipelineOptions options);
@@ -149,34 +161,38 @@ final class UnsupportedGenAiRuntime implements GenAiRuntime {
   final MpPlatform platform;
 
   @override
-  Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) async =>
-      throw MpException(
-        MpStatus.unimplemented,
-        'No LlmInference backend is linked for ${platform.name}.',
-        task: 'LlmInference',
-      );
+  Future<LlmInferenceBackend> createLlmInference(
+    LlmInferenceOptions options,
+  ) async => throw MpException(
+    MpStatus.unimplemented,
+    'No LlmInference backend is linked for ${platform.name}.',
+    task: 'LlmInference',
+  );
 
   @override
-  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) async =>
-      throw MpException(
-        MpStatus.unimplemented,
-        'No ImageGenerator backend is linked for ${platform.name}.',
-        task: 'ImageGenerator',
-      );
+  Future<ImageGeneratorBackend> createImageGenerator(
+    ImageGeneratorOptions options,
+  ) async => throw MpException(
+    MpStatus.unimplemented,
+    'No ImageGenerator backend is linked for ${platform.name}.',
+    task: 'ImageGenerator',
+  );
 
   @override
-  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) async =>
-      throw MpException(
-        MpStatus.unimplemented,
-        'No GenerativeModel backend is linked for ${platform.name}.',
-        task: 'GenerativeModel',
-      );
+  Future<FunctionCallingBackend> createGenerativeModel(
+    GenerativeModelOptions options,
+  ) async => throw MpException(
+    MpStatus.unimplemented,
+    'No GenerativeModel backend is linked for ${platform.name}.',
+    task: 'GenerativeModel',
+  );
 
   @override
-  Future<RagPipelineBackend> createRagPipeline(RagPipelineOptions options) async =>
-      throw MpException(
-        MpStatus.unimplemented,
-        'No RagPipeline backend is linked for ${platform.name}.',
-        task: 'RagPipeline',
-      );
+  Future<RagPipelineBackend> createRagPipeline(
+    RagPipelineOptions options,
+  ) async => throw MpException(
+    MpStatus.unimplemented,
+    'No RagPipeline backend is linked for ${platform.name}.',
+    task: 'RagPipeline',
+  );
 }

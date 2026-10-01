@@ -12,12 +12,15 @@ import 'package:sensors_plus/sensors_plus.dart';
 /// Requests the camera permission from the host activity. The `camera` plugin
 /// reports a denial as a generic initialization failure, so the demo asks first
 /// and can show an actionable message.
-const MethodChannel _permissions = MethodChannel('dev.ifiokjr.mp_device_demo/permissions');
+const MethodChannel _permissions = MethodChannel(
+  'dev.ifiokjr.mp_device_demo/permissions',
+);
 
 Future<bool> _ensureCameraPermission() async {
   if (!Platform.isAndroid) return true;
   try {
-    return await _permissions.invokeMethod<bool>('ensureCameraPermission') ?? false;
+    return await _permissions.invokeMethod<bool>('ensureCameraPermission') ??
+        false;
   } on PlatformException catch (error) {
     debugPrint('Permission request failed: $error');
 
@@ -47,7 +50,10 @@ class MpDeviceDemoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'MP device demo',
-    theme: ThemeData(colorSchemeSeed: const Color(0xFFFF694D), useMaterial3: true),
+    theme: ThemeData(
+      colorSchemeSeed: const Color(0xFFFF694D),
+      useMaterial3: true,
+    ),
     home: const LiveInferencePage(),
   );
 }
@@ -105,7 +111,8 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
     _controller = null;
 
     if (controller != null) {
-      if (controller.value.isStreamingImages) await controller.stopImageStream();
+      if (controller.value.isStreamingImages)
+        await controller.stopImageStream();
       await controller.dispose();
     }
 
@@ -131,7 +138,9 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
       _setStatus('Opening the camera…');
 
       if (!await _ensureCameraPermission()) {
-        _setStatus('Camera permission was denied. Grant it and restart the demo.');
+        _setStatus(
+          'Camera permission was denied. Grant it and restart the demo.',
+        );
 
         return;
       }
@@ -149,7 +158,9 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
         cameras.first,
         ResolutionPreset.medium,
         enableAudio: false,
-        imageFormatGroup: Platform.isIOS ? ImageFormatGroup.bgra8888 : ImageFormatGroup.nv21,
+        imageFormatGroup: Platform.isIOS
+            ? ImageFormatGroup.bgra8888
+            : ImageFormatGroup.nv21,
       );
       _controller = controller;
       await controller.initialize();
@@ -157,11 +168,12 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
       // The scheduler keeps only the newest waiting frame. When inference cannot
       // keep up with the camera, older frames are dropped rather than queued so
       // the displayed result stays current.
-      final LatestFrameScheduler<MpCameraFrame> scheduler = LatestFrameScheduler<MpCameraFrame>(
-        _infer,
-      );
+      final LatestFrameScheduler<MpCameraFrame> scheduler =
+          LatestFrameScheduler<MpCameraFrame>(_infer);
       _scheduler = scheduler;
-      _failures = scheduler.failures.listen((LatestFrameFailure<MpCameraFrame> failure) {
+      _failures = scheduler.failures.listen((
+        LatestFrameFailure<MpCameraFrame> failure,
+      ) {
         _setStatus('Inference error: ${failure.error}');
       });
       _results = detector.results.listen(
@@ -181,7 +193,9 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
   /// Reads device motion so the demo can show the physical orientation that
   /// drives frame rotation, rather than only the reported interface state.
   Future<void> _listenToMotion() async {
-    _accelerometer = accelerometerEventStream().listen((AccelerometerEvent event) {
+    _accelerometer = accelerometerEventStream().listen((
+      AccelerometerEvent event,
+    ) {
       _setMotion(_describeTilt(event));
     });
     _gyroscope = gyroscopeEventStream().listen((GyroscopeEvent event) {
@@ -196,13 +210,16 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
   String _describeTilt(AccelerometerEvent event) {
     const double threshold = 5.0;
 
-    if (event.y.abs() > threshold) return event.y > 0 ? 'portrait' : 'portrait upside-down';
+    if (event.y.abs() > threshold)
+      return event.y > 0 ? 'portrait' : 'portrait upside-down';
 
-    if (event.x.abs() > threshold) return event.x > 0 ? 'landscape left' : 'landscape right';
+    if (event.x.abs() > threshold)
+      return event.x > 0 ? 'landscape left' : 'landscape right';
     return 'flat';
   }
 
-  double _magnitude(double x, double y, double z) => (x * x + y * y + z * z) * 0.5;
+  double _magnitude(double x, double y, double z) =>
+      (x * x + y * y + z * z) * 0.5;
 
   void _onFrame(CameraImage cameraImage) {
     final CameraController? controller = _controller;
@@ -219,7 +236,9 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
             controller.description,
             controller.value.deviceOrientation,
           ),
-          mirroredPreview: MpCameraRotation.isPreviewMirrored(controller.description),
+          mirroredPreview: MpCameraRotation.isPreviewMirrored(
+            controller.description,
+          ),
         ),
       );
     } on Object catch (error) {
@@ -237,11 +256,15 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
   void _onResult(VisionLiveResult<DetectionResult> event) {
     if (!mounted) return;
     final DetectionResult result = event.result;
-    final Detection? best = result.detections.isEmpty ? null : result.detections.first;
+    final Detection? best = result.detections.isEmpty
+        ? null
+        : result.detections.first;
     final LatestFrameScheduler<MpCameraFrame>? scheduler = _scheduler;
     setState(() {
       _faces = result.detections.length;
-      _confidence = best == null || best.categories.isEmpty ? 0 : best.categories.first.score;
+      _confidence = best == null || best.categories.isEmpty
+          ? 0
+          : best.categories.first.score;
       _dropped = scheduler?.droppedCount ?? 0;
       _processed = scheduler?.processedCount ?? 0;
       _status = _faces == 0 ? 'No face in frame.' : 'Tracking $_faces face(s).';
@@ -261,7 +284,8 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
   @override
   Widget build(BuildContext context) {
     final CameraController? controller = _controller;
-    final bool previewReady = controller != null && controller.value.isInitialized;
+    final bool previewReady =
+        controller != null && controller.value.isInitialized;
 
     return Scaffold(
       appBar: AppBar(title: const Text('MP device demo')),
@@ -276,7 +300,10 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
                         aspectRatio: controller.value.aspectRatio,
                         child: CameraPreview(controller),
                       )
-                    : const Text('Camera preview', style: TextStyle(color: Colors.white70)),
+                    : const Text(
+                        'Camera preview',
+                        style: TextStyle(color: Colors.white70),
+                      ),
               ),
             ),
           ),
@@ -288,7 +315,10 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
                 Text(_status, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
                 _Metric(label: 'Faces', value: '$_faces'),
-                _Metric(label: 'Top confidence', value: _confidence.toStringAsFixed(3)),
+                _Metric(
+                  label: 'Top confidence',
+                  value: _confidence.toStringAsFixed(3),
+                ),
                 _Metric(label: 'Device motion', value: _motion),
                 _Metric(label: 'Processed frames', value: '$_processed'),
                 _Metric(label: 'Dropped frames', value: '$_dropped'),
@@ -323,7 +353,8 @@ class _Metric extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     ),

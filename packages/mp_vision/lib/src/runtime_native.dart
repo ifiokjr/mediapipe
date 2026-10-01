@@ -45,15 +45,23 @@ extension on _TaskKind {
 final class _NativeVisionRuntime implements VisionRuntime {
   const _NativeVisionRuntime();
 
-  Future<VisionTaskBackend<T>> _create<T>(_TaskKind kind, VisionTaskOptions options) async {
-    final BaseOptions resolved = await _resolvedBaseOptions(options.baseOptions);
+  Future<VisionTaskBackend<T>> _create<T>(
+    _TaskKind kind,
+    VisionTaskOptions options,
+  ) async {
+    final BaseOptions resolved = await _resolvedBaseOptions(
+      options.baseOptions,
+    );
 
-    return _NativeVisionBackend<T>(await _spawnVisionWorker(kind, options, resolved));
+    return _NativeVisionBackend<T>(
+      await _spawnVisionWorker(kind, options, resolved),
+    );
   }
 
   @override
-  Future<VisionTaskBackend<DetectionResult>> createFaceDetector(FaceDetectorOptions options) =>
-      _create<DetectionResult>(_TaskKind.faceDetector, options);
+  Future<VisionTaskBackend<DetectionResult>> createFaceDetector(
+    FaceDetectorOptions options,
+  ) => _create<DetectionResult>(_TaskKind.faceDetector, options);
 
   @override
   Future<VisionTaskBackend<FaceLandmarkerResult>> createFaceLandmarker(
@@ -81,8 +89,9 @@ final class _NativeVisionRuntime implements VisionRuntime {
   ) => _create<ClassificationResult>(_TaskKind.imageClassifier, options);
 
   @override
-  Future<VisionTaskBackend<EmbeddingResult>> createImageEmbedder(ImageEmbedderOptions options) =>
-      _create<EmbeddingResult>(_TaskKind.imageEmbedder, options);
+  Future<VisionTaskBackend<EmbeddingResult>> createImageEmbedder(
+    ImageEmbedderOptions options,
+  ) => _create<EmbeddingResult>(_TaskKind.imageEmbedder, options);
 
   @override
   Future<VisionTaskBackend<ImageSegmenterResult>> createImageSegmenter(
@@ -93,15 +102,22 @@ final class _NativeVisionRuntime implements VisionRuntime {
   Future<InteractiveSegmenterBackend> createInteractiveSegmenter(
     InteractiveSegmenterOptions options,
   ) async {
-    final BaseOptions resolved = await _resolvedBaseOptions(options.baseOptions);
+    final BaseOptions resolved = await _resolvedBaseOptions(
+      options.baseOptions,
+    );
     return _NativeInteractiveSegmenter(
-      await _spawnVisionWorker(_TaskKind.interactiveSegmenter, options, resolved),
+      await _spawnVisionWorker(
+        _TaskKind.interactiveSegmenter,
+        options,
+        resolved,
+      ),
     );
   }
 
   @override
-  Future<VisionTaskBackend<DetectionResult>> createObjectDetector(ObjectDetectorOptions options) =>
-      _create<DetectionResult>(_TaskKind.objectDetector, options);
+  Future<VisionTaskBackend<DetectionResult>> createObjectDetector(
+    ObjectDetectorOptions options,
+  ) => _create<DetectionResult>(_TaskKind.objectDetector, options);
 
   @override
   Future<VisionTaskBackend<PoseLandmarkerResult>> createPoseLandmarker(
@@ -125,10 +141,13 @@ final class _NativeVisionBackend<T> implements VisionTaskBackend<T> {
   Stream<VisionLiveResult<T>> get results => _results.stream;
 
   @override
-  Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) => _run(
-    () async =>
-        await _worker.request<Object>(_VisionProcess(image, processingOptions: processingOptions))
-            as T,
+  Future<T> processImage(
+    MpImage image,
+    ImageProcessingOptions? processingOptions,
+  ) => _run(
+    () async => await _worker.request<Object>(
+      _VisionProcess(image, processingOptions: processingOptions),
+    ) as T,
   );
 
   @override
@@ -137,11 +156,13 @@ final class _NativeVisionBackend<T> implements VisionTaskBackend<T> {
     int timestampMs,
     ImageProcessingOptions? processingOptions,
   ) => _run(
-    () async =>
-        await _worker.request<Object>(
-              _VisionProcess(image, timestampMs: timestampMs, processingOptions: processingOptions),
-            )
-            as T,
+    () async => await _worker.request<Object>(
+      _VisionProcess(
+        image,
+        timestampMs: timestampMs,
+        processingOptions: processingOptions,
+      ),
+    ) as T,
   );
 
   @override
@@ -150,12 +171,20 @@ final class _NativeVisionBackend<T> implements VisionTaskBackend<T> {
     int timestampMs,
     ImageProcessingOptions? processingOptions,
   ) => _run(() async {
-    final T result =
-        await _worker.request<Object>(
-              _VisionProcess(image, timestampMs: timestampMs, processingOptions: processingOptions),
-            )
-            as T;
-    _results.add(VisionLiveResult<T>(result: result, input: image, timestampMs: timestampMs));
+    final T result = await _worker.request<Object>(
+      _VisionProcess(
+        image,
+        timestampMs: timestampMs,
+        processingOptions: processingOptions,
+      ),
+    ) as T;
+    _results.add(
+      VisionLiveResult<T>(
+        result: result,
+        input: image,
+        timestampMs: timestampMs,
+      ),
+    );
   });
 
   @override
@@ -193,7 +222,11 @@ final class _NativeInteractiveSegmenter implements InteractiveSegmenterBackend {
   ) {
     final Future<ImageSegmenterResult> operation = _tail.then(
       (_) => _worker.request<ImageSegmenterResult>(
-        _InteractiveProcess(image, prompt, processingOptions: processingOptions),
+        _InteractiveProcess(
+          image,
+          prompt,
+          processingOptions: processingOptions,
+        ),
       ),
     );
     _tail = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
@@ -271,7 +304,12 @@ native.NativeTaskWorkerHandler _createVisionWorker(Object? initialMessage) {
     }
 
     if (command case final _InteractiveProcess request) {
-      return _segmentInteractive(address, request.image, request.prompt, request.processingOptions);
+      return _segmentInteractive(
+        address,
+        request.image,
+        request.prompt,
+        request.processingOptions,
+      );
     }
 
     final _VisionProcess request = command! as _VisionProcess;
@@ -285,13 +323,18 @@ native.NativeTaskWorkerHandler _createVisionWorker(Object? initialMessage) {
   };
 }
 
-Future<BaseOptions> _resolvedBaseOptions(BaseOptions options) async => BaseOptions(
-  modelAsset: await native.resolveNativeModelAsset(options.modelAsset),
-  delegate: options.delegate,
-  liteRtOptions: options.liteRtOptions,
-);
+Future<BaseOptions> _resolvedBaseOptions(BaseOptions options) async =>
+    BaseOptions(
+      modelAsset: await native.resolveNativeModelAsset(options.modelAsset),
+      delegate: options.delegate,
+      liteRtOptions: options.liteRtOptions,
+    );
 
-int _createTask(_TaskKind kind, VisionTaskOptions options, BaseOptions baseOptions) {
+int _createTask(
+  _TaskKind kind,
+  VisionTaskOptions options,
+  BaseOptions baseOptions,
+) {
   final native.NativeScope scope = native.NativeScope(task: kind.taskName);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
@@ -389,7 +432,8 @@ int _createFaceDetector(
     ..min_detection_confidence = options.minDetectionConfidence
     ..min_suppression_threshold = options.minSuppressionThreshold
     ..result_callback = ffi.nullptr;
-  final ffi.Pointer<native.MpFaceDetectorPtr> output = scope.allocator<native.MpFaceDetectorPtr>();
+  final ffi.Pointer<native.MpFaceDetectorPtr> output = scope
+      .allocator<native.MpFaceDetectorPtr>();
   scope.check(native.MpFaceDetectorCreate(input, output, error), error);
 
   return output.value.address;
@@ -411,7 +455,8 @@ int _createFaceLandmarker(
     ..min_face_presence_confidence = options.minFacePresenceConfidence
     ..min_tracking_confidence = options.minTrackingConfidence
     ..output_face_blendshapes = options.outputFaceBlendshapes
-    ..output_facial_transformation_matrixes = options.outputFacialTransformationMatrixes
+    ..output_facial_transformation_matrixes =
+        options.outputFacialTransformationMatrixes
     ..result_callback = ffi.nullptr;
   final ffi.Pointer<native.MpFaceLandmarkerPtr> output = scope
       .allocator<native.MpFaceLandmarkerPtr>();
@@ -511,7 +556,9 @@ int _createImageClassifier(
   input.ref
     ..base_options = scope.baseOptions(base).ref
     ..running_mode = _runningMode(options.runningMode)
-    ..classifier_options = scope.classifierOptions(options.classifierOptions).ref
+    ..classifier_options = scope
+        .classifierOptions(options.classifierOptions)
+        .ref
     ..result_callback = ffi.nullptr;
   final ffi.Pointer<native.MpImageClassifierPtr> output = scope
       .allocator<native.MpImageClassifierPtr>();
@@ -576,7 +623,10 @@ int _createInteractiveSegmenter(
     ..output_category_mask = options.outputCategoryMask;
   final ffi.Pointer<native.MpInteractiveSegmenterLegacyPtr> output = scope
       .allocator<native.MpInteractiveSegmenterLegacyPtr>();
-  scope.check(native.MpInteractiveSegmenterLegacyCreate(input, output, error), error);
+  scope.check(
+    native.MpInteractiveSegmenterLegacyCreate(input, output, error),
+    error,
+  );
 
   return output.value.address;
 }
@@ -587,7 +637,8 @@ int _createObjectDetector(
   BaseOptions base,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error,
 ) {
-  final ClassifierOptions filters = options.classifierOptions ?? ClassifierOptions();
+  final ClassifierOptions filters =
+      options.classifierOptions ?? ClassifierOptions();
   final ffi.Pointer<native.MpObjectDetectorOptions> input = scope
       .allocator<native.MpObjectDetectorOptions>();
   input.ref
@@ -639,7 +690,12 @@ Object _processTask(
   int? timestampMs,
   ImageProcessingOptions? processingOptions,
 ) => switch (kind) {
-  _TaskKind.faceDetector => _processFaceDetector(address, image, timestampMs, processingOptions),
+  _TaskKind.faceDetector => _processFaceDetector(
+    address,
+    image,
+    timestampMs,
+    processingOptions,
+  ),
   _TaskKind.faceLandmarker => _processFaceLandmarker(
     address,
     image,
@@ -670,7 +726,12 @@ Object _processTask(
     timestampMs,
     processingOptions,
   ),
-  _TaskKind.imageEmbedder => _processImageEmbedder(address, image, timestampMs, processingOptions),
+  _TaskKind.imageEmbedder => _processImageEmbedder(
+    address,
+    image,
+    timestampMs,
+    processingOptions,
+  ),
   _TaskKind.imageSegmenter => _processImageSegmenter(
     address,
     image,
@@ -689,7 +750,9 @@ Object _processTask(
     timestampMs,
     processingOptions,
   ),
-  _TaskKind.interactiveSegmenter => throw StateError('Use the interactive task entrypoint.'),
+  _TaskKind.interactiveSegmenter => throw StateError(
+    'Use the interactive task entrypoint.',
+  ),
 };
 
 DetectionResult _processFaceDetector(
@@ -706,7 +769,6 @@ DetectionResult _processFaceDetector(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpFaceDetectorDetectImage(
             ffi.Pointer<native.MpFaceDetectorInternal>.fromAddress(address),
             input,
@@ -725,7 +787,10 @@ DetectionResult _processFaceDetector(
     scope.check(status, error);
     ownsResult = true;
 
-    return native.detectionResultFromNative(result.ref, timestampMs: timestampMs);
+    return native.detectionResultFromNative(
+      result.ref,
+      timestampMs: timestampMs,
+    );
   } finally {
     if (ownsResult) native.MpFaceDetectorCloseResult(result);
     native.MpImageFree(input);
@@ -747,7 +812,6 @@ FaceLandmarkerResult _processFaceLandmarker(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpFaceLandmarkerDetectImage(
             ffi.Pointer<native.MpFaceLandmarkerInternal>.fromAddress(address),
             input,
@@ -780,7 +844,9 @@ GestureRecognizerResult _processGestureRecognizer(
   int? timestampMs,
   ImageProcessingOptions? processingOptions,
 ) {
-  final native.NativeScope scope = native.NativeScope(task: 'GestureRecognizer');
+  final native.NativeScope scope = native.NativeScope(
+    task: 'GestureRecognizer',
+  );
   final ffi.Pointer<native.MpGestureRecognizerResult> result = scope
       .allocator<native.MpGestureRecognizerResult>();
   var ownsResult = false;
@@ -788,16 +854,19 @@ GestureRecognizerResult _processGestureRecognizer(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpGestureRecognizerRecognizeImage(
-            ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(address),
+            ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(
+              address,
+            ),
             input,
             scope.imageProcessingOptions(processingOptions),
             result,
             error,
           )
         : native.MpGestureRecognizerRecognizeForVideo(
-            ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(address),
+            ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(
+              address,
+            ),
             input,
             scope.imageProcessingOptions(processingOptions),
             timestampMs,
@@ -829,7 +898,6 @@ HandLandmarkerResult _processHandLandmarker(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpHandLandmarkerDetectImage(
             ffi.Pointer<native.MpHandLandmarkerInternal>.fromAddress(address),
             input,
@@ -862,7 +930,9 @@ HolisticLandmarkerResult _processHolisticLandmarker(
   int? timestampMs,
   ImageProcessingOptions? processingOptions,
 ) {
-  final native.NativeScope scope = native.NativeScope(task: 'HolisticLandmarker');
+  final native.NativeScope scope = native.NativeScope(
+    task: 'HolisticLandmarker',
+  );
   final ffi.Pointer<native.MpHolisticLandmarkerResult> result = scope
       .allocator<native.MpHolisticLandmarkerResult>();
   var ownsResult = false;
@@ -870,16 +940,19 @@ HolisticLandmarkerResult _processHolisticLandmarker(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpHolisticLandmarkerDetectImage(
-            ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(address),
+            ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(
+              address,
+            ),
             input,
             scope.imageProcessingOptions(processingOptions),
             result,
             error,
           )
         : native.MpHolisticLandmarkerDetectForVideo(
-            ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(address),
+            ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(
+              address,
+            ),
             input,
             scope.imageProcessingOptions(processingOptions),
             timestampMs,
@@ -911,7 +984,6 @@ ClassificationResult _processImageClassifier(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpImageClassifierClassifyImage(
             ffi.Pointer<native.MpImageClassifierInternal>.fromAddress(address),
             input,
@@ -952,7 +1024,6 @@ EmbeddingResult _processImageEmbedder(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpImageEmbedderEmbedImage(
             ffi.Pointer<native.MpImageEmbedderInternal>.fromAddress(address),
             input,
@@ -993,7 +1064,6 @@ ImageSegmenterResult _processImageSegmenter(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpImageSegmenterSegmentImage(
             ffi.Pointer<native.MpImageSegmenterInternal>.fromAddress(address),
             input,
@@ -1034,7 +1104,6 @@ DetectionResult _processObjectDetector(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpObjectDetectorDetectImage(
             ffi.Pointer<native.MpObjectDetectorInternal>.fromAddress(address),
             input,
@@ -1053,7 +1122,10 @@ DetectionResult _processObjectDetector(
     scope.check(status, error);
     ownsResult = true;
 
-    return native.detectionResultFromNative(result.ref, timestampMs: timestampMs);
+    return native.detectionResultFromNative(
+      result.ref,
+      timestampMs: timestampMs,
+    );
   } finally {
     if (ownsResult) native.MpObjectDetectorCloseResult(result);
     native.MpImageFree(input);
@@ -1075,7 +1147,6 @@ PoseLandmarkerResult _processPoseLandmarker(
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     final native.MpStatus status = timestampMs == null
-
         ? native.MpPoseLandmarkerDetectImage(
             ffi.Pointer<native.MpPoseLandmarkerInternal>.fromAddress(address),
             input,
@@ -1108,18 +1179,25 @@ ImageSegmenterResult _segmentInteractive(
   InteractivePrompt prompt,
   ImageProcessingOptions? processingOptions,
 ) {
-  final native.NativeScope scope = native.NativeScope(task: 'InteractiveSegmenter');
+  final native.NativeScope scope = native.NativeScope(
+    task: 'InteractiveSegmenter',
+  );
   final ffi.Pointer<native.MpImageSegmenterResult> result = scope
       .allocator<native.MpImageSegmenterResult>();
   var ownsResult = false;
   final native.MpImagePtr input = scope.image(image);
   try {
-    final ffi.Pointer<native.MpRegionOfInterest> region = _interactiveRegion(scope, prompt);
+    final ffi.Pointer<native.MpRegionOfInterest> region = _interactiveRegion(
+      scope,
+      prompt,
+    );
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
 
     scope.check(
       native.MpInteractiveSegmenterLegacySegmentImage(
-        ffi.Pointer<native.MpInteractiveSegmenterLegacyInternal>.fromAddress(address),
+        ffi.Pointer<native.MpInteractiveSegmenterLegacyInternal>.fromAddress(
+          address,
+        ),
         input,
         region,
         scope.imageProcessingOptions(processingOptions),
@@ -1154,7 +1232,9 @@ ffi.Pointer<native.MpRegionOfInterest> _interactiveRegion(
         ..has_score = false;
       return native.MpRegionOfInterest.$allocate(
         scope.allocator,
-        format: native.MpRegionOfInterestFormat.MP_REGION_OF_INTEREST_FORMAT_KEYPOINT,
+        format: native
+            .MpRegionOfInterestFormat
+            .MP_REGION_OF_INTEREST_FORMAT_KEYPOINT,
         keypoint: keypoint,
         scribble: ffi.nullptr,
         scribble_count: 0,
@@ -1173,7 +1253,9 @@ ffi.Pointer<native.MpRegionOfInterest> _interactiveRegion(
       }
       return native.MpRegionOfInterest.$allocate(
         scope.allocator,
-        format: native.MpRegionOfInterestFormat.MP_REGION_OF_INTEREST_FORMAT_SCRIBBLE,
+        format: native
+            .MpRegionOfInterestFormat
+            .MP_REGION_OF_INTEREST_FORMAT_SCRIBBLE,
         keypoint: ffi.nullptr,
         scribble: scribble,
         scribble_count: points.length,
@@ -1225,10 +1307,13 @@ void _closeTask(_TaskKind kind, int address) {
         ffi.Pointer<native.MpImageSegmenterInternal>.fromAddress(address),
         error,
       ),
-      _TaskKind.interactiveSegmenter => native.MpInteractiveSegmenterLegacyClose(
-        ffi.Pointer<native.MpInteractiveSegmenterLegacyInternal>.fromAddress(address),
-        error,
-      ),
+      _TaskKind.interactiveSegmenter =>
+        native.MpInteractiveSegmenterLegacyClose(
+          ffi.Pointer<native.MpInteractiveSegmenterLegacyInternal>.fromAddress(
+            address,
+          ),
+          error,
+        ),
       _TaskKind.objectDetector => native.MpObjectDetectorClose(
         ffi.Pointer<native.MpObjectDetectorInternal>.fromAddress(address),
         error,

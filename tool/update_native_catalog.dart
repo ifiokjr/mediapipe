@@ -6,7 +6,8 @@ import 'package:crypto/crypto.dart';
 
 Future<void> main(List<String> arguments) async {
   final String release = _readOption(arguments, '--release');
-  final Directory artifacts = Directory(_readOption(arguments, '--artifacts')).absolute;
+  final Directory artifacts = Directory(_readOption(arguments, '--artifacts'))
+      .absolute;
 
   if (!RegExp(r'^native-v\d+\.\d+\.\d+-\d+$').hasMatch(release)) {
     throw FormatException('Invalid native release tag: $release');
@@ -26,9 +27,15 @@ Future<void> main(List<String> arguments) async {
     release: release,
     archives: archives,
   );
-  final File output = File.fromUri(root.uri.resolve('packages/mp_core/hook/native_artifacts.json'));
-  await output.writeAsString('${const JsonEncoder.withIndent('  ').convert(catalog)}\n');
-  stdout.writeln('Updated ${output.path} from ${archives.length} native archives.');
+  final File output = File.fromUri(
+    root.uri.resolve('packages/mp_core/hook/native_artifacts.json'),
+  );
+  await output.writeAsString(
+    '${const JsonEncoder.withIndent('  ').convert(catalog)}\n',
+  );
+  stdout.writeln(
+    'Updated ${output.path} from ${archives.length} native archives.',
+  );
 }
 
 Future<Map<String, Object>> buildNativeArtifactCatalog({
@@ -46,14 +53,18 @@ Future<Map<String, Object>> buildNativeArtifactCatalog({
     ).firstMatch(archiveFile.uri.pathSegments.last);
 
     if (filename == null) {
-      throw FormatException('Unexpected native archive name: ${archiveFile.path}');
+      throw FormatException(
+        'Unexpected native archive name: ${archiveFile.path}',
+      );
     }
 
     final String version = filename.group(1)!;
     final String target = filename.group(2)!;
 
     if (mediaPipeVersion != null && mediaPipeVersion != version) {
-      throw StateError('Native archives contain more than one MediaPipe version.');
+      throw StateError(
+        'Native archives contain more than one MediaPipe version.',
+      );
     }
 
     mediaPipeVersion = version;
@@ -64,7 +75,9 @@ Future<Map<String, Object>> buildNativeArtifactCatalog({
       final ArchiveFile? manifestFile = archive.find('manifest.json');
 
       if (manifestFile == null) {
-        throw FormatException('${archiveFile.path} does not contain manifest.json.');
+        throw FormatException(
+          '${archiveFile.path} does not contain manifest.json.',
+        );
       }
 
       final Object? manifest = jsonDecode(utf8.decode(manifestFile.content));
@@ -72,9 +85,10 @@ Future<Map<String, Object>> buildNativeArtifactCatalog({
         'mediaPipeVersion': final String manifestVersion,
         'target': final String manifestTarget,
       }) {
-
         if (manifestVersion != version || manifestTarget != target) {
-          throw StateError('Native archive metadata does not match ${archiveFile.path}.');
+          throw StateError(
+            'Native archive metadata does not match ${archiveFile.path}.',
+          );
         }
       } else {
         throw FormatException('Invalid manifest in ${archiveFile.path}.');
@@ -89,7 +103,8 @@ Future<Map<String, Object>> buildNativeArtifactCatalog({
         .then((Digest digest) => digest.toString());
     final String name = archiveFile.uri.pathSegments.last;
     artifacts[target] = <String, String>{
-      'url': 'https://github.com/ifiokjr/mediapipe/releases/download/$release/$name',
+      'url':
+          'https://github.com/ifiokjr/mediapipe/releases/download/$release/$name',
       'sha256': archiveDigest,
     };
   }
@@ -125,7 +140,8 @@ Directory _findRepositoryRoot() {
 
   while (current.parent.path != current.path) {
     if (File.fromUri(current.uri.resolve('pubspec.yaml')).existsSync() &&
-        Directory.fromUri(current.uri.resolve('packages/mp_core/')).existsSync()) {
+        Directory.fromUri(current.uri.resolve('packages/mp_core/'))
+            .existsSync()) {
       return current;
     }
     current = current.parent;

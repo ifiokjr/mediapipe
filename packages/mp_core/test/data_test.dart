@@ -6,7 +6,11 @@ import 'package:test/test.dart';
 void main() {
   test('AudioData copies samples and calculates duration', () {
     final Float32List source = Float32List.fromList(<double>[0, 1, 2, 3]);
-    final AudioData audio = AudioData(channelCount: 2, sampleRateHz: 2, samples: source);
+    final AudioData audio = AudioData(
+      channelCount: 2,
+      sampleRateHz: 2,
+      samples: source,
+    );
 
     source[0] = 99;
 
@@ -26,14 +30,25 @@ void main() {
     expect(image.sampleCount, 6);
     expect(image.byteLength, 6);
     expect(
-      () => MpImage.uint8(width: 1, height: 1, format: MpImageFormat.float32x1, data: Uint8List(1)),
+      () => MpImage.uint8(
+        width: 1,
+        height: 1,
+        format: MpImageFormat.float32x1,
+        data: Uint8List(1),
+      ),
       throwsArgumentError,
     );
   });
 
   test('cosineSimilarity supports float and quantized embeddings', () {
-    final Embedding first = Embedding.float(Float32List.fromList(<double>[1, 2]), headIndex: 0);
-    final Embedding second = Embedding.float(Float32List.fromList(<double>[2, 4]), headIndex: 0);
+    final Embedding first = Embedding.float(
+      Float32List.fromList(<double>[1, 2]),
+      headIndex: 0,
+    );
+    final Embedding second = Embedding.float(
+      Float32List.fromList(<double>[2, 4]),
+      headIndex: 0,
+    );
 
     expect(cosineSimilarity(first, second), closeTo(1, 1e-12));
     expect(

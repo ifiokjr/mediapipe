@@ -10,8 +10,12 @@ Future<void> main(List<String> arguments) async {
   if (arguments case ['--target', final String value]) {
     final NativeTarget target = NativeTarget.parse(value);
     final Directory root = _findRepositoryRoot();
-    final Directory directory = Directory.fromUri(root.uri.resolve('.mp-sdk/${target.name}/'));
-    final File manifestFile = File.fromUri(directory.uri.resolve('manifest.json'));
+    final Directory directory = Directory.fromUri(
+      root.uri.resolve('.mp-sdk/${target.name}/'),
+    );
+    final File manifestFile = File.fromUri(
+      directory.uri.resolve('manifest.json'),
+    );
     final Object? manifest = jsonDecode(await manifestFile.readAsString());
     if (manifest case {
       'mediaPipeVersion': final String mediaPipeVersion,
@@ -19,7 +23,6 @@ Future<void> main(List<String> arguments) async {
       'libraries': final Map<String, Object?> libraryValues,
     }) {
       if (mediaPipeVersion != 'v1.0.0' || manifestTarget != target.name) {
-
         throw StateError('Native manifest does not describe ${target.name}.');
       }
 
@@ -37,11 +40,17 @@ Future<void> main(List<String> arguments) async {
         final String digest = sha256.convert(bytes).toString();
 
         if (digest != entry.value) {
-          throw StateError('Native library checksum mismatch for ${entry.key}.');
+          throw StateError(
+            'Native library checksum mismatch for ${entry.key}.',
+          );
         }
 
         if (target.isAndroid) {
-          verifyAndroidElf(bytes, architecture: target.architecture, name: entry.key);
+          verifyAndroidElf(
+            bytes,
+            architecture: target.architecture,
+            name: entry.key,
+          );
         }
       }
 
@@ -49,7 +58,9 @@ Future<void> main(List<String> arguments) async {
         File.fromUri(directory.uri.resolve(target.libraryName)),
         target: target,
       );
-      stdout.writeln('Verified ${libraryValues.length} libraries for ${target.name}.');
+      stdout.writeln(
+        'Verified ${libraryValues.length} libraries for ${target.name}.',
+      );
 
       return;
     }
@@ -57,7 +68,9 @@ Future<void> main(List<String> arguments) async {
     throw const FormatException('Invalid native artifact manifest.');
   }
 
-  throw const FormatException('Usage: verify_native.dart --target <os-architecture>');
+  throw const FormatException(
+    'Usage: verify_native.dart --target <os-architecture>',
+  );
 }
 
 const Set<String> _requiredTaskExports = <String>{
@@ -78,7 +91,10 @@ const Set<String> _requiredTaskExports = <String>{
   'MpTextEmbedderCreate',
 };
 
-Future<void> _verifyTaskExports(File library, {required NativeTarget target}) async {
+Future<void> _verifyTaskExports(
+  File library, {
+  required NativeTarget target,
+}) async {
   if (target.os == 'windows') return;
   final List<String> arguments = <String>[
     if (target.os != 'macos') '--dynamic',
@@ -101,8 +117,9 @@ Future<void> _verifyTaskExports(File library, {required NativeTarget target}) as
       .map((String line) => line.trim().split(RegExp(r'\s+')).last)
       .map((String symbol) => symbol.split('@').first)
       .map(
-        (String symbol) =>
-            target.os == 'macos' && symbol.startsWith('_') ? symbol.substring(1) : symbol,
+        (String symbol) => target.os == 'macos' && symbol.startsWith('_')
+            ? symbol.substring(1)
+            : symbol,
       )
       .toSet();
   final Set<String> missing = _requiredTaskExports.difference(symbols);
@@ -119,13 +136,19 @@ Future<void> _verifyTaskExports(File library, {required NativeTarget target}) as
         .toList();
 
     if (cxxExports.isNotEmpty) {
-      throw StateError('${target.libraryName} exposes C++ implementation symbols.');
+      throw StateError(
+        '${target.libraryName} exposes C++ implementation symbols.',
+      );
     }
   }
 }
 
 /// Verifies the architecture and 16 KB load-segment alignment of an Android ELF.
-void verifyAndroidElf(Uint8List bytes, {required String architecture, required String name}) {
+void verifyAndroidElf(
+  Uint8List bytes, {
+  required String architecture,
+  required String name,
+}) {
   if (bytes.length < 64 ||
       bytes[0] != 0x7f ||
       bytes[1] != 0x45 ||
@@ -146,10 +169,13 @@ void verifyAndroidElf(Uint8List bytes, {required String architecture, required S
     'arm' => 40,
     'arm64' => 183,
     'x64' => 62,
-    _ => throw FormatException('Unsupported Android architecture: $architecture.'),
+    _ => throw FormatException(
+      'Unsupported Android architecture: $architecture.',
+    ),
   };
 
-  if (elfClass != expectedClass || data.getUint16(18, Endian.little) != expectedMachine) {
+  if (elfClass != expectedClass ||
+      data.getUint16(18, Endian.little) != expectedMachine) {
     throw FormatException('$name does not match Android $architecture.');
   }
 
@@ -180,7 +206,9 @@ void verifyAndroidElf(Uint8List bytes, {required String architecture, required S
         : data.getUint64(offset + 48, Endian.little);
 
     if (alignment < 16384) {
-      throw FormatException('$name has a load segment aligned to $alignment bytes, not 16384.');
+      throw FormatException(
+        '$name has a load segment aligned to $alignment bytes, not 16384.',
+      );
     }
   }
 
@@ -190,14 +218,19 @@ void verifyAndroidElf(Uint8List bytes, {required String architecture, required S
 }
 
 bool _isSafeFlatName(String name) =>
-    name.isNotEmpty && !name.contains('/') && !name.contains(r'\') && name != '.' && name != '..';
+    name.isNotEmpty &&
+    !name.contains('/') &&
+    !name.contains(r'\') &&
+    name != '.' &&
+    name != '..';
 
 Directory _findRepositoryRoot() {
   Directory current = Directory.current.absolute;
 
   while (current.parent.path != current.path) {
     if (File.fromUri(current.uri.resolve('pubspec.yaml')).existsSync() &&
-        Directory.fromUri(current.uri.resolve('packages/mp_core/')).existsSync()) {
+        Directory.fromUri(current.uri.resolve('packages/mp_core/'))
+            .existsSync()) {
       return current;
     }
     current = current.parent;

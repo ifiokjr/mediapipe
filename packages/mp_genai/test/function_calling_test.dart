@@ -27,9 +27,11 @@ void main() {
       runtime: runtime,
     );
 
-    final GenerateContentResponse response = await model.generateContent(<GenAiContent>[
-      GenAiContent.text(role: 'user', text: 'Check this action'),
-    ]);
+    final GenerateContentResponse response = await model.generateContent(
+      <GenAiContent>[
+        GenAiContent.text(role: 'user', text: 'Check this action'),
+      ],
+    );
     final FunctionCallingChat chat = await model.startChat();
     await chat.sendText('Check another action');
     final List<GenAiContent> history = await chat.history();
@@ -40,7 +42,8 @@ void main() {
     await chat.disableConstraint();
 
     final GenAiFunctionCallPart call =
-        response.candidates.single.content.parts.single as GenAiFunctionCallPart;
+        response.candidates.single.content.parts.single
+            as GenAiFunctionCallPart;
     expect(call.call.name, 'verify_action');
     expect(call.call.arguments, <String, Object?>{'confidence': 0.8});
     expect(history, hasLength(2));
@@ -51,7 +54,10 @@ void main() {
   });
 
   test('validates schemas, tools, and JSON function data', () {
-    expect(() => FunctionSchema(type: FunctionSchemaType.array), throwsArgumentError);
+    expect(
+      () => FunctionSchema(type: FunctionSchemaType.array),
+      throwsArgumentError,
+    );
     expect(
       () => FunctionSchema(
         type: FunctionSchemaType.object,
@@ -68,7 +74,10 @@ void main() {
       throwsArgumentError,
     );
     expect(
-      () => FunctionCall(name: 'lookup', arguments: <String, Object?>{'bad': Object()}),
+      () => FunctionCall(
+        name: 'lookup',
+        arguments: <String, Object?>{'bad': Object()},
+      ),
       throwsArgumentError,
     );
   });
@@ -84,7 +93,9 @@ void main() {
 
     final _FakeFunctionRuntime runtime = _FakeFunctionRuntime();
     final GenerativeModel model = await GenerativeModel.create(
-      GenerativeModelOptions(inferenceOptions: LlmInferenceOptions(baseOptions: _baseOptions())),
+      GenerativeModelOptions(
+        inferenceOptions: LlmInferenceOptions(baseOptions: _baseOptions()),
+      ),
       runtime: runtime,
     );
     await model.close();
@@ -95,7 +106,8 @@ void main() {
   });
 }
 
-BaseOptions _baseOptions() => BaseOptions(modelAsset: ModelAsset.path('/models/model.task'));
+BaseOptions _baseOptions() =>
+    BaseOptions(modelAsset: ModelAsset.path('/models/model.task'));
 
 GenerateContentResponse _response() => GenerateContentResponse(<GenAiCandidate>[
   GenAiCandidate(
@@ -103,7 +115,10 @@ GenerateContentResponse _response() => GenerateContentResponse(<GenAiCandidate>[
       role: 'model',
       parts: <GenAiPart>[
         GenAiFunctionCallPart(
-          FunctionCall(name: 'verify_action', arguments: <String, Object?>{'confidence': 0.8}),
+          FunctionCall(
+            name: 'verify_action',
+            arguments: <String, Object?>{'confidence': 0.8},
+          ),
         ),
       ],
     ),
@@ -114,12 +129,14 @@ final class _FakeFunctionRuntime implements GenAiRuntime {
   final _FakeFunctionBackend backend = _FakeFunctionBackend();
 
   @override
-  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) async =>
-      backend;
+  Future<FunctionCallingBackend> createGenerativeModel(
+    GenerativeModelOptions options,
+  ) async => backend;
 
   @override
-  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) =>
-      throw UnimplementedError();
+  Future<ImageGeneratorBackend> createImageGenerator(
+    ImageGeneratorOptions options,
+  ) => throw UnimplementedError();
 
   @override
   Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) =>
@@ -138,7 +155,9 @@ final class _FakeFunctionBackend implements FunctionCallingBackend {
   bool get isClosed => closeCount > 0;
 
   @override
-  Future<GenerateContentResponse> generateContent(List<GenAiContent> contents) async => _response();
+  Future<GenerateContentResponse> generateContent(
+    List<GenAiContent> contents,
+  ) async => _response();
 
   @override
   Future<FunctionCallingChatBackend> startChat() async => chat;
@@ -159,14 +178,16 @@ final class _FakeChatBackend implements FunctionCallingChatBackend {
   bool get isClosed => closed;
 
   @override
-  Future<GenerateContentResponse> sendMessage(GenAiContent content) async => _response();
+  Future<GenerateContentResponse> sendMessage(GenAiContent content) async =>
+      _response();
 
   @override
   Future<ChatRewindResult> rewind() async =>
       ChatRewindResult(lastSent: entries.first, lastReceived: entries.last);
 
   @override
-  Future<List<GenAiContent>> history() async => List<GenAiContent>.unmodifiable(entries);
+  Future<List<GenAiContent>> history() async =>
+      List<GenAiContent>.unmodifiable(entries);
 
   @override
   Future<GenAiContent> last() async => entries.last;

@@ -14,19 +14,27 @@ import 'text_summarizer.dart';
 /// A platform adapter capable of creating MediaPipe text task backends.
 abstract interface class TextRuntime {
   /// Creates a language detector backend.
-  Future<LanguageDetectorBackend> createLanguageDetector(LanguageDetectorOptions options);
+  Future<LanguageDetectorBackend> createLanguageDetector(
+    LanguageDetectorOptions options,
+  );
 
   /// Creates a text classifier backend.
-  Future<TextClassifierBackend> createTextClassifier(TextClassifierOptions options);
+  Future<TextClassifierBackend> createTextClassifier(
+    TextClassifierOptions options,
+  );
 
   /// Creates a text embedder backend.
   Future<TextEmbedderBackend> createTextEmbedder(TextEmbedderOptions options);
 
   /// Creates a text proofreader backend.
-  Future<TextProofreaderBackend> createTextProofreader(TextProofreaderOptions options);
+  Future<TextProofreaderBackend> createTextProofreader(
+    TextProofreaderOptions options,
+  );
 
   /// Creates a text summarizer backend.
-  Future<TextSummarizerBackend> createTextSummarizer(TextSummarizerOptions options);
+  Future<TextSummarizerBackend> createTextSummarizer(
+    TextSummarizerOptions options,
+  );
 }
 
 /// The adapter selected for the active platform.
@@ -47,22 +55,27 @@ final class UnsupportedTextRuntime implements TextRuntime {
   );
 
   @override
-  Future<LanguageDetectorBackend> createLanguageDetector(LanguageDetectorOptions options) async =>
-      _unsupported('LanguageDetector');
+  Future<LanguageDetectorBackend> createLanguageDetector(
+    LanguageDetectorOptions options,
+  ) async => _unsupported('LanguageDetector');
 
   @override
-  Future<TextClassifierBackend> createTextClassifier(TextClassifierOptions options) async =>
-      _unsupported('TextClassifier');
+  Future<TextClassifierBackend> createTextClassifier(
+    TextClassifierOptions options,
+  ) async => _unsupported('TextClassifier');
 
   @override
-  Future<TextEmbedderBackend> createTextEmbedder(TextEmbedderOptions options) async =>
-      _unsupported('TextEmbedder');
+  Future<TextEmbedderBackend> createTextEmbedder(
+    TextEmbedderOptions options,
+  ) async => _unsupported('TextEmbedder');
 
   @override
-  Future<TextProofreaderBackend> createTextProofreader(TextProofreaderOptions options) async =>
-      _unsupported('TextProofreader');
+  Future<TextProofreaderBackend> createTextProofreader(
+    TextProofreaderOptions options,
+  ) async => _unsupported('TextProofreader');
 
   @override
-  Future<TextSummarizerBackend> createTextSummarizer(TextSummarizerOptions options) async =>
-      _unsupported('TextSummarizer');
+  Future<TextSummarizerBackend> createTextSummarizer(
+    TextSummarizerOptions options,
+  ) async => _unsupported('TextSummarizer');
 }

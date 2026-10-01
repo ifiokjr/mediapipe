@@ -29,7 +29,9 @@ Future<void> _detectLanguages(MpAssetCache cache) async {
   stdout.writeln('== Language detection ==');
   final LanguageDetector detector = await LanguageDetector.create(
     LanguageDetectorOptions(
-      baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.languageDetector)),
+      baseOptions: BaseOptions(
+        modelAsset: await cache.model(MpExampleModels.languageDetector),
+      ),
     ),
   );
   try {
@@ -50,7 +52,9 @@ Future<void> _embed(MpAssetCache cache) async {
   stdout.writeln('\n== Text embedding ==');
   final TextEmbedder embedder = await TextEmbedder.create(
     TextEmbedderOptions(
-      baseOptions: BaseOptions(modelAsset: await cache.model(MpExampleModels.textEmbedderQa)),
+      baseOptions: BaseOptions(
+        modelAsset: await cache.model(MpExampleModels.textEmbedderQa),
+      ),
       embedderOptions: const EmbedderOptions(l2Normalize: true),
     ),
   );
@@ -64,7 +68,9 @@ Future<void> _embed(MpAssetCache cache) async {
     for (final String sentence in sentences) {
       final EmbeddingResult result = await embedder.embed(sentence);
       embeddings.add(result.embeddings.first);
-      stdout.writeln('  ${result.embeddings.first.length} dimensions  "$sentence"');
+      stdout.writeln(
+        '  ${result.embeddings.first.length} dimensions  "$sentence"',
+      );
     }
 
     // The first two sentences are paraphrases, so they should score higher than

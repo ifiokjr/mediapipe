@@ -7,7 +7,8 @@ import 'package:mp_camera/mp_camera.dart';
 import 'package:mp_core/mp_core.dart';
 import 'package:mp_vision/mp_vision.dart';
 
-const String _models = 'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/vision/';
+const String _models =
+    'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/vision/';
 
 /// Owns one camera and one task. Reconfiguration and disposal are serialized so
 /// a slow model download cannot resurrect a closed camera or overwrite a new mode.
@@ -49,7 +50,11 @@ final class TrackingSession extends ChangeNotifier {
   final Stopwatch _sinceResult = Stopwatch();
 
   /// Stops existing resources before opening the selected task and lens.
-  Future<void> configure({required bool enabled, required bool faceMode, bool front = true}) {
+  Future<void> configure({
+    required bool enabled,
+    required bool faceMode,
+    bool front = true,
+  }) {
     final int generation = ++_generation;
     loading = enabled;
     pose = <NormalizedLandmark>[];
@@ -71,7 +76,9 @@ final class TrackingSession extends ChangeNotifier {
         if (kIsWeb ||
             (defaultTargetPlatform != TargetPlatform.android &&
                 defaultTargetPlatform != TargetPlatform.iOS)) {
-          throw UnsupportedError('Live camera requires Android or iOS. Demo mode works here.');
+          throw UnsupportedError(
+            'Live camera requires Android or iOS. Demo mode works here.',
+          );
         }
 
         status = 'Loading ${faceMode ? 'face' : 'pose'} model…';
@@ -106,9 +113,12 @@ final class TrackingSession extends ChangeNotifier {
         if (_disposed || generation != _generation) return;
 
         if (defaultTargetPlatform == TargetPlatform.android) {
-          const MethodChannel permission = MethodChannel('dev.ifiokjr.mp_device_demo/permissions');
+          const MethodChannel permission = MethodChannel(
+            'dev.ifiokjr.mp_device_demo/permissions',
+          );
           final bool granted =
-              await permission.invokeMethod<bool>('ensureCameraPermission') ?? false;
+              await permission.invokeMethod<bool>('ensureCameraPermission') ??
+              false;
 
           if (!granted) {
             throw StateError(
@@ -119,7 +129,8 @@ final class TrackingSession extends ChangeNotifier {
 
         final List<CameraDescription> cameras = await availableCameras();
 
-        if (cameras.isEmpty) throw StateError('No camera found. Connect a camera and retry.');
+        if (cameras.isEmpty)
+          throw StateError('No camera found. Connect a camera and retry.');
         final CameraLensDirection lens = front
             ? CameraLensDirection.front
             : CameraLensDirection.back;
@@ -141,21 +152,25 @@ final class TrackingSession extends ChangeNotifier {
 
         if (_disposed || generation != _generation) return;
         final MpCameraClock clock = MpCameraClock();
-        final LatestFrameScheduler<MpCameraFrame> scheduler = LatestFrameScheduler<MpCameraFrame>(
-          (MpCameraFrame frame) => _infer(frame, generation),
-        );
+        final LatestFrameScheduler<MpCameraFrame> scheduler =
+            LatestFrameScheduler<MpCameraFrame>(
+              (MpCameraFrame frame) => _infer(frame, generation),
+            );
         _scheduler = scheduler;
         _sinceResult.reset();
         _sinceResult.start();
         _watchdog = Timer.periodic(const Duration(milliseconds: 250), (_) {
-          if (_sinceResult.elapsedMilliseconds <= 750 || (pose.isEmpty && face.isEmpty)) return;
+          if (_sinceResult.elapsedMilliseconds <= 750 ||
+              (pose.isEmpty && face.isEmpty))
+            return;
           pose = <NormalizedLandmark>[];
           face = <NormalizedLandmark>[];
           status = 'Tracking paused · waiting for a fresh camera frame';
           _notify();
         });
         _failures = scheduler.failures.listen(
-          (LatestFrameFailure<MpCameraFrame> failure) => _frameError(failure.error),
+          (LatestFrameFailure<MpCameraFrame> failure) =>
+              _frameError(failure.error),
         );
         await controller.startImageStream((CameraImage image) {
           if (_disposed || generation != _generation) return;
@@ -169,7 +184,9 @@ final class TrackingSession extends ChangeNotifier {
                   description,
                   DeviceOrientation.portraitUp,
                 ),
-                mirroredPreview: MpCameraRotation.isPreviewMirrored(description),
+                mirroredPreview: MpCameraRotation.isPreviewMirrored(
+                  description,
+                ),
               ),
             );
           } on Object catch (error) {
@@ -206,12 +223,18 @@ final class TrackingSession extends ChangeNotifier {
     List<NormalizedLandmark> nextPose = <NormalizedLandmark>[];
 
     if (faceTask != null) {
-      final FaceLandmarkerResult result = await faceTask.detectForVideo(image, frame.timestampMs);
+      final FaceLandmarkerResult result = await faceTask.detectForVideo(
+        image,
+        frame.timestampMs,
+      );
       nextFace = result.faceLandmarks.firstOrNull ?? <NormalizedLandmark>[];
     }
 
     if (poseTask != null) {
-      final PoseLandmarkerResult result = await poseTask.detectForVideo(image, frame.timestampMs);
+      final PoseLandmarkerResult result = await poseTask.detectForVideo(
+        image,
+        frame.timestampMs,
+      );
       nextPose = result.landmarks.firstOrNull ?? <NormalizedLandmark>[];
     }
 
@@ -260,7 +283,8 @@ final class TrackingSession extends ChangeNotifier {
     }
 
     if (controller != null) {
-      if (controller.value.isStreamingImages) await close(controller.stopImageStream);
+      if (controller.value.isStreamingImages)
+        await close(controller.stopImageStream);
       await close(controller.dispose);
     }
 
@@ -274,7 +298,8 @@ final class TrackingSession extends ChangeNotifier {
 
     if (poseTask != null) await close(poseTask.close);
 
-    if (errors.isNotEmpty) throw StateError('Resource cleanup failed: ${errors.join('; ')}');
+    if (errors.isNotEmpty)
+      throw StateError('Resource cleanup failed: ${errors.join('; ')}');
   }
 
   void _notify() {
@@ -286,7 +311,10 @@ final class TrackingSession extends ChangeNotifier {
     _disposed = true;
     _generation++;
     unawaited(
-      _operation.then((_) => _release()).catchError((Object error, StackTrace stack) {
+      _operation.then((_) => _release()).catchError((
+        Object error,
+        StackTrace stack,
+      ) {
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: error,
@@ -306,7 +334,8 @@ final class TrackingSession extends ChangeNotifier {
 MpImageUint8 uprightImage(MpImageUint8 image, int rotation) {
   if (rotation == 0) return image;
 
-  if (!<int>[90, 180, 270].contains(rotation)) throw ArgumentError.value(rotation, 'rotation');
+  if (!<int>[90, 180, 270].contains(rotation))
+    throw ArgumentError.value(rotation, 'rotation');
   final bool swap = rotation != 180;
   final int width = swap ? image.height : image.width;
   final int height = swap ? image.width : image.height;
@@ -327,5 +356,10 @@ MpImageUint8 uprightImage(MpImageUint8 image, int rotation) {
     }
   }
 
-  return MpImageUint8(width: width, height: height, format: image.format, data: pixels);
+  return MpImageUint8(
+    width: width,
+    height: height,
+    format: image.format,
+    data: pixels,
+  );
 }

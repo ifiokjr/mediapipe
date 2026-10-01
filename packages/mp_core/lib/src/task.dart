@@ -51,7 +51,11 @@ final class TimestampTracker {
   /// Accepts [timestampMs] when it is non-negative and strictly increasing.
   void add(int timestampMs) {
     if (timestampMs < 0) {
-      throw ArgumentError.value(timestampMs, 'timestampMs', 'must not be negative');
+      throw ArgumentError.value(
+        timestampMs,
+        'timestampMs',
+        'must not be negative',
+      );
     }
 
     final int? previous = _lastTimestampMs;

@@ -45,7 +45,9 @@ Future<void> main() async {
       if (chunk.isDone) break;
     }
     // `response` must be consumed: it also closes the temporary session.
-    stdout.writeln('\ncomplete: ${(await generation.response).length} characters');
+    stdout.writeln(
+      '\ncomplete: ${(await generation.response).length} characters',
+    );
 
     stdout.writeln('\n== Stateful session ==');
     final LlmSession session = await engine.createSession();

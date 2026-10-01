@@ -48,7 +48,10 @@ void main() {
       title: 'Readme',
     );
 
-    final EmbeddingResult result = await embedder.embed('document', formatContext: context);
+    final EmbeddingResult result = await embedder.embed(
+      'document',
+      formatContext: context,
+    );
 
     expect(result.embeddings.single.floatValues, <double>[1, 2]);
     expect(runtime.embedder.formatContext, same(context));
@@ -60,7 +63,9 @@ void main() {
       runtime: runtime,
     );
 
-    final TextProofreaderResult result = await proofreader.proofread('A sentence');
+    final TextProofreaderResult result = await proofreader.proofread(
+      'A sentence',
+    );
     final List<TextProofreaderChunk> chunks = await proofreader
         .proofreadStreaming('A sentence')
         .toList();
@@ -75,7 +80,10 @@ void main() {
     ]);
     expect(chunks.last.isDone, isTrue);
     expect(runtime.proofreader.closeCount, 1);
-    expect(() => proofreader.proofread('again'), throwsA(isA<MpTaskClosedError>()));
+    expect(
+      () => proofreader.proofread('again'),
+      throwsA(isA<MpTaskClosedError>()),
+    );
   });
 
   test('text summarizer delegates mode and streams chunks', () async {
@@ -84,7 +92,10 @@ void main() {
       mode: TextSummarizerMode.tldr,
       maxTokens: 128,
     );
-    final TextSummarizer summarizer = await TextSummarizer.create(options, runtime: runtime);
+    final TextSummarizer summarizer = await TextSummarizer.create(
+      options,
+      runtime: runtime,
+    );
 
     final TextSummarizerResult result = await summarizer.summarize('Long text');
     final List<TextSummarizerChunk> chunks = await summarizer
@@ -92,7 +103,14 @@ void main() {
         .toList();
 
     expect(result.summary, 'Short text.');
-    expect(chunks.last, isA<TextSummarizerChunk>().having((chunk) => chunk.isDone, 'isDone', true));
+    expect(
+      chunks.last,
+      isA<TextSummarizerChunk>().having(
+        (chunk) => chunk.isDone,
+        'isDone',
+        true,
+      ),
+    );
     expect(runtime.summarizerOptions, same(options));
   });
 
@@ -111,7 +129,10 @@ void main() {
     final List<TextCorrection> source = <TextCorrection>[
       const TextCorrection(type: TextCorrectionType.same, text: 'kept'),
     ];
-    final TextProofreaderResult result = TextProofreaderResult(text: 'kept', corrections: source);
+    final TextProofreaderResult result = TextProofreaderResult(
+      text: 'kept',
+      corrections: source,
+    );
 
     source.clear();
 
@@ -136,7 +157,8 @@ void main() {
   });
 }
 
-BaseOptions _baseOptions() => BaseOptions(modelAsset: ModelAsset.path('model.tflite'));
+BaseOptions _baseOptions() =>
+    BaseOptions(modelAsset: ModelAsset.path('model.tflite'));
 
 final class _FakeTextRuntime implements TextRuntime {
   final _FakeLanguageDetector languageDetector = _FakeLanguageDetector();
@@ -147,22 +169,29 @@ final class _FakeTextRuntime implements TextRuntime {
   TextSummarizerOptions? summarizerOptions;
 
   @override
-  Future<LanguageDetectorBackend> createLanguageDetector(LanguageDetectorOptions options) async =>
-      languageDetector;
+  Future<LanguageDetectorBackend> createLanguageDetector(
+    LanguageDetectorOptions options,
+  ) async => languageDetector;
 
   @override
-  Future<TextClassifierBackend> createTextClassifier(TextClassifierOptions options) async =>
-      classifier;
+  Future<TextClassifierBackend> createTextClassifier(
+    TextClassifierOptions options,
+  ) async => classifier;
 
   @override
-  Future<TextEmbedderBackend> createTextEmbedder(TextEmbedderOptions options) async => embedder;
+  Future<TextEmbedderBackend> createTextEmbedder(
+    TextEmbedderOptions options,
+  ) async => embedder;
 
   @override
-  Future<TextProofreaderBackend> createTextProofreader(TextProofreaderOptions options) async =>
-      proofreader;
+  Future<TextProofreaderBackend> createTextProofreader(
+    TextProofreaderOptions options,
+  ) async => proofreader;
 
   @override
-  Future<TextSummarizerBackend> createTextSummarizer(TextSummarizerOptions options) async {
+  Future<TextSummarizerBackend> createTextSummarizer(
+    TextSummarizerOptions options,
+  ) async {
     summarizerOptions = options;
 
     return summarizer;
@@ -179,7 +208,8 @@ base class _FakeTask implements MpTask {
   Future<void> close() async => closeCount++;
 }
 
-final class _FakeLanguageDetector extends _FakeTask implements LanguageDetectorBackend {
+final class _FakeLanguageDetector extends _FakeTask
+    implements LanguageDetectorBackend {
   final List<String> inputs = <String>[];
 
   @override
@@ -191,7 +221,8 @@ final class _FakeLanguageDetector extends _FakeTask implements LanguageDetectorB
   }
 }
 
-final class _FakeTextClassifier extends _FakeTask implements TextClassifierBackend {
+final class _FakeTextClassifier extends _FakeTask
+    implements TextClassifierBackend {
   final List<String> inputs = <String>[];
 
   @override
@@ -200,7 +231,9 @@ final class _FakeTextClassifier extends _FakeTask implements TextClassifierBacke
     return ClassificationResult(
       classifications: <Classifications>[
         Classifications(
-          categories: const <Category>[Category(index: 0, score: 0.8, categoryName: 'positive')],
+          categories: const <Category>[
+            Category(index: 0, score: 0.8, categoryName: 'positive'),
+          ],
           headIndex: 0,
         ),
       ],
@@ -212,7 +245,10 @@ final class _FakeTextEmbedder extends _FakeTask implements TextEmbedderBackend {
   TextEmbedderFormatContext? formatContext;
 
   @override
-  Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) async {
+  Future<EmbeddingResult> embed(
+    String text, {
+    TextEmbedderFormatContext? formatContext,
+  }) async {
     this.formatContext = formatContext;
     return EmbeddingResult(
       embeddings: <Embedding>[
@@ -222,17 +258,22 @@ final class _FakeTextEmbedder extends _FakeTask implements TextEmbedderBackend {
   }
 }
 
-final class _FakeTextProofreader extends _FakeTask implements TextProofreaderBackend {
+final class _FakeTextProofreader extends _FakeTask
+    implements TextProofreaderBackend {
   @override
-  Future<TextProofreaderResult> proofread(String text) async => TextProofreaderResult(
-    text: 'A corrected sentence.',
-    corrections: const <TextCorrection>[
-      TextCorrection(type: TextCorrectionType.same, text: 'A '),
-      TextCorrection(type: TextCorrectionType.insertion, text: 'corrected '),
-      TextCorrection(type: TextCorrectionType.same, text: 'sentence'),
-      TextCorrection(type: TextCorrectionType.insertion, text: '.'),
-    ],
-  );
+  Future<TextProofreaderResult> proofread(String text) async =>
+      TextProofreaderResult(
+        text: 'A corrected sentence.',
+        corrections: const <TextCorrection>[
+          TextCorrection(type: TextCorrectionType.same, text: 'A '),
+          TextCorrection(
+            type: TextCorrectionType.insertion,
+            text: 'corrected ',
+          ),
+          TextCorrection(type: TextCorrectionType.same, text: 'sentence'),
+          TextCorrection(type: TextCorrectionType.insertion, text: '.'),
+        ],
+      );
 
   @override
   Stream<TextProofreaderChunk> proofreadStreaming(String text) =>
@@ -248,7 +289,8 @@ final class _FakeTextProofreader extends _FakeTask implements TextProofreaderBac
       ]);
 }
 
-final class _FakeTextSummarizer extends _FakeTask implements TextSummarizerBackend {
+final class _FakeTextSummarizer extends _FakeTask
+    implements TextSummarizerBackend {
   @override
   Future<TextSummarizerResult> summarize(String text) async =>
       const TextSummarizerResult('Short text.');

@@ -5,7 +5,8 @@ import 'results.dart';
 import 'runtime.dart';
 
 abstract base class _VisionTask<T> implements MpTask {
-  _VisionTask(this.options, this._backend, String taskName) : _lifecycle = TaskLifecycle(taskName);
+  _VisionTask(this.options, this._backend, String taskName)
+    : _lifecycle = TaskLifecycle(taskName);
 
   /// Options used to create this task.
   final VisionTaskOptions options;
@@ -23,7 +24,10 @@ abstract base class _VisionTask<T> implements MpTask {
     return _backend.results;
   }
 
-  Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) {
+  Future<T> processImage(
+    MpImage image,
+    ImageProcessingOptions? processingOptions,
+  ) {
     _lifecycle.ensureOpen();
     _requireMode(VisionRunningMode.image, 'image processing');
 
@@ -71,12 +75,19 @@ abstract base class _VisionTask<T> implements MpTask {
 
 /// Detects faces and their bounding boxes.
 final class FaceDetector extends _VisionTask<DetectionResult> {
-  FaceDetector._(FaceDetectorOptions options, VisionTaskBackend<DetectionResult> backend)
-    : super(options, backend, 'FaceDetector');
+  FaceDetector._(
+    FaceDetectorOptions options,
+    VisionTaskBackend<DetectionResult> backend,
+  ) : super(options, backend, 'FaceDetector');
 
   /// Creates a face detector using [runtime], or the active platform adapter.
-  static Future<FaceDetector> create(FaceDetectorOptions options, {VisionRuntime? runtime}) async =>
-      FaceDetector._(options, await (runtime ?? defaultVisionRuntime).createFaceDetector(options));
+  static Future<FaceDetector> create(
+    FaceDetectorOptions options, {
+    VisionRuntime? runtime,
+  }) async => FaceDetector._(
+    options,
+    await (runtime ?? defaultVisionRuntime).createFaceDetector(options),
+  );
 
   /// Results emitted by [detectAsync].
   ///
@@ -86,8 +97,10 @@ final class FaceDetector extends _VisionTask<DetectionResult> {
   Stream<VisionLiveResult<DetectionResult>> get results => liveResults;
 
   /// Detects faces in an unrelated still [image].
-  Future<DetectionResult> detect(MpImage image, {ImageProcessingOptions? processingOptions}) =>
-      processImage(image, processingOptions);
+  Future<DetectionResult> detect(
+    MpImage image, {
+    ImageProcessingOptions? processingOptions,
+  }) => processImage(image, processingOptions);
 
   /// Detects faces in one decoded video frame.
   Future<DetectionResult> detectForVideo(
@@ -106,8 +119,10 @@ final class FaceDetector extends _VisionTask<DetectionResult> {
 
 /// Detects facial landmarks, blendshapes, and transforms.
 final class FaceLandmarker extends _VisionTask<FaceLandmarkerResult> {
-  FaceLandmarker._(FaceLandmarkerOptions options, VisionTaskBackend<FaceLandmarkerResult> backend)
-    : super(options, backend, 'FaceLandmarker');
+  FaceLandmarker._(
+    FaceLandmarkerOptions options,
+    VisionTaskBackend<FaceLandmarkerResult> backend,
+  ) : super(options, backend, 'FaceLandmarker');
 
   /// Creates a face landmarker using [runtime], or the active platform adapter.
   static Future<FaceLandmarker> create(
@@ -126,8 +141,10 @@ final class FaceLandmarker extends _VisionTask<FaceLandmarkerResult> {
   Stream<VisionLiveResult<FaceLandmarkerResult>> get results => liveResults;
 
   /// Detects facial landmarks in an unrelated still [image].
-  Future<FaceLandmarkerResult> detect(MpImage image, {ImageProcessingOptions? processingOptions}) =>
-      processImage(image, processingOptions);
+  Future<FaceLandmarkerResult> detect(
+    MpImage image, {
+    ImageProcessingOptions? processingOptions,
+  }) => processImage(image, processingOptions);
 
   /// Detects facial landmarks in one decoded video frame.
   Future<FaceLandmarkerResult> detectForVideo(
@@ -190,8 +207,10 @@ final class GestureRecognizer extends _VisionTask<GestureRecognizerResult> {
 
 /// Detects hand landmarks and handedness.
 final class HandLandmarker extends _VisionTask<HandLandmarkerResult> {
-  HandLandmarker._(HandLandmarkerOptions options, VisionTaskBackend<HandLandmarkerResult> backend)
-    : super(options, backend, 'HandLandmarker');
+  HandLandmarker._(
+    HandLandmarkerOptions options,
+    VisionTaskBackend<HandLandmarkerResult> backend,
+  ) : super(options, backend, 'HandLandmarker');
 
   /// Creates a hand landmarker using [runtime], or the active platform adapter.
   static Future<HandLandmarker> create(
@@ -210,8 +229,10 @@ final class HandLandmarker extends _VisionTask<HandLandmarkerResult> {
   Stream<VisionLiveResult<HandLandmarkerResult>> get results => liveResults;
 
   /// Detects hand landmarks in an unrelated still [image].
-  Future<HandLandmarkerResult> detect(MpImage image, {ImageProcessingOptions? processingOptions}) =>
-      processImage(image, processingOptions);
+  Future<HandLandmarkerResult> detect(
+    MpImage image, {
+    ImageProcessingOptions? processingOptions,
+  }) => processImage(image, processingOptions);
 
   /// Detects hand landmarks in one decoded video frame.
   Future<HandLandmarkerResult> detectForVideo(
@@ -274,8 +295,10 @@ final class HolisticLandmarker extends _VisionTask<HolisticLandmarkerResult> {
 
 /// Classifies images with a task-compatible model.
 final class ImageClassifier extends _VisionTask<ClassificationResult> {
-  ImageClassifier._(ImageClassifierOptions options, VisionTaskBackend<ClassificationResult> backend)
-    : super(options, backend, 'ImageClassifier');
+  ImageClassifier._(
+    ImageClassifierOptions options,
+    VisionTaskBackend<ClassificationResult> backend,
+  ) : super(options, backend, 'ImageClassifier');
 
   /// Creates an image classifier using [runtime], or the active platform adapter.
   static Future<ImageClassifier> create(
@@ -316,8 +339,10 @@ final class ImageClassifier extends _VisionTask<ClassificationResult> {
 
 /// Extracts vector embeddings from images.
 final class ImageEmbedder extends _VisionTask<EmbeddingResult> {
-  ImageEmbedder._(ImageEmbedderOptions options, VisionTaskBackend<EmbeddingResult> backend)
-    : super(options, backend, 'ImageEmbedder');
+  ImageEmbedder._(
+    ImageEmbedderOptions options,
+    VisionTaskBackend<EmbeddingResult> backend,
+  ) : super(options, backend, 'ImageEmbedder');
 
   /// Creates an image embedder using [runtime], or the active platform adapter.
   static Future<ImageEmbedder> create(
@@ -336,8 +361,10 @@ final class ImageEmbedder extends _VisionTask<EmbeddingResult> {
   Stream<VisionLiveResult<EmbeddingResult>> get results => liveResults;
 
   /// Extracts embeddings from an unrelated still [image].
-  Future<EmbeddingResult> embed(MpImage image, {ImageProcessingOptions? processingOptions}) =>
-      processImage(image, processingOptions);
+  Future<EmbeddingResult> embed(
+    MpImage image, {
+    ImageProcessingOptions? processingOptions,
+  }) => processImage(image, processingOptions);
 
   /// Extracts embeddings from one decoded video frame.
   Future<EmbeddingResult> embedForVideo(
@@ -356,8 +383,10 @@ final class ImageEmbedder extends _VisionTask<EmbeddingResult> {
 
 /// Assigns category and confidence masks to image pixels.
 final class ImageSegmenter extends _VisionTask<ImageSegmenterResult> {
-  ImageSegmenter._(ImageSegmenterOptions options, VisionTaskBackend<ImageSegmenterResult> backend)
-    : super(options, backend, 'ImageSegmenter');
+  ImageSegmenter._(
+    ImageSegmenterOptions options,
+    VisionTaskBackend<ImageSegmenterResult> backend,
+  ) : super(options, backend, 'ImageSegmenter');
 
   /// Creates an image segmenter using [runtime], or the active platform adapter.
   static Future<ImageSegmenter> create(
@@ -433,8 +462,10 @@ final class InteractiveSegmenter implements MpTask {
 
 /// Detects objects and their bounding boxes.
 final class ObjectDetector extends _VisionTask<DetectionResult> {
-  ObjectDetector._(ObjectDetectorOptions options, VisionTaskBackend<DetectionResult> backend)
-    : super(options, backend, 'ObjectDetector');
+  ObjectDetector._(
+    ObjectDetectorOptions options,
+    VisionTaskBackend<DetectionResult> backend,
+  ) : super(options, backend, 'ObjectDetector');
 
   /// Creates an object detector using [runtime], or the active platform adapter.
   static Future<ObjectDetector> create(
@@ -453,8 +484,10 @@ final class ObjectDetector extends _VisionTask<DetectionResult> {
   Stream<VisionLiveResult<DetectionResult>> get results => liveResults;
 
   /// Detects objects in an unrelated still [image].
-  Future<DetectionResult> detect(MpImage image, {ImageProcessingOptions? processingOptions}) =>
-      processImage(image, processingOptions);
+  Future<DetectionResult> detect(
+    MpImage image, {
+    ImageProcessingOptions? processingOptions,
+  }) => processImage(image, processingOptions);
 
   /// Detects objects in one decoded video frame.
   Future<DetectionResult> detectForVideo(
@@ -473,8 +506,10 @@ final class ObjectDetector extends _VisionTask<DetectionResult> {
 
 /// Detects pose landmarks and optional segmentation masks.
 final class PoseLandmarker extends _VisionTask<PoseLandmarkerResult> {
-  PoseLandmarker._(PoseLandmarkerOptions options, VisionTaskBackend<PoseLandmarkerResult> backend)
-    : super(options, backend, 'PoseLandmarker');
+  PoseLandmarker._(
+    PoseLandmarkerOptions options,
+    VisionTaskBackend<PoseLandmarkerResult> backend,
+  ) : super(options, backend, 'PoseLandmarker');
 
   /// Creates a pose landmarker using [runtime], or the active platform adapter.
   static Future<PoseLandmarker> create(
@@ -493,8 +528,10 @@ final class PoseLandmarker extends _VisionTask<PoseLandmarkerResult> {
   Stream<VisionLiveResult<PoseLandmarkerResult>> get results => liveResults;
 
   /// Detects pose landmarks in an unrelated still [image].
-  Future<PoseLandmarkerResult> detect(MpImage image, {ImageProcessingOptions? processingOptions}) =>
-      processImage(image, processingOptions);
+  Future<PoseLandmarkerResult> detect(
+    MpImage image, {
+    ImageProcessingOptions? processingOptions,
+  }) => processImage(image, processingOptions);
 
   /// Detects pose landmarks in one decoded video frame.
   Future<PoseLandmarkerResult> detectForVideo(

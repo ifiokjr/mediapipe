@@ -69,16 +69,31 @@ void main() {
                 title: 'Guides',
                 links: [
                   SidebarLink(text: 'Models & assets', href: 'guides/models'),
-                  SidebarLink(text: 'Live streams', href: 'guides/live-streams'),
-                  SidebarLink(text: 'Device verification', href: 'guides/device-verification'),
-                  SidebarLink(text: 'Privacy & security', href: 'guides/privacy-security'),
-                  SidebarLink(text: 'Migrate from MediaPipe', href: 'guides/migration'),
+                  SidebarLink(
+                    text: 'Live streams',
+                    href: 'guides/live-streams',
+                  ),
+                  SidebarLink(
+                    text: 'Device verification',
+                    href: 'guides/device-verification',
+                  ),
+                  SidebarLink(
+                    text: 'Privacy & security',
+                    href: 'guides/privacy-security',
+                  ),
+                  SidebarLink(
+                    text: 'Migrate from MediaPipe',
+                    href: 'guides/migration',
+                  ),
                 ],
               ),
               SidebarGroup(
                 title: 'Project',
                 links: [
-                  SidebarLink(text: 'Architecture', href: 'project/architecture'),
+                  SidebarLink(
+                    text: 'Architecture',
+                    href: 'project/architecture',
+                  ),
                   SidebarLink(text: 'Releases', href: 'project/releases'),
                 ],
               ),

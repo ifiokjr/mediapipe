@@ -23,10 +23,14 @@ void main() {
     materializedModelPath = null;
     sendMalformedStream = false;
     allowStreamDone = null;
-    messenger.setMockMethodCallHandler(_events, (MethodCall call) async => null);
+    messenger.setMockMethodCallHandler(
+      _events,
+      (MethodCall call) async => null,
+    );
     messenger.setMockMethodCallHandler(_methods, (MethodCall call) async {
       calls.add(call);
-      final Map<Object?, Object?> arguments = call.arguments! as Map<Object?, Object?>;
+      final Map<Object?, Object?> arguments =
+          call.arguments! as Map<Object?, Object?>;
       switch (call.method) {
         case 'proofreader.create':
           materializedModelPath = arguments['modelPath']! as String;
@@ -101,38 +105,45 @@ void main() {
     messenger.setMockMethodCallHandler(_events, null);
   });
 
-  test('proofreader materializes bytes and converts platform results', () async {
-    final TextProofreader proofreader = await TextProofreader.create(
-      TextProofreaderOptions(
-        baseOptions: BaseOptions(
-          modelAsset: ModelAsset.bytes(
-            Uint8List.fromList(<int>[1, 2, 3]),
-            name: 'proofreader.litertlm',
+  test(
+    'proofreader materializes bytes and converts platform results',
+    () async {
+      final TextProofreader proofreader = await TextProofreader.create(
+        TextProofreaderOptions(
+          baseOptions: BaseOptions(
+            modelAsset: ModelAsset.bytes(
+              Uint8List.fromList(<int>[1, 2, 3]),
+              name: 'proofreader.litertlm',
+            ),
           ),
+          maxTokens: 512,
         ),
-        maxTokens: 512,
-      ),
-    );
+      );
 
-    final TextProofreaderResult result = await proofreader.proofread('Text');
-    await proofreader.close();
+      final TextProofreaderResult result = await proofreader.proofread('Text');
+      await proofreader.close();
 
-    expect(result.text, 'Corrected text.');
-    expect(result.corrections.last.type, TextCorrectionType.insertion);
-    expect(calls.map((MethodCall call) => call.method), <String>[
-      'proofreader.create',
-      'proofreader.proofread',
-      'proofreader.close',
-    ]);
-    final Map<Object?, Object?> createArguments = calls.first.arguments! as Map<Object?, Object?>;
-    expect(createArguments['maxTokens'], 512);
-    expect(File(materializedModelPath!).existsSync(), isFalse);
-  });
+      expect(result.text, 'Corrected text.');
+      expect(result.corrections.last.type, TextCorrectionType.insertion);
+      expect(calls.map((MethodCall call) => call.method), <String>[
+        'proofreader.create',
+        'proofreader.proofread',
+        'proofreader.close',
+      ]);
+      final Map<Object?, Object?> createArguments =
+          calls.first.arguments! as Map<Object?, Object?>;
+      expect(createArguments['maxTokens'], 512);
+      expect(File(materializedModelPath!).existsSync(), isFalse);
+    },
+  );
 
   test('summarizer forwards mode and parses the result', () async {
-    final Directory directory = Directory.systemTemp.createTempSync('mp_text_test_');
-    final File model = File('${directory.path}${Platform.pathSeparator}summary.litertlm')
-      ..writeAsBytesSync(<int>[1]);
+    final Directory directory = Directory.systemTemp.createTempSync(
+      'mp_text_test_',
+    );
+    final File model = File(
+      '${directory.path}${Platform.pathSeparator}summary.litertlm',
+    )..writeAsBytesSync(<int>[1]);
     addTearDown(() => directory.deleteSync(recursive: true));
 
     final TextSummarizer summarizer = await TextSummarizer.create(
@@ -146,35 +157,51 @@ void main() {
     await summarizer.close();
 
     expect(result.summary, 'Summary.');
-    final Map<Object?, Object?> createArguments = calls.first.arguments! as Map<Object?, Object?>;
+    final Map<Object?, Object?> createArguments =
+        calls.first.arguments! as Map<Object?, Object?>;
     expect(createArguments['mode'], 'tldr');
     expect(createArguments['modelPath'], model.absolute.path);
   });
 
   test('proofreader converts platform stream events in order', () async {
-    final Directory directory = Directory.systemTemp.createTempSync('mp_text_test_');
-    final File model = File('${directory.path}${Platform.pathSeparator}proofread.litertlm')
-      ..writeAsBytesSync(<int>[1]);
+    final Directory directory = Directory.systemTemp.createTempSync(
+      'mp_text_test_',
+    );
+    final File model = File(
+      '${directory.path}${Platform.pathSeparator}proofread.litertlm',
+    )..writeAsBytesSync(<int>[1]);
     addTearDown(() => directory.deleteSync(recursive: true));
     final TextProofreader proofreader = await TextProofreader.create(
-      TextProofreaderOptions(baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path))),
+      TextProofreaderOptions(
+        baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path)),
+      ),
     );
 
-    final List<TextProofreaderChunk> chunks = await proofreader.proofreadStreaming('Text').toList();
+    final List<TextProofreaderChunk> chunks = await proofreader
+        .proofreadStreaming('Text')
+        .toList();
     await proofreader.close();
 
-    expect(chunks.map((TextProofreaderChunk chunk) => chunk.text), <String>['Corrected ', 'text.']);
+    expect(chunks.map((TextProofreaderChunk chunk) => chunk.text), <String>[
+      'Corrected ',
+      'text.',
+    ]);
     expect(chunks.last.isDone, isTrue);
     expect(chunks.last.corrections.last.type, TextCorrectionType.insertion);
   });
 
   test('a failed operation does not strand the task as busy', () async {
-    final Directory directory = Directory.systemTemp.createTempSync('mp_text_test_');
-    final File model = File('${directory.path}${Platform.pathSeparator}proofread.litertlm')
-      ..writeAsBytesSync(<int>[1]);
+    final Directory directory = Directory.systemTemp.createTempSync(
+      'mp_text_test_',
+    );
+    final File model = File(
+      '${directory.path}${Platform.pathSeparator}proofread.litertlm',
+    )..writeAsBytesSync(<int>[1]);
     addTearDown(() => directory.deleteSync(recursive: true));
     final TextProofreader proofreader = await TextProofreader.create(
-      TextProofreaderOptions(baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path))),
+      TextProofreaderOptions(
+        baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path)),
+      ),
     );
 
     var failNext = true;
@@ -184,13 +211,22 @@ void main() {
         failNext = false;
         throw PlatformException(code: 'invalid_argument', message: 'bad input');
       }
-      return <String, Object?>{'text': 'Corrected text.', 'corrections': <Object?>[]};
+      return <String, Object?>{
+        'text': 'Corrected text.',
+        'corrections': <Object?>[],
+      };
     });
     addTearDown(() {
-      messenger.setMockMethodCallHandler(_methods, (MethodCall call) async => null);
+      messenger.setMockMethodCallHandler(
+        _methods,
+        (MethodCall call) async => null,
+      );
     });
 
-    await expectLater(proofreader.proofread('Text'), throwsA(isA<MpException>()));
+    await expectLater(
+      proofreader.proofread('Text'),
+      throwsA(isA<MpException>()),
+    );
     // The failure must release the busy flag; otherwise every later call is
     // rejected with failedPrecondition for the rest of the task's life.
     final TextProofreaderResult result = await proofreader.proofread('Text');
@@ -199,30 +235,46 @@ void main() {
     await proofreader.close();
   });
 
-  test('stream conversion errors do not release the native operation early', () async {
-    sendMalformedStream = true;
-    allowStreamDone = Completer<void>();
-    final Directory directory = Directory.systemTemp.createTempSync('mp_text_test_');
-    final File model = File('${directory.path}${Platform.pathSeparator}proofread.litertlm')
-      ..writeAsBytesSync(<int>[1]);
-    addTearDown(() => directory.deleteSync(recursive: true));
-    final TextProofreader proofreader = await TextProofreader.create(
-      TextProofreaderOptions(baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path))),
-    );
+  test(
+    'stream conversion errors do not release the native operation early',
+    () async {
+      sendMalformedStream = true;
+      allowStreamDone = Completer<void>();
+      final Directory directory = Directory.systemTemp.createTempSync(
+        'mp_text_test_',
+      );
+      final File model = File(
+        '${directory.path}${Platform.pathSeparator}proofread.litertlm',
+      )..writeAsBytesSync(<int>[1]);
+      addTearDown(() => directory.deleteSync(recursive: true));
+      final TextProofreader proofreader = await TextProofreader.create(
+        TextProofreaderOptions(
+          baseOptions: BaseOptions(modelAsset: ModelAsset.path(model.path)),
+        ),
+      );
 
-    await expectLater(proofreader.proofreadStreaming('Text'), emitsError(isA<MpException>()));
-    var closeCompleted = false;
-    final Future<void> close = proofreader.close().then((_) => closeCompleted = true);
-    await Future<void>.delayed(Duration.zero);
+      await expectLater(
+        proofreader.proofreadStreaming('Text'),
+        emitsError(isA<MpException>()),
+      );
+      var closeCompleted = false;
+      final Future<void> close = proofreader.close().then(
+        (_) => closeCompleted = true,
+      );
+      await Future<void>.delayed(Duration.zero);
 
-    expect(closeCompleted, isFalse);
-    allowStreamDone!.complete();
-    await close.timeout(const Duration(seconds: 1));
-    expect(closeCompleted, isTrue);
-  });
+      expect(closeCompleted, isFalse);
+      allowStreamDone!.complete();
+      await close.timeout(const Duration(seconds: 1));
+      expect(closeCompleted, isTrue);
+    },
+  );
 }
 
-Future<void> _sendEvent(TestDefaultBinaryMessenger messenger, Map<String, Object?> event) async {
+Future<void> _sendEvent(
+  TestDefaultBinaryMessenger messenger,
+  Map<String, Object?> event,
+) async {
   await messenger.handlePlatformMessage(
     _events.name,
     const StandardMethodCodec().encodeSuccessEnvelope(event),

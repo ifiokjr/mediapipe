@@ -31,7 +31,10 @@ final class NativeArtifact {
 /// Parsed `hook/native_artifacts.json` catalog of native runtime archives.
 final class NativeArtifactCatalog {
   /// Creates a catalog for [mediaPipeVersion] with its [artifacts].
-  const NativeArtifactCatalog({required this.mediaPipeVersion, required this.artifacts});
+  const NativeArtifactCatalog({
+    required this.mediaPipeVersion,
+    required this.artifacts,
+  });
 
   /// MediaPipe release every artifact in the catalog was built from.
   final String mediaPipeVersion;
@@ -54,7 +57,10 @@ final class NativeArtifactCatalog {
       final Map<String, NativeArtifact> artifacts = <String, NativeArtifact>{};
 
       for (final MapEntry<String, Object?> entry in artifactValues.entries) {
-        if (entry.value case {'url': final String url, 'sha256': final String checksum}) {
+        if (entry.value case {
+          'url': final String url,
+          'sha256': final String checksum,
+        }) {
           _requireDigest(checksum, 'artifact ${entry.key}');
 
           final Uri uri = Uri.parse(url);
@@ -75,7 +81,10 @@ final class NativeArtifactCatalog {
         throw FormatException('Invalid artifact entry for ${entry.key}.');
       }
 
-      return NativeArtifactCatalog(mediaPipeVersion: mediaPipeVersion, artifacts: artifacts);
+      return NativeArtifactCatalog(
+        mediaPipeVersion: mediaPipeVersion,
+        artifacts: artifacts,
+      );
     }
 
     throw const FormatException('Invalid native artifact catalog.');
@@ -94,7 +103,9 @@ Future<Directory> resolveNativeArtifact({
   HttpClient? client,
 }) async {
   final Directory cache = Directory.fromUri(
-    sharedOutputDirectory.resolve('mp_core/${artifact.target}-${artifact.sha256}/'),
+    sharedOutputDirectory.resolve(
+      'mp_core/${artifact.target}-${artifact.sha256}/',
+    ),
   );
   final File ready = File.fromUri(cache.uri.resolve('.ready'));
 
@@ -108,7 +119,10 @@ Future<Directory> resolveNativeArtifact({
       client ?? (HttpClient()..connectionTimeout = const Duration(seconds: 30));
   try {
     final HttpClientRequest request = await httpClient.getUrl(artifact.uri);
-    request.headers.set(HttpHeaders.userAgentHeader, 'mp_core native asset hook');
+    request.headers.set(
+      HttpHeaders.userAgentHeader,
+      'mp_core native asset hook',
+    );
     final HttpClientResponse response = await request.close();
 
     if (response.statusCode != HttpStatus.ok) {
@@ -152,7 +166,9 @@ Future<void> _extractArchive(File source, Directory destination) async {
     final Archive archive = ZipDecoder().decodeStream(input);
 
     for (final ArchiveFile entry in archive) {
-      if (!entry.isFile || entry.isSymbolicLink || !_isSafeFlatName(entry.name)) {
+      if (!entry.isFile ||
+          entry.isSymbolicLink ||
+          !_isSafeFlatName(entry.name)) {
         throw FormatException('Unsafe native artifact entry: ${entry.name}');
       }
 
@@ -161,7 +177,6 @@ Future<void> _extractArchive(File source, Directory destination) async {
       );
       try {
         entry.writeContent(output);
-
       } finally {
         output.closeSync();
       }
@@ -176,10 +191,14 @@ Future<void> _verifyManifest(
   String expectedTarget,
   String expectedMediaPipeVersion,
 ) async {
-  final File manifestFile = File.fromUri(directory.uri.resolve('manifest.json'));
+  final File manifestFile = File.fromUri(
+    directory.uri.resolve('manifest.json'),
+  );
 
   if (!manifestFile.existsSync()) {
-    throw const FormatException('Native artifact does not contain manifest.json.');
+    throw const FormatException(
+      'Native artifact does not contain manifest.json.',
+    );
   }
 
   final Object? decoded = jsonDecode(await manifestFile.readAsString());
@@ -195,7 +214,9 @@ Future<void> _verifyManifest(
     }
 
     if (target != expectedTarget) {
-      throw FormatException('Expected native target $expectedTarget, received $target.');
+      throw FormatException(
+        'Expected native target $expectedTarget, received $target.',
+      );
     }
 
     if (libraryValues.isEmpty) {
@@ -204,7 +225,9 @@ Future<void> _verifyManifest(
 
     for (final MapEntry<String, Object?> entry in libraryValues.entries) {
       if (!_isSafeFlatName(entry.key) || entry.value is! String) {
-        throw FormatException('Invalid native library manifest entry: ${entry.key}.');
+        throw FormatException(
+          'Invalid native library manifest entry: ${entry.key}.',
+        );
       }
 
       final String expectedDigest = entry.value! as String;
@@ -229,7 +252,9 @@ Future<void> _verifyManifest(
         .listSync()
         .whereType<File>()
         .map((File file) => file.uri.pathSegments.last)
-        .where((String name) => name != 'artifact.zip' && name != 'manifest.json')
+        .where(
+          (String name) => name != 'artifact.zip' && name != 'manifest.json',
+        )
         .toSet();
     if (extractedFiles.length != libraryValues.length ||
         !extractedFiles.containsAll(libraryValues.keys)) {
@@ -243,7 +268,11 @@ Future<void> _verifyManifest(
 }
 
 bool _isSafeFlatName(String name) =>
-    name.isNotEmpty && !name.contains('/') && !name.contains(r'\') && name != '.' && name != '..';
+    name.isNotEmpty &&
+    !name.contains('/') &&
+    !name.contains(r'\') &&
+    name != '.' &&
+    name != '..';
 
 void _requireDigest(String value, String subject) {
   if (!RegExp(r'^[0-9a-f]{64}$').hasMatch(value)) {

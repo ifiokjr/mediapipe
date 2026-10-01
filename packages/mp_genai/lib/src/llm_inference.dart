@@ -23,7 +23,11 @@ final class LlmGenerationChunk {
 /// A cancellable in-progress LLM generation.
 final class LlmGeneration {
   /// Creates a generation from streaming [chunks], [response], and [cancel].
-  const LlmGeneration({required this.chunks, required this.response, required this.cancel});
+  const LlmGeneration({
+    required this.chunks,
+    required this.response,
+    required this.cancel,
+  });
 
   /// Incremental response chunks.
   final Stream<LlmGenerationChunk> chunks;
@@ -50,8 +54,13 @@ final class LlmInference implements MpTask {
   final TaskLifecycle _lifecycle = TaskLifecycle('LlmInference');
 
   /// Loads an engine using [runtime], or the active platform adapter.
-  static Future<LlmInference> create(LlmInferenceOptions options, {GenAiRuntime? runtime}) async =>
-      LlmInference._(options, await (runtime ?? defaultGenAiRuntime).createLlmInference(options));
+  static Future<LlmInference> create(
+    LlmInferenceOptions options, {
+    GenAiRuntime? runtime,
+  }) async => LlmInference._(
+    options,
+    await (runtime ?? defaultGenAiRuntime).createLlmInference(options),
+  );
 
   @override
   bool get isClosed => _lifecycle.isClosed;
@@ -77,7 +86,10 @@ final class LlmInference implements MpTask {
   /// The temporary session closes once [LlmGeneration.response] settles.
   /// Consume that future at least once, even when you only read
   /// [LlmGeneration.chunks]; the session stays open until it completes.
-  Future<LlmGeneration> generateResponse(String prompt, {LlmSessionOptions? sessionOptions}) async {
+  Future<LlmGeneration> generateResponse(
+    String prompt, {
+    LlmSessionOptions? sessionOptions,
+  }) async {
     final LlmSession session = await createSession(options: sessionOptions);
     try {
       await session.addQueryChunk(prompt);
@@ -143,7 +155,8 @@ final class LlmSession implements MpTask {
   Future<void> addAudio(Uint8List bytes) {
     _lifecycle.ensureOpen();
 
-    if (bytes.isEmpty) throw ArgumentError.value(bytes, 'bytes', 'must not be empty');
+    if (bytes.isEmpty)
+      throw ArgumentError.value(bytes, 'bytes', 'must not be empty');
 
     return _backend.addAudio(Uint8List.fromList(bytes));
   }

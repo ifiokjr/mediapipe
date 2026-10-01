@@ -29,7 +29,9 @@ final class AudioClassifierOptions {
 final class AudioClassifierResult {
   /// Creates an immutable audio classifier result.
   AudioClassifierResult(Iterable<ClassificationResult> classifications)
-    : classifications = List<ClassificationResult>.unmodifiable(classifications);
+    : classifications = List<ClassificationResult>.unmodifiable(
+        classifications,
+      );
 
   /// Classification results for each window in chronological order.
   final List<ClassificationResult> classifications;
@@ -38,10 +40,14 @@ final class AudioClassifierResult {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AudioClassifierResult &&
-          const ListEquality<ClassificationResult>().equals(classifications, other.classifications);
+          const ListEquality<ClassificationResult>().equals(
+            classifications,
+            other.classifications,
+          );
 
   @override
-  int get hashCode => const ListEquality<ClassificationResult>().hash(classifications);
+  int get hashCode =>
+      const ListEquality<ClassificationResult>().hash(classifications);
 }
 
 /// Platform implementation used by [AudioClassifier].

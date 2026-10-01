@@ -61,7 +61,11 @@ void main() {
   });
 }
 
-Uint8List _elf({required int elfClass, required int machine, required int alignment}) {
+Uint8List _elf({
+  required int elfClass,
+  required int machine,
+  required int alignment,
+}) {
   final Uint8List bytes = Uint8List(128);
   bytes.setAll(0, const <int>[0x7f, 0x45, 0x4c, 0x46]);
   bytes[4] = elfClass;

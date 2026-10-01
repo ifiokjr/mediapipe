@@ -3,19 +3,27 @@ import 'package:mp_core/mp_core.dart';
 
 void _validateProbability(double value, String name) {
   if (!value.isFinite || value < 0 || value > 1) {
-    throw ArgumentError.value(value, name, 'must be finite and between 0 and 1');
+    throw ArgumentError.value(
+      value,
+      name,
+      'must be finite and between 0 and 1',
+    );
   }
 }
 
 void _validateCount(int value, String name) {
-  if (value <= 0) throw ArgumentError.value(value, name, 'must be greater than zero');
+  if (value <= 0)
+    throw ArgumentError.value(value, name, 'must be greater than zero');
 }
 
 /// Options shared by every vision task.
 @immutable
 abstract base class VisionTaskOptions {
   /// Creates common vision task options.
-  const VisionTaskOptions({required this.baseOptions, this.runningMode = VisionRunningMode.image});
+  const VisionTaskOptions({
+    required this.baseOptions,
+    this.runningMode = VisionRunningMode.image,
+  });
 
   /// Model and hardware configuration.
   final BaseOptions baseOptions;
@@ -58,8 +66,14 @@ final class FaceLandmarkerOptions extends VisionTaskOptions {
     this.outputFacialTransformationMatrixes = false,
   }) {
     _validateCount(numFaces, 'numFaces');
-    _validateProbability(minFaceDetectionConfidence, 'minFaceDetectionConfidence');
-    _validateProbability(minFacePresenceConfidence, 'minFacePresenceConfidence');
+    _validateProbability(
+      minFaceDetectionConfidence,
+      'minFaceDetectionConfidence',
+    );
+    _validateProbability(
+      minFacePresenceConfidence,
+      'minFacePresenceConfidence',
+    );
     _validateProbability(minTrackingConfidence, 'minTrackingConfidence');
   }
 
@@ -94,8 +108,14 @@ abstract base class HandTaskOptions extends VisionTaskOptions {
     this.minTrackingConfidence = 0.5,
   }) {
     _validateCount(numHands, 'numHands');
-    _validateProbability(minHandDetectionConfidence, 'minHandDetectionConfidence');
-    _validateProbability(minHandPresenceConfidence, 'minHandPresenceConfidence');
+    _validateProbability(
+      minHandDetectionConfidence,
+      'minHandDetectionConfidence',
+    );
+    _validateProbability(
+      minHandPresenceConfidence,
+      'minHandPresenceConfidence',
+    );
     _validateProbability(minTrackingConfidence, 'minTrackingConfidence');
   }
 
@@ -162,13 +182,34 @@ final class HolisticLandmarkerOptions extends VisionTaskOptions {
     this.outputPoseSegmentationMasks = false,
     this.minHandLandmarksConfidence = 0.5,
   }) {
-    _validateProbability(minFaceDetectionConfidence, 'minFaceDetectionConfidence');
-    _validateProbability(minFaceSuppressionThreshold, 'minFaceSuppressionThreshold');
-    _validateProbability(minFacePresenceConfidence, 'minFacePresenceConfidence');
-    _validateProbability(minPoseDetectionConfidence, 'minPoseDetectionConfidence');
-    _validateProbability(minPoseSuppressionThreshold, 'minPoseSuppressionThreshold');
-    _validateProbability(minPosePresenceConfidence, 'minPosePresenceConfidence');
-    _validateProbability(minHandLandmarksConfidence, 'minHandLandmarksConfidence');
+    _validateProbability(
+      minFaceDetectionConfidence,
+      'minFaceDetectionConfidence',
+    );
+    _validateProbability(
+      minFaceSuppressionThreshold,
+      'minFaceSuppressionThreshold',
+    );
+    _validateProbability(
+      minFacePresenceConfidence,
+      'minFacePresenceConfidence',
+    );
+    _validateProbability(
+      minPoseDetectionConfidence,
+      'minPoseDetectionConfidence',
+    );
+    _validateProbability(
+      minPoseSuppressionThreshold,
+      'minPoseSuppressionThreshold',
+    );
+    _validateProbability(
+      minPosePresenceConfidence,
+      'minPosePresenceConfidence',
+    );
+    _validateProbability(
+      minHandLandmarksConfidence,
+      'minHandLandmarksConfidence',
+    );
   }
 
   /// Minimum accepted face detection confidence.
@@ -236,7 +277,9 @@ base class ImageSegmenterOptions extends VisionTaskOptions {
     this.outputCategoryMask = false,
   }) {
     if (!outputConfidenceMasks && !outputCategoryMask) {
-      throw ArgumentError('At least one segmentation-mask output must be enabled.');
+      throw ArgumentError(
+        'At least one segmentation-mask output must be enabled.',
+      );
     }
   }
 
@@ -286,8 +329,14 @@ final class PoseLandmarkerOptions extends VisionTaskOptions {
     this.outputSegmentationMasks = false,
   }) {
     _validateCount(numPoses, 'numPoses');
-    _validateProbability(minPoseDetectionConfidence, 'minPoseDetectionConfidence');
-    _validateProbability(minPosePresenceConfidence, 'minPosePresenceConfidence');
+    _validateProbability(
+      minPoseDetectionConfidence,
+      'minPoseDetectionConfidence',
+    );
+    _validateProbability(
+      minPosePresenceConfidence,
+      'minPosePresenceConfidence',
+    );
     _validateProbability(minTrackingConfidence, 'minTrackingConfidence');
   }
 

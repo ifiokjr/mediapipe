@@ -77,7 +77,10 @@ class TrackingOverlay extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.saveLayer(Offset.zero & size, Paint()..color = Colors.white.withValues(alpha: opacity));
+    canvas.saveLayer(
+      Offset.zero & size,
+      Paint()..color = Colors.white.withValues(alpha: opacity),
+    );
 
     if (mirrored) {
       canvas.translate(size.width, 0);
@@ -89,7 +92,10 @@ class TrackingOverlay extends CustomPainter {
     if (face.length >= 468) _drawFace(canvas, size);
 
     if (showPoints) {
-      for (final NormalizedLandmark p in <NormalizedLandmark>[...pose, ...face]) {
+      for (final NormalizedLandmark p in <NormalizedLandmark>[
+        ...pose,
+        ...face,
+      ]) {
         canvas.drawCircle(
           Offset(p.x * size.width, p.y * size.height),
           1.7,
@@ -248,7 +254,11 @@ class TrackingOverlay extends CustomPainter {
     canvas.translate(head.dx, head.dy);
     canvas.rotate(math.atan2((p(8) - p(7)).dy, (p(8) - p(7)).dx));
     final RRect skull = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset.zero, width: radius * 1.7, height: radius * 1.9),
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: radius * 1.7,
+        height: radius * 1.9,
+      ),
       Radius.circular(radius * .7),
     );
     canvas.drawRRect(skull.inflate(3), Paint()..color = ink);
@@ -271,7 +281,11 @@ class TrackingOverlay extends CustomPainter {
       Paint()..color = ink,
     );
     canvas.drawArc(
-      Rect.fromCenter(center: Offset(0, radius * .25), width: radius * .7, height: radius * .45),
+      Rect.fromCenter(
+        center: Offset(0, radius * .25),
+        width: radius * .7,
+        height: radius * .45,
+      ),
       0,
       math.pi,
       false,
@@ -287,8 +301,11 @@ class TrackingOverlay extends CustomPainter {
   /// vertices retain depth; back-to-front polygon sorting provides occlusion
   /// between accessory surfaces and diffuse lighting makes rotation readable.
   void _drawFace(Canvas canvas, Size size) {
-    _V3 landmark(int i) =>
-        _V3(face[i].x * size.width, face[i].y * size.height, face[i].z * size.width);
+    _V3 landmark(int i) => _V3(
+      face[i].x * size.width,
+      face[i].y * size.height,
+      face[i].z * size.width,
+    );
     final _V3 left = landmark(33);
     final _V3 right = landmark(263);
     final _V3 origin = (left + right) * .5;
@@ -305,14 +322,25 @@ class TrackingOverlay extends CustomPainter {
       surfaces.add(
         _Surface(
           vertices
-              .map((_V3 v) => origin + (xAxis * v.x + yAxis * v.y + zAxis * v.z) * scale)
+              .map(
+                (_V3 v) =>
+                    origin + (xAxis * v.x + yAxis * v.y + zAxis * v.z) * scale,
+              )
               .toList(),
           color,
         ),
       );
     }
 
-    void box(double x, double y, double z, double w, double h, double d, Color color) {
+    void box(
+      double x,
+      double y,
+      double z,
+      double w,
+      double h,
+      double d,
+      Color color,
+    ) {
       final List<_V3> v = <_V3>[
         _V3(x, y, z),
         _V3(x + w, y, z),
@@ -344,8 +372,11 @@ class TrackingOverlay extends CustomPainter {
         for (int i = 0; i < segments; i++) {
           final double a = i * math.pi * 2 / segments;
           final double b = (i + 1) * math.pi * 2 / segments;
-          _V3 rim(double angle, double radius, double z) =>
-              _V3(center + math.cos(angle) * radius, math.sin(angle) * radius * .83, z);
+          _V3 rim(double angle, double radius, double z) => _V3(
+            center + math.cos(angle) * radius,
+            math.sin(angle) * radius * .83,
+            z,
+          );
           polygon(<_V3>[
             rim(a, .245, -.12),
             rim(b, .245, -.12),
@@ -400,11 +431,15 @@ class TrackingOverlay extends CustomPainter {
 
     for (final _Surface surface in surfaces) {
       final Path path = Path()
-        ..addPolygon(surface.vertices.map((_V3 v) => Offset(v.x, v.y)).toList(), true);
+        ..addPolygon(
+          surface.vertices.map((_V3 v) => Offset(v.x, v.y)).toList(),
+          true,
+        );
       final _V3 normal = (surface.vertices[1] - surface.vertices[0])
           .cross(surface.vertices[2] - surface.vertices[0])
           .unit;
-      final double light = .64 + .36 * normal.dot(const _V3(-.3, -.5, -.8).unit).abs();
+      final double light =
+          .64 + .36 * normal.dot(const _V3(-.3, -.5, -.8).unit).abs();
       final Color color = surface.color;
       canvas.drawPath(
         path,
@@ -440,7 +475,8 @@ final class _V3 {
   _V3 operator *(double s) => _V3(x * s, y * s, z * s);
   double get length => math.sqrt(x * x + y * y + z * z);
   _V3 get unit => length < .0001 ? const _V3(0, 0, 0) : this * (1 / length);
-  _V3 cross(_V3 b) => _V3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
+  _V3 cross(_V3 b) =>
+      _V3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
   double dot(_V3 b) => x * b.x + y * b.y + z * b.z;
 }
 
@@ -448,13 +484,18 @@ final class _Surface {
   const _Surface(this.vertices, this.color);
   final List<_V3> vertices;
   final Color color;
-  double get depth => vertices.fold<double>(0, (double sum, _V3 v) => sum + v.z) / vertices.length;
+  double get depth =>
+      vertices.fold<double>(0, (double sum, _V3 v) => sum + v.z) /
+      vertices.length;
 }
 
 /// Synthetic character for a clearly labeled preview. Never feeds rep counters.
 List<NormalizedLandmark> demoPose(double phase) {
   final double wave = math.sin(phase * math.pi * 2) * .035;
-  final List<(double, double)> points = List<(double, double)>.filled(33, (.5, .2));
+  final List<(double, double)> points = List<(double, double)>.filled(33, (
+    .5,
+    .2,
+  ));
   points[0] = (.5, .18 + wave * .3);
   points[7] = (.45, .18);
   points[8] = (.55, .18);
@@ -477,8 +518,13 @@ List<NormalizedLandmark> demoPose(double phase) {
 
   return points
       .map(
-        ((double, double) p) =>
-            NormalizedLandmark(x: p.$1, y: p.$2, z: 0, visibility: 1, presence: 1),
+        ((double, double) p) => NormalizedLandmark(
+          x: p.$1,
+          y: p.$2,
+          z: 0,
+          visibility: 1,
+          presence: 1,
+        ),
       )
       .toList();
 }
@@ -486,16 +532,20 @@ List<NormalizedLandmark> demoPose(double phase) {
 /// Rotating synthetic face used solely to preview accessory meshes.
 List<NormalizedLandmark> demoFace(double phase) {
   final double yaw = math.sin(phase * math.pi * 2) * .5;
-  NormalizedLandmark point(double x, double y, [double z = 0]) => NormalizedLandmark(
-    x: .5 + x * math.cos(yaw) + z * math.sin(yaw),
-    y: y,
-    z: -x * math.sin(yaw) + z * math.cos(yaw),
-  );
-  final List<NormalizedLandmark> points = List<NormalizedLandmark>.generate(478, (int i) {
-    final double a = i * math.pi * 2 / 478;
+  NormalizedLandmark point(double x, double y, [double z = 0]) =>
+      NormalizedLandmark(
+        x: .5 + x * math.cos(yaw) + z * math.sin(yaw),
+        y: y,
+        z: -x * math.sin(yaw) + z * math.cos(yaw),
+      );
+  final List<NormalizedLandmark> points = List<NormalizedLandmark>.generate(
+    478,
+    (int i) {
+      final double a = i * math.pi * 2 / 478;
 
-    return point(math.cos(a) * .24, .5 + math.sin(a) * .3);
-  });
+      return point(math.cos(a) * .24, .5 + math.sin(a) * .3);
+    },
+  );
   points[33] = point(-.17, .43);
   points[263] = point(.17, .43);
   points[10] = point(0, .22);

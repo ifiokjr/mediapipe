@@ -11,7 +11,12 @@ const ListEquality<double> _doubleListEquality = ListEquality<double>();
 @immutable
 final class Category {
   /// Creates a category.
-  const Category({required this.index, required this.score, this.categoryName, this.displayName});
+  const Category({
+    required this.index,
+    required this.score,
+    this.categoryName,
+    this.displayName,
+  });
 
   /// The label index in the model metadata, or `-1` when unavailable.
   final int index;
@@ -46,8 +51,11 @@ final class Category {
 @immutable
 final class Classifications {
   /// Creates an immutable classifier-head result.
-  Classifications({required Iterable<Category> categories, required this.headIndex, this.headName})
-    : categories = List<Category>.unmodifiable(categories);
+  Classifications({
+    required Iterable<Category> categories,
+    required this.headIndex,
+    this.headName,
+  }) : categories = List<Category>.unmodifiable(categories);
 
   /// Categories ordered by descending score.
   final List<Category> categories;
@@ -70,15 +78,18 @@ final class Classifications {
           headName == other.headName;
 
   @override
-  int get hashCode => Object.hash(_objectListEquality.hash(categories), headIndex, headName);
+  int get hashCode =>
+      Object.hash(_objectListEquality.hash(categories), headIndex, headName);
 }
 
 /// A complete classification task result.
 @immutable
 final class ClassificationResult {
   /// Creates a classification result.
-  ClassificationResult({required Iterable<Classifications> classifications, this.timestampMs})
-    : classifications = List<Classifications>.unmodifiable(classifications);
+  ClassificationResult({
+    required Iterable<Classifications> classifications,
+    this.timestampMs,
+  }) : classifications = List<Classifications>.unmodifiable(classifications);
 
   /// Results from every classifier head.
   final List<Classifications> classifications;
@@ -94,7 +105,8 @@ final class ClassificationResult {
           timestampMs == other.timestampMs;
 
   @override
-  int get hashCode => Object.hash(_objectListEquality.hash(classifications), timestampMs);
+  int get hashCode =>
+      Object.hash(_objectListEquality.hash(classifications), timestampMs);
 }
 
 /// The storage representation of an embedding vector.
@@ -118,8 +130,13 @@ final class Embedding {
   });
 
   /// Creates a floating-point embedding.
-  factory Embedding.float(Float32List values, {required int headIndex, String? headName}) {
-    if (values.isEmpty) throw ArgumentError.value(values, 'values', 'must not be empty');
+  factory Embedding.float(
+    Float32List values, {
+    required int headIndex,
+    String? headName,
+  }) {
+    if (values.isEmpty)
+      throw ArgumentError.value(values, 'values', 'must not be empty');
     return Embedding._(
       type: EmbeddingType.float,
       headIndex: headIndex,
@@ -130,8 +147,13 @@ final class Embedding {
   }
 
   /// Creates a scalar-quantized embedding.
-  factory Embedding.quantized(Uint8List values, {required int headIndex, String? headName}) {
-    if (values.isEmpty) throw ArgumentError.value(values, 'values', 'must not be empty');
+  factory Embedding.quantized(
+    Uint8List values, {
+    required int headIndex,
+    String? headName,
+  }) {
+    if (values.isEmpty)
+      throw ArgumentError.value(values, 'values', 'must not be empty');
     return Embedding._(
       type: EmbeddingType.quantized,
       headIndex: headIndex,
@@ -166,8 +188,14 @@ final class Embedding {
           type == other.type &&
           headIndex == other.headIndex &&
           headName == other.headName &&
-          const DeepCollectionEquality().equals(floatValues, other.floatValues) &&
-          const DeepCollectionEquality().equals(quantizedValues, other.quantizedValues);
+          const DeepCollectionEquality().equals(
+            floatValues,
+            other.floatValues,
+          ) &&
+          const DeepCollectionEquality().equals(
+            quantizedValues,
+            other.quantizedValues,
+          );
 
   @override
   int get hashCode => Object.hash(
@@ -200,7 +228,8 @@ final class EmbeddingResult {
           timestampMs == other.timestampMs;
 
   @override
-  int get hashCode => Object.hash(_objectListEquality.hash(embeddings), timestampMs);
+  int get hashCode =>
+      Object.hash(_objectListEquality.hash(embeddings), timestampMs);
 }
 
 /// Computes cosine similarity for embeddings with the same representation.
@@ -214,7 +243,8 @@ double cosineSimilarity(Embedding first, Embedding second) {
   }
 
   final Iterable<num> firstValues = first.floatValues ?? first.quantizedValues!;
-  final Iterable<num> secondValues = second.floatValues ?? second.quantizedValues!;
+  final Iterable<num> secondValues =
+      second.floatValues ?? second.quantizedValues!;
   double dot = 0;
   double firstMagnitude = 0;
   double secondMagnitude = 0;
@@ -222,7 +252,6 @@ double cosineSimilarity(Embedding first, Embedding second) {
   final Iterator<num> secondIterator = secondValues.iterator;
 
   while (firstIterator.moveNext() && secondIterator.moveNext()) {
-
     final double firstValue = firstIterator.current.toDouble();
     final double secondValue = secondIterator.current.toDouble();
     dot += firstValue * secondValue;
@@ -241,10 +270,17 @@ double cosineSimilarity(Embedding first, Embedding second) {
 @immutable
 final class BoundingBox {
   /// Creates a bounding box.
-  BoundingBox({required this.left, required this.top, required this.width, required this.height}) {
-    if (width < 0) throw ArgumentError.value(width, 'width', 'must not be negative');
+  BoundingBox({
+    required this.left,
+    required this.top,
+    required this.width,
+    required this.height,
+  }) {
+    if (width < 0)
+      throw ArgumentError.value(width, 'width', 'must not be negative');
 
-    if (height < 0) throw ArgumentError.value(height, 'height', 'must not be negative');
+    if (height < 0)
+      throw ArgumentError.value(height, 'height', 'must not be negative');
   }
 
   /// Horizontal origin in pixels.
@@ -282,7 +318,12 @@ final class BoundingBox {
 @immutable
 final class NormalizedKeypoint {
   /// Creates a normalized keypoint.
-  const NormalizedKeypoint({required this.x, required this.y, this.label, this.score});
+  const NormalizedKeypoint({
+    required this.x,
+    required this.y,
+    this.label,
+    this.score,
+  });
 
   /// Horizontal coordinate, normally in the range 0–1.
   final double x;
@@ -366,7 +407,8 @@ final class DetectionResult {
           timestampMs == other.timestampMs;
 
   @override
-  int get hashCode => Object.hash(_objectListEquality.hash(detections), timestampMs);
+  int get hashCode =>
+      Object.hash(_objectListEquality.hash(detections), timestampMs);
 }
 
 /// A point in world coordinates, measured in metres.
@@ -465,16 +507,28 @@ final class NormalizedLandmark {
 @immutable
 final class MpMatrix {
   /// Creates a matrix and copies [values].
-  MpMatrix({required this.rows, required this.columns, required Float32List values})
-    : values = Float32List.fromList(values) {
-    if (rows <= 0) throw ArgumentError.value(rows, 'rows', 'must be greater than zero');
+  MpMatrix({
+    required this.rows,
+    required this.columns,
+    required Float32List values,
+  }) : values = Float32List.fromList(values) {
+    if (rows <= 0)
+      throw ArgumentError.value(rows, 'rows', 'must be greater than zero');
 
     if (columns <= 0) {
-      throw ArgumentError.value(columns, 'columns', 'must be greater than zero');
+      throw ArgumentError.value(
+        columns,
+        'columns',
+        'must be greater than zero',
+      );
     }
 
     if (values.length != rows * columns) {
-      throw ArgumentError.value(values.length, 'values.length', 'must equal rows * columns');
+      throw ArgumentError.value(
+        values.length,
+        'values.length',
+        'must equal rows * columns',
+      );
     }
   }
 
@@ -504,5 +558,6 @@ final class MpMatrix {
           _doubleListEquality.equals(values, other.values);
 
   @override
-  int get hashCode => Object.hash(rows, columns, _doubleListEquality.hash(values));
+  int get hashCode =>
+      Object.hash(rows, columns, _doubleListEquality.hash(values));
 }

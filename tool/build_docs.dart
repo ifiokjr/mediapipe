@@ -52,7 +52,9 @@ Future<void> main() async {
 
   for (final FileSystemEntity entity in output.listSync(recursive: true)) {
     if (entity is File && entity.path.endsWith('.html')) {
-      final Match? match = rootRelativeHref.firstMatch(entity.readAsStringSync());
+      final Match? match = rootRelativeHref.firstMatch(
+        entity.readAsStringSync(),
+      );
 
       if (match != null) {
         stderr.writeln('Unscoped root link remains in ${entity.path}.');

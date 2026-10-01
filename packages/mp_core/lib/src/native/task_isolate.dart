@@ -7,8 +7,9 @@ import '../errors.dart';
 typedef NativeTaskWorkerHandler = FutureOr<Object?> Function(Object? command);
 
 /// Creates a command handler inside a dedicated native-task isolate.
-typedef NativeTaskWorkerFactory =
-    FutureOr<NativeTaskWorkerHandler> Function(Object? initialMessage);
+typedef NativeTaskWorkerFactory = FutureOr<NativeTaskWorkerHandler> Function(
+  Object? initialMessage,
+);
 
 /// Rewrites an unresolvable native symbol into an actionable failure.
 ///
@@ -79,7 +80,9 @@ final class NativeTaskIsolate {
 
       worker?._handleResponse(message);
     });
-    final StreamSubscription<Object?> errorSubscription = errors.listen((Object? message) {
+    final StreamSubscription<Object?> errorSubscription = errors.listen((
+      Object? message,
+    ) {
       final Object error = _remoteError(message);
       if (!ready.isCompleted) {
         ready.completeError(error);
@@ -89,8 +92,12 @@ final class NativeTaskIsolate {
         earlyTermination = error;
       }
     });
-    final StreamSubscription<Object?> exitSubscription = exits.listen((Object? _) {
-      final StateError error = StateError('Native task worker exited unexpectedly.');
+    final StreamSubscription<Object?> exitSubscription = exits.listen((
+      Object? _,
+    ) {
+      final StateError error = StateError(
+        'Native task worker exited unexpectedly.',
+      );
       if (!ready.isCompleted) {
         ready.completeError(error);
       } else if (worker case final NativeTaskIsolate activeWorker) {
@@ -129,7 +136,10 @@ final class NativeTaskIsolate {
       responses.close();
       errors.close();
       exits.close();
-      Error.throwWithStackTrace(nativeTaskFailure(error), handshake.stackTrace ?? StackTrace.empty);
+      Error.throwWithStackTrace(
+        nativeTaskFailure(error),
+        handshake.stackTrace ?? StackTrace.empty,
+      );
     }
 
     final NativeTaskIsolate result = NativeTaskIsolate._(
@@ -166,7 +176,9 @@ final class NativeTaskIsolate {
     if (_disposed) return;
 
     if (_pending.isNotEmpty) {
-      throw StateError('Cannot dispose a native task worker with pending requests.');
+      throw StateError(
+        'Cannot dispose a native task worker with pending requests.',
+      );
     }
 
     _disposed = true;
@@ -176,7 +188,8 @@ final class NativeTaskIsolate {
   Future<void> _releaseResources({required bool kill}) async {
     await _responseSubscription.cancel();
 
-    for (final StreamSubscription<Object?> subscription in _lifecycleSubscriptions) {
+    for (final StreamSubscription<Object?> subscription
+        in _lifecycleSubscriptions) {
       await subscription.cancel();
     }
 
@@ -192,7 +205,9 @@ final class NativeTaskIsolate {
   void _handleResponse(Object? message) {
     if (message is! _NativeTaskResponse) {
       for (final Completer<Object?> pending in _pending.values) {
-        pending.completeError(StateError('Native task worker returned an invalid response.'));
+        pending.completeError(
+          StateError('Native task worker returned an invalid response.'),
+        );
       }
 
       _pending.clear();
@@ -205,7 +220,6 @@ final class NativeTaskIsolate {
     if (completer == null) return;
 
     if (message.error case final Object error) {
-
       completer.completeError(error, message.stackTrace);
     } else {
       completer.complete(message.result);
@@ -227,7 +241,9 @@ final class NativeTaskIsolate {
 
 Object _remoteError(Object? message) {
   if (message case <Object?>[final Object error, final Object stackTrace]) {
-    return nativeTaskFailure(RemoteError(error.toString(), stackTrace.toString()));
+    return nativeTaskFailure(
+      RemoteError(error.toString(), stackTrace.toString()),
+    );
   }
 
   return StateError('Native task worker failed: $message');
@@ -257,7 +273,12 @@ final class _NativeTaskRequest {
 }
 
 final class _NativeTaskResponse {
-  const _NativeTaskResponse({required this.requestId, this.result, this.error, this.stackTrace});
+  const _NativeTaskResponse({
+    required this.requestId,
+    this.result,
+    this.error,
+    this.stackTrace,
+  });
 
   final int requestId;
   final Object? result;
@@ -271,7 +292,9 @@ Future<void> _runNativeTaskWorker(_NativeTaskBootstrap bootstrap) async {
   try {
     handler = await bootstrap.factory(bootstrap.initialMessage);
   } on Object catch (error, stackTrace) {
-    bootstrap.responses.send(_NativeTaskReady(error: error, stackTrace: stackTrace));
+    bootstrap.responses.send(
+      _NativeTaskReady(error: error, stackTrace: stackTrace),
+    );
     commands.close();
 
     return;
@@ -281,12 +304,17 @@ Future<void> _runNativeTaskWorker(_NativeTaskBootstrap bootstrap) async {
   await for (final Object? message in commands) {
     if (message is! _NativeTaskRequest) continue;
     try {
-
       final Object? result = await handler(message.command);
-      bootstrap.responses.send(_NativeTaskResponse(requestId: message.requestId, result: result));
+      bootstrap.responses.send(
+        _NativeTaskResponse(requestId: message.requestId, result: result),
+      );
     } on Object catch (error, stackTrace) {
       bootstrap.responses.send(
-        _NativeTaskResponse(requestId: message.requestId, error: error, stackTrace: stackTrace),
+        _NativeTaskResponse(
+          requestId: message.requestId,
+          error: error,
+          stackTrace: stackTrace,
+        ),
       );
     }
   }

@@ -18,7 +18,10 @@ final class TextTasksExample extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: ListView(
             children: const <Widget>[
-              Text('Mobile text task build fixture', style: TextStyle(fontSize: 24)),
+              Text(
+                'Mobile text task build fixture',
+                style: TextStyle(fontSize: 24),
+              ),
               SizedBox(height: 12),
               Text(
                 'This application registers the Android and iOS mp_text plugin. '

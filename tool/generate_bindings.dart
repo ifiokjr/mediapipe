@@ -42,7 +42,9 @@ Future<void> main() async {
 }
 
 void _createCCompatibleHeaders(Directory repositoryRoot, Directory upstream) {
-  final Directory source = Directory.fromUri(upstream.uri.resolve('mediapipe/tasks/c/'));
+  final Directory source = Directory.fromUri(
+    upstream.uri.resolve('mediapipe/tasks/c/'),
+  );
   final Directory generatedRoot = Directory.fromUri(
     repositoryRoot.uri.resolve('.dart_tool/ffigen/'),
   );
@@ -67,9 +69,11 @@ void _createCCompatibleHeaders(Directory repositoryRoot, Directory upstream) {
     output.writeAsStringSync(_makeCCompatible(entity.readAsStringSync()));
   }
 
-  File.fromUri(generatedRoot.uri.resolve('mediapipe_tasks.h')).writeAsStringSync(
-    File.fromUri(repositoryRoot.uri.resolve('tool/mediapipe_tasks.h')).readAsStringSync(),
-  );
+  File.fromUri(generatedRoot.uri.resolve('mediapipe_tasks.h'))
+      .writeAsStringSync(
+        File.fromUri(repositoryRoot.uri.resolve('tool/mediapipe_tasks.h'))
+            .readAsStringSync(),
+      );
 }
 
 String _makeCCompatible(String source) {
@@ -139,7 +143,8 @@ Directory _findRepositoryRoot() {
 
   while (current.parent.path != current.path) {
     if (File.fromUri(current.uri.resolve('pubspec.yaml')).existsSync() &&
-        Directory.fromUri(current.uri.resolve('packages/mp_core/')).existsSync()) {
+        Directory.fromUri(current.uri.resolve('packages/mp_core/'))
+            .existsSync()) {
       return current;
     }
     current = current.parent;
@@ -161,7 +166,12 @@ Future<String> _run(
   stdout.write(result.stdout);
   stderr.write(result.stderr);
   if (result.exitCode != 0) {
-    throw ProcessException(executable, arguments, 'Command failed', result.exitCode);
+    throw ProcessException(
+      executable,
+      arguments,
+      'Command failed',
+      result.exitCode,
+    );
   }
   return result.stdout as String;
 }

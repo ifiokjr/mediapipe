@@ -5,7 +5,10 @@ import 'package:test/test.dart';
 void main() {
   test('records, retrieves, and generates through the backend', () async {
     final _FakeRagRuntime runtime = _FakeRagRuntime();
-    final RagPipeline pipeline = await RagPipeline.create(_options(), runtime: runtime);
+    final RagPipeline pipeline = await RagPipeline.create(
+      _options(),
+      runtime: runtime,
+    );
     final RagDocument document = RagDocument(
       text: 'A local action signal.',
       metadata: <String, Object?>{'source': 'camera'},
@@ -18,7 +21,10 @@ void main() {
       'Was the action observed?',
       options: RagRetrievalOptions(topK: 2, minSimilarityScore: 0.5),
     );
-    expect(await pipeline.generate('Was the action observed?'), 'Observed locally.');
+    expect(
+      await pipeline.generate('Was the action observed?'),
+      'Observed locally.',
+    );
     expect(
       await pipeline
           .generateStreaming('Was the action observed?')
@@ -35,15 +41,22 @@ void main() {
 
   test('validates storage and retrieval options', () {
     expect(
-      () => SqliteVectorStoreOptions(embeddingDimensions: 0, databasePath: 'memory.db'),
+      () => SqliteVectorStoreOptions(
+        embeddingDimensions: 0,
+        databasePath: 'memory.db',
+      ),
       throwsArgumentError,
     );
     expect(
-      () => RagSqliteColumn(name: 'id', sqlType: 'INTEGER', autoIncrement: true),
+      () =>
+          RagSqliteColumn(name: 'id', sqlType: 'INTEGER', autoIncrement: true),
       throwsArgumentError,
     );
     expect(() => RagRetrievalOptions(topK: 0), throwsArgumentError);
-    expect(() => RagRetrievalOptions(minSimilarityScore: 2), throwsArgumentError);
+    expect(
+      () => RagRetrievalOptions(minSimilarityScore: 2),
+      throwsArgumentError,
+    );
   });
 
   test('copies metadata and guards a closed pipeline', () async {
@@ -56,7 +69,10 @@ void main() {
     expect(document.metadata['tags'], <Object?>['local']);
 
     final _FakeRagRuntime runtime = _FakeRagRuntime();
-    final RagPipeline pipeline = await RagPipeline.create(_options(), runtime: runtime);
+    final RagPipeline pipeline = await RagPipeline.create(
+      _options(),
+      runtime: runtime,
+    );
     await pipeline.close();
     await pipeline.close();
 
@@ -66,7 +82,9 @@ void main() {
 }
 
 RagPipelineOptions _options() => RagPipelineOptions(
-  embeddingModel: GeckoEmbeddingModelOptions(model: ModelAsset.path('/models/embedder.tflite')),
+  embeddingModel: GeckoEmbeddingModelOptions(
+    model: ModelAsset.path('/models/embedder.tflite'),
+  ),
   vectorStore: const InMemoryVectorStoreOptions(),
   inferenceOptions: LlmInferenceOptions(
     baseOptions: BaseOptions(modelAsset: ModelAsset.path('/models/model.task')),
@@ -78,15 +96,19 @@ final class _FakeRagRuntime implements GenAiRuntime {
   final _FakeRagBackend backend = _FakeRagBackend();
 
   @override
-  Future<RagPipelineBackend> createRagPipeline(RagPipelineOptions options) async => backend;
+  Future<RagPipelineBackend> createRagPipeline(
+    RagPipelineOptions options,
+  ) async => backend;
 
   @override
-  Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) =>
-      throw UnimplementedError();
+  Future<FunctionCallingBackend> createGenerativeModel(
+    GenerativeModelOptions options,
+  ) => throw UnimplementedError();
 
   @override
-  Future<ImageGeneratorBackend> createImageGenerator(ImageGeneratorOptions options) =>
-      throw UnimplementedError();
+  Future<ImageGeneratorBackend> createImageGenerator(
+    ImageGeneratorOptions options,
+  ) => throw UnimplementedError();
 
   @override
   Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) =>
@@ -116,7 +138,10 @@ final class _FakeRagBackend implements RagPipelineBackend {
   }
 
   @override
-  Future<List<RagRetrievalEntity>> retrieve(String query, RagRetrievalOptions options) async {
+  Future<List<RagRetrievalEntity>> retrieve(
+    String query,
+    RagRetrievalOptions options,
+  ) async {
     lastOptions = options;
     return <RagRetrievalEntity>[
       RagRetrievalEntity(
@@ -135,7 +160,10 @@ final class _FakeRagBackend implements RagPipelineBackend {
   }
 
   @override
-  Stream<RagGenerationChunk> generateStreaming(String query, RagRetrievalOptions options) {
+  Stream<RagGenerationChunk> generateStreaming(
+    String query,
+    RagRetrievalOptions options,
+  ) {
     lastOptions = options;
     return Stream<RagGenerationChunk>.fromIterable(const <RagGenerationChunk>[
       RagGenerationChunk(text: 'Observed ', isDone: false),

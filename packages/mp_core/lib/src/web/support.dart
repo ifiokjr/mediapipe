@@ -46,7 +46,10 @@ JSObject requireWebObject(JSObject receiver, String property) {
   final JSAny? value = receiver[property];
 
   if (value.isUndefinedOrNull || !value.isA<JSObject>()) {
-    throw MpException(MpStatus.internal, 'The MediaPipe web runtime did not expose `$property`.');
+    throw MpException(
+      MpStatus.internal,
+      'The MediaPipe web runtime did not expose `$property`.',
+    );
   }
 
   return value as JSObject;
@@ -85,10 +88,9 @@ Map<String, Object?> webBaseOptions(BaseOptions options) {
 
 /// Resolves model options and verifies checksum-pinned remote models in Dart.
 Future<Map<String, Object?>> resolveWebBaseOptions(BaseOptions options) async {
-  if (options.modelAsset case ModelAssetUri(
-    uri: final Uri uri,
-    sha256: final String? expected,
-  ) when expected != null) {
+  if (options.modelAsset
+      case ModelAssetUri(uri: final Uri uri, sha256: final String? expected)
+      when expected != null) {
     final Uint8List bytes = await _downloadWebBytes(uri);
     final String actual = sha256.convert(bytes).toString();
 
@@ -112,22 +114,21 @@ Future<Map<String, Object?>> resolveWebBaseOptions(BaseOptions options) async {
 
 Future<Uint8List> _downloadWebBytes(Uri uri) async {
   try {
-    final JSPromise<JSObject> responsePromise = globalContext.callMethod<JSPromise<JSObject>>(
-      'fetch'.toJS,
-      uri.toString().toJS,
-    );
+    final JSPromise<JSObject> responsePromise = globalContext
+        .callMethod<JSPromise<JSObject>>('fetch'.toJS, uri.toString().toJS);
     final JSObject response = await responsePromise.toDart;
     final JSAny? ok = response['ok'];
 
     if (ok == null || !ok.isA<JSBoolean>() || !(ok as JSBoolean).toDart) {
       final Object? status = webDartify(response['status']);
-      throw MpException(MpStatus.unavailable, 'Model download failed with HTTP status $status.');
+      throw MpException(
+        MpStatus.unavailable,
+        'Model download failed with HTTP status $status.',
+      );
     }
 
-    final JSPromise<JSArrayBuffer> bufferPromise = callWebMethod<JSPromise<JSArrayBuffer>>(
-      response,
-      'arrayBuffer',
-    );
+    final JSPromise<JSArrayBuffer> bufferPromise =
+        callWebMethod<JSPromise<JSArrayBuffer>>(response, 'arrayBuffer');
 
     final JSArrayBuffer buffer = await bufferPromise.toDart;
 
@@ -147,19 +148,24 @@ Future<Uint8List> _downloadWebBytes(Uri uri) async {
 Map<String, Object?> webClassifierOptions(ClassifierOptions? options) {
   if (options == null) return <String, Object?>{};
   return <String, Object?>{
-    if (options.displayNamesLocale case final String locale) 'displayNamesLocale': locale,
+    if (options.displayNamesLocale case final String locale)
+      'displayNamesLocale': locale,
     if (options.maxResults case final int maxResults) 'maxResults': maxResults,
-    if (options.scoreThreshold case final double threshold) 'scoreThreshold': threshold,
-    if (options.categoryAllowlist.isNotEmpty) 'categoryAllowlist': options.categoryAllowlist,
-    if (options.categoryDenylist.isNotEmpty) 'categoryDenylist': options.categoryDenylist,
+    if (options.scoreThreshold case final double threshold)
+      'scoreThreshold': threshold,
+    if (options.categoryAllowlist.isNotEmpty)
+      'categoryAllowlist': options.categoryAllowlist,
+    if (options.categoryDenylist.isNotEmpty)
+      'categoryDenylist': options.categoryDenylist,
   };
 }
 
 /// Maps common embedder options to the web API.
-Map<String, Object?> webEmbedderOptions(EmbedderOptions options) => <String, Object?>{
-  'l2Normalize': options.l2Normalize,
-  'quantize': options.quantize,
-};
+Map<String, Object?> webEmbedderOptions(EmbedderOptions options) =>
+    <String, Object?>{
+      'l2Normalize': options.l2Normalize,
+      'quantize': options.quantize,
+    };
 
 /// Converts a JavaScript number into a Dart integer without trusting its shape.
 int? webOptionalInt(Object? value) => switch (value) {
@@ -180,7 +186,8 @@ ClassificationResult webClassificationResult(Map<Object?, Object?> result) {
         headIndex: (head['headIndex']! as num).toInt(),
         headName: webEmptyToNull(head['headName'] as String?),
         categories: categories.map((Object? categoryValue) {
-          final Map<Object?, Object?> category = categoryValue! as Map<Object?, Object?>;
+          final Map<Object?, Object?> category =
+              categoryValue! as Map<Object?, Object?>;
           return Category(
             index: (category['index']! as num).toInt(),
             score: (category['score']! as num).toDouble(),
@@ -194,14 +201,17 @@ ClassificationResult webClassificationResult(Map<Object?, Object?> result) {
 }
 
 /// Treats MediaPipe's empty optional strings as absent values.
-String? webEmptyToNull(String? value) => value == null || value.isEmpty ? null : value;
+String? webEmptyToNull(String? value) =>
+    value == null || value.isEmpty ? null : value;
 
 /// Converts an immutable [MpImage] into browser `ImageData`.
 ///
 /// Browser image sources are eight-bit RGBA. Higher precision formats are
 /// deterministically converted to that representation at this boundary.
 JSObject webImageData(MpImage image) {
-  final Uint8ClampedList rgba = Uint8ClampedList(image.width * image.height * 4);
+  final Uint8ClampedList rgba = Uint8ClampedList(
+    image.width * image.height * 4,
+  );
 
   for (int pixel = 0; pixel < image.width * image.height; pixel += 1) {
     final int output = pixel * 4;
@@ -219,7 +229,10 @@ JSObject webImageData(MpImage image) {
   final JSAny? constructor = globalContext['ImageData'];
 
   if (constructor == null || !constructor.isA<JSFunction>()) {
-    throw const MpException(MpStatus.unavailable, 'This browser does not expose ImageData.');
+    throw const MpException(
+      MpStatus.unavailable,
+      'This browser does not expose ImageData.',
+    );
   }
   return (constructor as JSFunction).callAsConstructor<JSObject>(
     rgba.toJS,
@@ -300,7 +313,8 @@ void _writeFloatPixel(
   int inputOffset,
   MpImageFormat format,
 ) {
-  int byte(int channel) => (input[inputOffset + channel].clamp(0, 1) * 255).round();
+  int byte(int channel) =>
+      (input[inputOffset + channel].clamp(0, 1) * 255).round();
 
   switch (format) {
     case MpImageFormat.float32x1:

@@ -20,10 +20,18 @@ final class MpCameraFrameConverter {
     bool mirroredPreview = false,
   }) {
     if (timestampMs < 0) {
-      throw ArgumentError.value(timestampMs, 'timestampMs', 'must not be negative');
+      throw ArgumentError.value(
+        timestampMs,
+        'timestampMs',
+        'must not be negative',
+      );
     }
     if (rotationDegrees % 90 != 0) {
-      throw ArgumentError.value(rotationDegrees, 'rotationDegrees', 'must be a multiple of 90');
+      throw ArgumentError.value(
+        rotationDegrees,
+        'rotationDegrees',
+        'must be a multiple of 90',
+      );
     }
 
     final MpImage image = switch (cameraImage.format.group) {
@@ -53,10 +61,16 @@ final class MpCameraFrameConverter {
     final int minimumRowStride = image.width * 4;
 
     if (rowStride < minimumRowStride) {
-      throw StateError('BGRA row stride $rowStride is smaller than $minimumRowStride.');
+      throw StateError(
+        'BGRA row stride $rowStride is smaller than $minimumRowStride.',
+      );
     }
 
-    _requireBufferLength(plane, minimumLength: rowStride * image.height, format: 'BGRA8888');
+    _requireBufferLength(
+      plane,
+      minimumLength: rowStride * image.height,
+      format: 'BGRA8888',
+    );
 
     final Uint8List rgba = Uint8List(image.width * image.height * 4);
     int destination = 0;
@@ -90,14 +104,18 @@ final class MpCameraFrameConverter {
     _requirePlaneCount(image, 1);
 
     if (image.width.isOdd || image.height.isOdd) {
-      throw StateError('NV21 dimensions must be even, got ${image.width}x${image.height}.');
+      throw StateError(
+        'NV21 dimensions must be even, got ${image.width}x${image.height}.',
+      );
     }
 
     final Plane plane = image.planes.single;
     final int rowStride = plane.bytesPerRow;
 
     if (rowStride < image.width) {
-      throw StateError('NV21 row stride $rowStride is smaller than ${image.width}.');
+      throw StateError(
+        'NV21 row stride $rowStride is smaller than ${image.width}.',
+      );
     }
 
     final int yPlaneLength = rowStride * image.height;
@@ -141,7 +159,9 @@ final class MpCameraFrameConverter {
     _requirePlaneCount(image, 3);
 
     if (image.width.isOdd || image.height.isOdd) {
-      throw StateError('YUV420 dimensions must be even, got ${image.width}x${image.height}.');
+      throw StateError(
+        'YUV420 dimensions must be even, got ${image.width}x${image.height}.',
+      );
     }
 
     final Plane yPlane = image.planes[0];
@@ -211,11 +231,15 @@ final class MpCameraFrameConverter {
     final int luminance = y - 16;
     final int blueDifference = u - 128;
     final int redDifference = v - 128;
-    destination[offset] = _clampByte((298 * luminance + 409 * redDifference + 128) >> 8);
+    destination[offset] = _clampByte(
+      (298 * luminance + 409 * redDifference + 128) >> 8,
+    );
     destination[offset + 1] = _clampByte(
       (298 * luminance - 100 * blueDifference - 208 * redDifference + 128) >> 8,
     );
-    destination[offset + 2] = _clampByte((298 * luminance + 516 * blueDifference + 128) >> 8);
+    destination[offset + 2] = _clampByte(
+      (298 * luminance + 516 * blueDifference + 128) >> 8,
+    );
   }
 
   static int _clampByte(int value) => value.clamp(0, 255);
@@ -261,7 +285,12 @@ final class MpCameraFrameConverter {
       );
     }
 
-    final int minimumLength = (height - 1) * plane.bytesPerRow + minimumRowLength;
-    _requireBufferLength(plane, minimumLength: minimumLength, format: '$name YUV420');
+    final int minimumLength =
+        (height - 1) * plane.bytesPerRow + minimumRowLength;
+    _requireBufferLength(
+      plane,
+      minimumLength: minimumLength,
+      format: '$name YUV420',
+    );
   }
 }

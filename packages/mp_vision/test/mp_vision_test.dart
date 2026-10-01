@@ -7,9 +7,10 @@ import 'package:test/test.dart';
 
 void main() {
   test('face detector delegates still images and closes once', () async {
-    final _FakeVisionBackend<DetectionResult> backend = _FakeVisionBackend<DetectionResult>(
-      DetectionResult(detections: const <Detection>[]),
-    );
+    final _FakeVisionBackend<DetectionResult> backend =
+        _FakeVisionBackend<DetectionResult>(
+          DetectionResult(detections: const <Detection>[]),
+        );
     final FaceDetector detector = await FaceDetector.create(
       FaceDetectorOptions(baseOptions: _baseOptions()),
       runtime: _FaceDetectorRuntime(backend),
@@ -26,11 +27,15 @@ void main() {
   });
 
   test('video mode validates timestamps before invoking the backend', () async {
-    final _FakeVisionBackend<DetectionResult> backend = _FakeVisionBackend<DetectionResult>(
-      DetectionResult(detections: const <Detection>[]),
-    );
+    final _FakeVisionBackend<DetectionResult> backend =
+        _FakeVisionBackend<DetectionResult>(
+          DetectionResult(detections: const <Detection>[]),
+        );
     final FaceDetector detector = await FaceDetector.create(
-      FaceDetectorOptions(baseOptions: _baseOptions(), runningMode: VisionRunningMode.video),
+      FaceDetectorOptions(
+        baseOptions: _baseOptions(),
+        runningMode: VisionRunningMode.video,
+      ),
       runtime: _FaceDetectorRuntime(backend),
     );
 
@@ -43,15 +48,20 @@ void main() {
   });
 
   test('live mode exposes typed result events', () async {
-    final _FakeVisionBackend<DetectionResult> backend = _FakeVisionBackend<DetectionResult>(
-      DetectionResult(detections: const <Detection>[]),
-    );
+    final _FakeVisionBackend<DetectionResult> backend =
+        _FakeVisionBackend<DetectionResult>(
+          DetectionResult(detections: const <Detection>[]),
+        );
     final FaceDetector detector = await FaceDetector.create(
-      FaceDetectorOptions(baseOptions: _baseOptions(), runningMode: VisionRunningMode.liveStream),
+      FaceDetectorOptions(
+        baseOptions: _baseOptions(),
+        runningMode: VisionRunningMode.liveStream,
+      ),
       runtime: _FaceDetectorRuntime(backend),
     );
     final MpImage image = _image();
-    final Future<VisionLiveResult<DetectionResult>> nextResult = detector.results.first;
+    final Future<VisionLiveResult<DetectionResult>> nextResult =
+        detector.results.first;
 
     await detector.detectAsync(image, 22);
     backend.controller.add(
@@ -69,7 +79,10 @@ void main() {
 
   test('task options reject unsafe values', () {
     expect(
-      () => FaceDetectorOptions(baseOptions: _baseOptions(), minDetectionConfidence: 1.1),
+      () => FaceDetectorOptions(
+        baseOptions: _baseOptions(),
+        minDetectionConfidence: 1.1,
+      ),
       throwsArgumentError,
     );
     expect(
@@ -77,24 +90,32 @@ void main() {
       throwsArgumentError,
     );
     expect(
-      () => ImageSegmenterOptions(baseOptions: _baseOptions(), outputConfidenceMasks: false),
+      () => ImageSegmenterOptions(
+        baseOptions: _baseOptions(),
+        outputConfidenceMasks: false,
+      ),
       throwsArgumentError,
     );
   });
 
   test('interactive prompts are immutable and validated', () {
     final List<PromptPoint> points = <PromptPoint>[PromptPoint(0.2, 0.4)];
-    final ScribblePrompt prompt = InteractivePrompt.scribble(points) as ScribblePrompt;
+    final ScribblePrompt prompt =
+        InteractivePrompt.scribble(points) as ScribblePrompt;
 
     points.add(PromptPoint(0.3, 0.5));
 
     expect(prompt.points, hasLength(1));
     expect(() => PromptPoint(-0.1, 0.5), throwsArgumentError);
-    expect(() => InteractivePrompt.strokes(const <PromptStroke>[]), throwsArgumentError);
+    expect(
+      () => InteractivePrompt.strokes(const <PromptStroke>[]),
+      throwsArgumentError,
+    );
   });
 }
 
-BaseOptions _baseOptions() => BaseOptions(modelAsset: ModelAsset.path('model.task'));
+BaseOptions _baseOptions() =>
+    BaseOptions(modelAsset: ModelAsset.path('model.task'));
 
 MpImage _image() => MpImage.uint8(
   width: 1,
@@ -121,7 +142,10 @@ final class _FakeVisionBackend<T> implements VisionTaskBackend<T> {
   Stream<VisionLiveResult<T>> get results => controller.stream;
 
   @override
-  Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) async {
+  Future<T> processImage(
+    MpImage image,
+    ImageProcessingOptions? processingOptions,
+  ) async {
     imageCount++;
 
     return output;
@@ -188,8 +212,9 @@ final class _FaceDetectorRuntime implements VisionRuntime {
   ) => throw UnimplementedError();
 
   @override
-  Future<VisionTaskBackend<EmbeddingResult>> createImageEmbedder(ImageEmbedderOptions options) =>
-      throw UnimplementedError();
+  Future<VisionTaskBackend<EmbeddingResult>> createImageEmbedder(
+    ImageEmbedderOptions options,
+  ) => throw UnimplementedError();
 
   @override
   Future<VisionTaskBackend<ImageSegmenterResult>> createImageSegmenter(
@@ -202,8 +227,9 @@ final class _FaceDetectorRuntime implements VisionRuntime {
   ) => throw UnimplementedError();
 
   @override
-  Future<VisionTaskBackend<DetectionResult>> createObjectDetector(ObjectDetectorOptions options) =>
-      throw UnimplementedError();
+  Future<VisionTaskBackend<DetectionResult>> createObjectDetector(
+    ObjectDetectorOptions options,
+  ) => throw UnimplementedError();
 
   @override
   Future<VisionTaskBackend<PoseLandmarkerResult>> createPoseLandmarker(

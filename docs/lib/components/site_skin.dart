@@ -43,9 +43,9 @@ class SiteSkin extends StatelessComponent {
     css('html').styles(raw: {'scroll-behavior': 'smooth'}),
     css('body').styles(
       raw: {
-        'font-family': '"Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif',
-        'background-image':
-            'linear-gradient(var(--mp-line) 1px, transparent 1px), linear-gradient(90deg, var(--mp-line) 1px, transparent 1px)',
+        'font-family':
+            '"Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif',
+        'background-image': 'linear-gradient(var(--mp-line) 1px, transparent 1px), linear-gradient(90deg, var(--mp-line) 1px, transparent 1px)',
         'background-size': '48px 48px',
         'background-attachment': 'fixed',
       },
@@ -69,7 +69,11 @@ class SiteSkin extends StatelessComponent {
     ),
     css('.header').styles(raw: {'border': '0', 'max-width': '1600px'}),
     css('.header-title span').styles(
-      raw: {'font-size': '1rem', 'font-weight': '800', 'letter-spacing': '-.04em'},
+      raw: {
+        'font-size': '1rem',
+        'font-weight': '800',
+        'letter-spacing': '-.04em',
+      },
     ),
     css('.header-title img').styles(raw: {'width': '2rem', 'height': '2rem'}),
     css('.sidebar-container').styles(raw: {'background': 'var(--mp-paper)'}),
@@ -108,9 +112,8 @@ class SiteSkin extends StatelessComponent {
         'letter-spacing': '-.055em',
       },
     ),
-    css('.content h3').styles(
-      raw: {'font-size': '1.25rem', 'letter-spacing': '-.025em'},
-    ),
+    css('.content h3')
+        .styles(raw: {'font-size': '1.25rem', 'letter-spacing': '-.025em'}),
     css('.content a').styles(
       raw: {
         'text-decoration-color': 'var(--mp-coral)',
@@ -160,18 +163,18 @@ class SiteSkin extends StatelessComponent {
         'text-decoration': 'none',
       },
     ),
-    css('.mp-package:hover').styles(raw: {'background': 'var(--mp-acid)', 'color': '#10110f'}),
-    css('.mp-package code').styles(raw: {'font-size': '1.15rem', 'font-weight': '800'}),
+    css('.mp-package:hover')
+        .styles(raw: {'background': 'var(--mp-acid)', 'color': '#10110f'}),
+    css('.mp-package code')
+        .styles(raw: {'font-size': '1.15rem', 'font-weight': '800'}),
     css('.mp-package span').styles(
       raw: {'display': 'block', 'margin-top': '.65rem', 'line-height': '1.45'},
     ),
-    css.media(
-      MediaQuery.all(maxWidth: 800.px),
-      [
-        css('.mp-package-grid').styles(raw: {'grid-template-columns': '1fr'}),
-        css('.content-container').styles(raw: {'border-right': '0', 'border-left': '0'}),
-      ],
-    ),
+    css.media(MediaQuery.all(maxWidth: 800.px), [
+      css('.mp-package-grid').styles(raw: {'grid-template-columns': '1fr'}),
+      css('.content-container')
+          .styles(raw: {'border-right': '0', 'border-left': '0'}),
+    ]),
   ];
 }
 
@@ -183,15 +186,31 @@ class PackageGrid extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     const List<(String, String, String)> packages = [
-      ('mp_core', 'packages/core', 'Models, media containers, result types, lifecycle, and runtime support.'),
-      ('mp_camera', 'packages/camera', 'Camera formats, rotation metadata, and latest-frame scheduling.'),
+      (
+        'mp_core',
+        'packages/core',
+        'Models, media containers, result types, lifecycle, and runtime support.',
+      ),
+      (
+        'mp_camera',
+        'packages/camera',
+        'Camera formats, rotation metadata, and latest-frame scheduling.',
+      ),
       (
         'mp_vision',
         'packages/vision',
         'Eleven detection, landmarking, classification, embedding, and segmentation tasks.',
       ),
-      ('mp_text', 'packages/text', 'Detection, classification, embeddings, proofreading, and summarization.'),
-      ('mp_audio', 'packages/audio', 'Clip and stream classification over immutable audio frames.'),
+      (
+        'mp_text',
+        'packages/text',
+        'Detection, classification, embeddings, proofreading, and summarization.',
+      ),
+      (
+        'mp_audio',
+        'packages/audio',
+        'Clip and stream classification over immutable audio frames.',
+      ),
       (
         'mp_genai',
         'packages/genai',

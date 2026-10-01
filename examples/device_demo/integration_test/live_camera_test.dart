@@ -9,26 +9,27 @@ import 'package:mp_device_demo/playground/playground_app.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('camera runs pose inference, switches to face inference, and stops', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const MotionPlaygroundApp());
-    await tester.ensureVisible(find.text('Start camera'));
-    await tester.tap(find.text('Start camera'));
-    await _waitForInference(tester);
-    expect(find.text('● LIVE CAMERA'), findsOneWidget);
+  testWidgets(
+    'camera runs pose inference, switches to face inference, and stops',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const MotionPlaygroundApp());
+      await tester.ensureVisible(find.text('Start camera'));
+      await tester.tap(find.text('Start camera'));
+      await _waitForInference(tester);
+      expect(find.text('● LIVE CAMERA'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Face studio'));
-    await tester.tap(find.text('Face studio'));
-    await _waitForInference(tester);
-    expect(find.text('3D FACE PLAY'), findsOneWidget);
+      await tester.ensureVisible(find.text('Face studio'));
+      await tester.tap(find.text('Face studio'));
+      await _waitForInference(tester);
+      expect(find.text('3D FACE PLAY'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Use demo'));
-    await tester.tap(find.text('Use demo'));
-    await tester.pump();
-    expect(find.text('◌ ANIMATED DEMO'), findsOneWidget);
-    await tester.pumpWidget(const SizedBox());
-  });
+      await tester.ensureVisible(find.text('Use demo'));
+      await tester.tap(find.text('Use demo'));
+      await tester.pump();
+      expect(find.text('◌ ANIMATED DEMO'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 }
 
 Future<void> _waitForInference(WidgetTester tester) async {
@@ -43,7 +44,8 @@ Future<void> _waitForInference(WidgetTester tester) async {
       );
     }
 
-    if (DateTime.now().isAfter(deadline)) fail('Timed out waiting for real camera inference.');
+    if (DateTime.now().isAfter(deadline))
+      fail('Timed out waiting for real camera inference.');
     await tester.pump(const Duration(milliseconds: 100));
   }
 
@@ -55,7 +57,8 @@ Future<void> _waitForInference(WidgetTester tester) async {
       fail('Frame inference failed.');
     }
 
-    if (DateTime.now().isAfter(deadline)) fail('Camera opened but no result arrived.');
+    if (DateTime.now().isAfter(deadline))
+      fail('Camera opened but no result arrived.');
     await tester.pump(const Duration(milliseconds: 100));
   }
 }

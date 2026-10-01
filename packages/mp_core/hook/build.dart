@@ -20,7 +20,8 @@ Future<void> main(List<String> arguments) async {
     final OS targetOS = input.config.code.targetOS;
     final String? mainLibraryName = _mainLibraryName(targetOS);
     if (mainLibraryName == null) return;
-    final String target = '${targetOS.name}-${input.config.code.targetArchitecture.name}';
+    final String target =
+        '${targetOS.name}-${input.config.code.targetArchitecture.name}';
 
     Directory? directory;
     final Uri? configured = input.userDefines.path('native_library_directory');
@@ -30,20 +31,25 @@ Future<void> main(List<String> arguments) async {
       // list directory dependencies before invoking the hook. Track its nearest
       // existing ancestor instead so creating the artifact root still
       // invalidates an earlier empty result.
-      output.dependencies.add(_nearestExistingDirectory(configuredDirectory).uri);
+      output.dependencies.add(
+        _nearestExistingDirectory(configuredDirectory).uri,
+      );
       final Directory targetDirectory = Directory.fromUri(
         configuredDirectory.uri.resolve('$target/'),
       );
       if (targetDirectory.existsSync()) {
         directory = targetDirectory;
-      } else if (File.fromUri(configuredDirectory.uri.resolve(mainLibraryName)).existsSync()) {
+      } else if (File.fromUri(configuredDirectory.uri.resolve(mainLibraryName))
+          .existsSync()) {
         directory = configuredDirectory;
       }
       if (directory == null) return;
     }
 
     if (directory == null) {
-      final Uri catalogUri = input.packageRoot.resolve('hook/native_artifacts.json');
+      final Uri catalogUri = input.packageRoot.resolve(
+        'hook/native_artifacts.json',
+      );
       final File catalogFile = File.fromUri(catalogUri);
       output.dependencies.add(catalogUri);
       final NativeArtifactCatalog catalog = NativeArtifactCatalog.parse(
@@ -65,7 +71,9 @@ Future<void> main(List<String> arguments) async {
             .toList(growable: false)
           ..sort((File left, File right) => left.path.compareTo(right.path));
     if (libraries.isEmpty) return;
-    if (!libraries.any((File file) => file.uri.pathSegments.last == mainLibraryName)) {
+    if (!libraries.any(
+      (File file) => file.uri.pathSegments.last == mainLibraryName,
+    )) {
       throw StateError('$mainLibraryName is missing from ${directory.path}.');
     }
 
@@ -77,7 +85,9 @@ Future<void> main(List<String> arguments) async {
       output.assets.code.add(
         CodeAsset(
           package: input.packageName,
-          name: fileName == mainLibraryName ? 'native.dart' : 'native/$fileName',
+          name: fileName == mainLibraryName
+              ? 'native.dart'
+              : 'native/$fileName',
           linkMode: DynamicLoadingBundled(),
           file: bundled,
         ),
