@@ -8,7 +8,6 @@ import com.google.ai.edge.localagents.core.proto.Content
 import com.google.ai.edge.localagents.core.proto.FunctionCall
 import com.google.ai.edge.localagents.core.proto.FunctionDeclaration
 import com.google.ai.edge.localagents.core.proto.FunctionResponse
-
 import com.google.ai.edge.localagents.core.proto.GenerateContentResponse
 import com.google.ai.edge.localagents.core.proto.Part
 import com.google.ai.edge.localagents.core.proto.Schema
@@ -17,7 +16,6 @@ import com.google.ai.edge.localagents.core.proto.Type
 import com.google.ai.edge.localagents.fc.ChatSession
 import com.google.ai.edge.localagents.fc.GemmaFormatter
 import com.google.ai.edge.localagents.fc.GenerativeModel
-
 import com.google.ai.edge.localagents.fc.HammerFormatter
 import com.google.ai.edge.localagents.fc.LlamaFormatter
 import com.google.ai.edge.localagents.fc.LlmInferenceBackend
@@ -126,7 +124,6 @@ class MpGenAiPlugin :
                 "imageGenerator.create" -> createImageGenerator(call, result)
                 "imageGenerator.generate" -> generateImage(call, result)
                 "imageGenerator.setInputs" -> setImageGeneratorInputs(call, result)
-
                 "imageGenerator.execute" -> executeImageGenerator(call, result)
                 "imageGenerator.createConditionImage" -> createConditionImage(call, result)
                 "imageGenerator.close" -> closeImageGenerator(call, result)
@@ -527,6 +524,7 @@ class MpGenAiPlugin :
                 result.successOnMain(null)
             } catch (error: Throwable) {
                 result.errorOnMain(error)
+
             } finally {
                 ownedImage?.close()
             }
@@ -621,7 +619,6 @@ class MpGenAiPlugin :
             var backend: LlmInferenceBackend? = null
             try {
                 inference = LlmInference.createFromOptions(applicationContext, llmOptions)
-
                 val initializedBackend = LlmInferenceBackend(inference, sessionOptions, formatter)
                 backend = initializedBackend
                 val model =
@@ -885,7 +882,6 @@ class MpGenAiPlugin :
                 val handle = nextHandle.getAndIncrement()
                 ragPipelines[handle] = RagPipelineHolder(memory, chain, languageModel)
                 result.successOnMain(handle)
-
             } catch (error: Throwable) {
                 runCatching { languageModel?.close() }
                 result.errorOnMain(error)
@@ -1071,7 +1067,6 @@ class MpGenAiPlugin :
             openFunctionModels.forEach { runCatching { it.close() } }
             openRagPipelines.forEach { runCatching { it.close() } }
         }
-
         executor.shutdown()
     }
 
@@ -1565,7 +1560,6 @@ class MpGenAiPlugin :
         properties.forEach { (name, schema) -> builder.putProperties(name, schema.toSchema()) }
         val anyOf =
             this["anyOf"] as? List<Map<String, Any?>>
-
                 ?: throw IllegalArgumentException("schema.anyOf must be a list")
         builder.addAllAnyOf(anyOf.map { it.toSchema() })
 
@@ -1799,7 +1793,6 @@ class MpGenAiPlugin :
             } else {
                 red = this[offset].toInt() and 0xff
                 green = this[offset + 1].toInt() and 0xff
-
                 blue = this[offset + 2].toInt() and 0xff
                 alpha = if (channels == 4) this[offset + 3].toInt() and 0xff else 0xff
             }

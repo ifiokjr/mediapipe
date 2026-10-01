@@ -8,7 +8,6 @@ import com.google.mediapipe.tasks.text.textproofreader.TextProofreaderResult
 import com.google.mediapipe.tasks.text.textproofreader.TextProofreaderStreamingResult
 import com.google.mediapipe.tasks.text.textsummarizer.TextSummarizer
 import com.google.mediapipe.tasks.text.textsummarizer.TextSummarizerStreamingResult
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -213,7 +212,6 @@ class MpTextPlugin :
                 val handle = nextHandle.getAndIncrement()
                 summarizers[handle] = summarizer
                 result.successOnMain(handle)
-
             } catch (error: Throwable) {
                 result.errorOnMain(error)
             }

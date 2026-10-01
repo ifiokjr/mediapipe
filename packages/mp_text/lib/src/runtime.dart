@@ -8,7 +8,6 @@ import 'runtime_stub.dart'
 import 'text_classifier.dart';
 import 'text_embedder.dart';
 import 'text_proofreader.dart';
-
 import 'text_summarizer.dart';
 
 /// A platform adapter capable of creating MediaPipe text task backends.
