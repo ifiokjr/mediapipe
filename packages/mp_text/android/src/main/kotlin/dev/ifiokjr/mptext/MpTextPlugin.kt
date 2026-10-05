@@ -83,6 +83,7 @@ class MpTextPlugin :
                         applicationContext,
                         options.build(),
                     )
+
                 val handle = nextHandle.getAndIncrement()
                 proofreaders[handle] = proofreader
                 result.successOnMain(handle)
@@ -340,6 +341,7 @@ class MpTextPlugin :
             openProofreaders.forEach { runCatching { it.close() } }
             openSummarizers.forEach { runCatching { it.close() } }
         }
+
         executor.shutdown()
     }
 

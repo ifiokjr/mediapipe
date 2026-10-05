@@ -115,11 +115,15 @@ sealed class MpImage {
     required int sampleCount,
   }) {
     if (width <= 0) throw ArgumentError.value(width, 'width', 'must be greater than zero');
+
     if (height <= 0) throw ArgumentError.value(height, 'height', 'must be greater than zero');
+
     if (format.storage != storage) {
       throw ArgumentError.value(format, 'format', 'requires ${format.storage.name} storage');
     }
+
     final int expected = width * height * format.channels;
+
     if (sampleCount != expected) {
       throw ArgumentError.value(sampleCount, 'data.length', 'must equal $expected');
     }
@@ -290,7 +294,9 @@ final class NormalizedRect {
         throw ArgumentError.value(entry.value, entry.key, 'must be between 0 and 1');
       }
     }
+
     if (left >= right) throw ArgumentError.value(left, 'left', 'must be less than right');
+
     if (top >= bottom) throw ArgumentError.value(top, 'top', 'must be less than bottom');
   }
 

@@ -235,6 +235,7 @@ List<List<Landmark>> _landmarkGroups(Object? value) =>
 List<JSObject> _objectArray(JSAny? value) {
   if (value.isUndefinedOrNull) return const <JSObject>[];
   final List<JSAny?> values = (value! as JSArray<JSAny?>).toDart;
+
   return values.map((JSAny? item) => item! as JSObject).toList();
 }
 

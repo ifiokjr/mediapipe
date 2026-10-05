@@ -164,6 +164,7 @@ final class _FakeTextRuntime implements TextRuntime {
   @override
   Future<TextSummarizerBackend> createTextSummarizer(TextSummarizerOptions options) async {
     summarizerOptions = options;
+
     return summarizer;
   }
 }

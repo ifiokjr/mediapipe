@@ -293,10 +293,13 @@ final class Float32ListEquality implements Equality<Float32List?> {
   @override
   bool equals(Float32List? first, Float32List? second) {
     if (first == null || second == null) return identical(first, second);
+
     if (first.length != second.length) return false;
+
     for (var i = 0; i < first.length; i++) {
       if (first[i] != second[i]) return false;
     }
+
     return true;
   }
 
@@ -304,9 +307,11 @@ final class Float32ListEquality implements Equality<Float32List?> {
   int hash(Float32List? list) {
     if (list == null) return 0;
     int result = list.length;
+
     for (final double value in list.take(8)) {
       result = Object.hash(result, value);
     }
+
     return result;
   }
 
@@ -332,6 +337,7 @@ final class PromptPoint {
   /// Creates a normalized point.
   PromptPoint(this.x, this.y) {
     if (x < 0 || x > 1) throw ArgumentError.value(x, 'x', 'must be between 0 and 1');
+
     if (y < 0 || y > 1) throw ArgumentError.value(y, 'y', 'must be between 0 and 1');
   }
 

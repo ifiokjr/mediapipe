@@ -78,6 +78,7 @@ void main() {
       OS.windows => 'opencv_core.dll',
       _ => throw UnsupportedError('Unsupported test host: ${OS.current.name}'),
     };
+
     File.fromUri(artifacts.uri.resolve(mainLibrary)).writeAsBytesSync(<int>[1]);
     File.fromUri(artifacts.uri.resolve(dependency)).writeAsBytesSync(<int>[2]);
 

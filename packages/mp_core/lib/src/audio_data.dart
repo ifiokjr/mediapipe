@@ -12,9 +12,11 @@ final class AudioData {
     if (channelCount <= 0) {
       throw ArgumentError.value(channelCount, 'channelCount', 'must be greater than zero');
     }
+
     if (!sampleRateHz.isFinite || sampleRateHz <= 0) {
       throw ArgumentError.value(sampleRateHz, 'sampleRateHz', 'must be finite and positive');
     }
+
     if (samples.isEmpty || samples.length % channelCount != 0) {
       throw ArgumentError.value(
         samples.length,

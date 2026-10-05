@@ -149,12 +149,14 @@ final class _FakeImageBackend implements ImageGeneratorBackend {
   @override
   Future<ImageGeneratorResult?> execute({required bool showResult}) async {
     this.showResult = showResult;
+
     return _result();
   }
 
   @override
   Future<MpImage> createConditionImage(MpImage image, ImageGeneratorConditionType type) async {
     conditionType = type;
+
     return image;
   }
 

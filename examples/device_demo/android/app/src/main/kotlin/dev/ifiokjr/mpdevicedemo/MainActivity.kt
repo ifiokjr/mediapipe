@@ -35,12 +35,16 @@ class MainActivity : FlutterActivity() {
             PackageManager.PERMISSION_GRANTED
         ) {
             result.success(true)
+
             return
         }
+
         if (pendingResult != null) {
             result.success(false)
+
             return
         }
+
         pendingResult = result
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA)
     }
@@ -51,6 +55,7 @@ class MainActivity : FlutterActivity() {
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
         if (requestCode != REQUEST_CAMERA) return
         val result = pendingResult ?: return
         pendingResult = null

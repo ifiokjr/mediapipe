@@ -269,8 +269,11 @@ final class TrackingSession extends ChangeNotifier {
       await _failures?.cancel();
     });
     _failures = null;
+
     if (faceTask != null) await close(faceTask.close);
+
     if (poseTask != null) await close(poseTask.close);
+
     if (errors.isNotEmpty) throw StateError('Resource cleanup failed: ${errors.join('; ')}');
   }
 
@@ -302,6 +305,7 @@ final class TrackingSession extends ChangeNotifier {
 /// share one upright space. This avoids platform-specific output rotation rules.
 MpImageUint8 uprightImage(MpImageUint8 image, int rotation) {
   if (rotation == 0) return image;
+
   if (!<int>[90, 180, 270].contains(rotation)) throw ArgumentError.value(rotation, 'rotation');
   final bool swap = rotation != 180;
   final int width = swap ? image.height : image.width;
@@ -316,6 +320,7 @@ MpImageUint8 uprightImage(MpImageUint8 image, int rotation) {
         180 => (image.width - 1 - x, image.height - 1 - y),
         _ => (y, image.width - 1 - x),
       };
+
       final int source = (y * image.width + x) * channels;
       final int target = (dy * width + dx) * channels;
       pixels.setRange(target, target + channels, image.data, source);

@@ -28,6 +28,7 @@ final class TextSummarizerOptions {
         'TextSummarizer supports only the CPU delegate',
       );
     }
+
     if (maxTokens case final int value when value <= 0) {
       throw ArgumentError.value(value, 'maxTokens', 'must be greater than zero');
     }
@@ -103,12 +104,14 @@ final class TextSummarizer implements MpTask {
   /// Summarizes [text] and waits for the complete result.
   Future<TextSummarizerResult> summarize(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.summarize(text);
   }
 
   /// Summarizes [text] and emits incremental output.
   Stream<TextSummarizerChunk> summarizeStreaming(String text) {
     _lifecycle.ensureOpen();
+
     return _backend.summarizeStreaming(text);
   }
 
