@@ -325,6 +325,14 @@ final class RagGenerationChunk {
 
   /// Whether generation is complete.
   final bool isDone;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RagGenerationChunk && text == other.text && isDone == other.isDone;
+
+  @override
+  int get hashCode => Object.hash(text, isDone);
 }
 
 /// Retrieval-augmented generation backed by MediaPipe's Android RAG SDK.

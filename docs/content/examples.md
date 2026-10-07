@@ -17,8 +17,9 @@ devenv shell test:android-device
 ```
 
 `test:examples` runs the Dart examples on the host against a real native
-runtime. `test:android-device` builds and drives the Flutter demo on an attached
-Android device.
+runtime. `test:android-device` drives the mp_text native plugin fixture on an
+attached Android device, and `test:device-demo` launches the Flutter demo on
+one.
 
 ## Dart examples
 
@@ -30,6 +31,7 @@ directory or `MP_EXAMPLE_CACHE`.
 | ----------------------------------------------- | ----------------------------------------------------------------------------- |
 | `examples/cli/bin/core_model_assets.dart`       | Model assets, image and audio containers, timestamp rules, and typed failures |
 | `examples/cli/bin/vision_face_detection.dart`   | Face detection over a real photograph with bounding boxes and keypoints       |
+| `examples/cli/bin/vision_hand_landmarks.dart`   | Hand landmarks, handedness, and world coordinates on the same photograph      |
 | `examples/cli/bin/text_language_detection.dart` | Language identification across four languages                                 |
 | `examples/cli/bin/text_tasks.dart`              | Language detection plus text embedding and cosine similarity                  |
 | `examples/cli/bin/audio_classification.dart`    | Clip classification and the native streaming contract                         |
@@ -52,19 +54,29 @@ dart run examples/cli/bin/vision_face_detection.dart
 
 ## Flutter device demo
 
-`examples/device_demo` streams camera frames through a face detector while
-showing device motion, processed frames, and dropped frames. It is the
-end-to-end test for the camera path: conversion, monotonic timestamps,
-latest-frame backpressure, and cleanup on shutdown.
+`examples/device_demo` is a live camera playground: it streams frames through
+pose and face landmarkers, counts exercise reps, and projects 3D accessories
+onto the tracked face. It is the end-to-end test for the camera path: frame
+conversion, monotonic timestamps, latest-frame backpressure, and deterministic
+cleanup on shutdown.
 
 ```sh
 cd examples/device_demo
-flutter run
+repo-flutter run
 ```
 
-The demo requests the camera permission itself and downloads its model on first
-launch, so no manual setup is required. Rotate the device to watch the reported
-orientation change while inference continues.
+The demo requests the camera permission itself and downloads its digest-pinned
+models on first launch, so no manual setup is required. A browser build runs in
+a synthetic-preview mode without a camera.
+
+The repository also carries a second, device-only entry point,
+`lib/device_telemetry.dart`, which streams a face detector while reporting
+device motion, processed frames, and dropped frames:
+
+```sh
+cd examples/device_demo
+repo-flutter run -t lib/device_telemetry.dart
+```
 
 ## What the examples prove
 

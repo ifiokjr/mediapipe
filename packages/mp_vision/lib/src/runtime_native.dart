@@ -115,7 +115,7 @@ final class _NativeVisionBackend<T> implements VisionTaskBackend<T> {
   final StreamController<VisionLiveResult<T>> _results =
       StreamController<VisionLiveResult<T>>.broadcast();
   Future<void> _tail = Future<void>.value();
-  var _closed = false;
+  bool _closed = false;
 
   @override
   bool get isClosed => _closed;
@@ -149,19 +149,30 @@ final class _NativeVisionBackend<T> implements VisionTaskBackend<T> {
     int timestampMs,
     ImageProcessingOptions? processingOptions,
   ) => _run(() async {
-    final T result =
-        await _worker.request<Object>(
-              _VisionProcess(image, timestampMs: timestampMs, processingOptions: processingOptions),
-            )
-            as T;
-    _results.add(VisionLiveResult<T>(result: result, input: image, timestampMs: timestampMs));
+    try {
+      final T result =
+          await _worker.request<Object>(
+                _VisionProcess(
+                  image,
+                  timestampMs: timestampMs,
+                  processingOptions: processingOptions,
+                ),
+              )
+              as T;
+      _results.add(VisionLiveResult<T>(result: result, input: image, timestampMs: timestampMs));
+    } on Object catch (error, stackTrace) {
+      // Report the failure on the results stream for fire-and-forget callers
+      // and surface it on the returned future for awaiting callers.
+      if (!_closed) _results.addError(error, stackTrace);
+      rethrow;
+    }
   });
 
   @override
   Future<void> close() => _run(() async {
     if (_closed) return;
     _closed = true;
-    await _worker.request<void>(_VisionClose.instance);
+    await _worker.request<void>(const _VisionClose());
     await _worker.dispose();
     await _results.close();
   });
@@ -178,7 +189,7 @@ final class _NativeInteractiveSegmenter implements InteractiveSegmenterBackend {
 
   final native.NativeTaskIsolate _worker;
   Future<void> _tail = Future<void>.value();
-  var _closed = false;
+  bool _closed = false;
 
   @override
   bool get isClosed => _closed;
@@ -203,7 +214,7 @@ final class _NativeInteractiveSegmenter implements InteractiveSegmenterBackend {
     final Future<void> operation = _tail.then((_) async {
       if (_closed) return;
       _closed = true;
-      await _worker.request<void>(_VisionClose.instance);
+      await _worker.request<void>(const _VisionClose());
       await _worker.dispose();
     });
     _tail = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
@@ -236,9 +247,7 @@ final class _InteractiveProcess {
 }
 
 final class _VisionClose {
-  const _VisionClose._();
-
-  static const _VisionClose instance = _VisionClose._();
+  const _VisionClose();
 }
 
 Future<native.NativeTaskIsolate> _spawnVisionWorker(
@@ -685,23 +694,25 @@ DetectionResult _processFaceDetector(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpFaceDetectorDetectImage(
-            ffi.Pointer<native.MpFaceDetectorInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpFaceDetectorDetectForVideo(
-            ffi.Pointer<native.MpFaceDetectorInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpFaceDetectorDetectImage(
+              ffi.Pointer<native.MpFaceDetectorInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpFaceDetectorDetectForVideo(
+              ffi.Pointer<native.MpFaceDetectorInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return native.detectionResultFromNative(result.ref, timestampMs: timestampMs);
   } finally {
@@ -724,23 +735,25 @@ FaceLandmarkerResult _processFaceLandmarker(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpFaceLandmarkerDetectImage(
-            ffi.Pointer<native.MpFaceLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpFaceLandmarkerDetectForVideo(
-            ffi.Pointer<native.MpFaceLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpFaceLandmarkerDetectImage(
+              ffi.Pointer<native.MpFaceLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpFaceLandmarkerDetectForVideo(
+              ffi.Pointer<native.MpFaceLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return faceLandmarkerResultFromNative(result.ref);
   } finally {
@@ -763,23 +776,25 @@ GestureRecognizerResult _processGestureRecognizer(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpGestureRecognizerRecognizeImage(
-            ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpGestureRecognizerRecognizeForVideo(
-            ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpGestureRecognizerRecognizeImage(
+              ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpGestureRecognizerRecognizeForVideo(
+              ffi.Pointer<native.MpGestureRecognizerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return gestureRecognizerResultFromNative(result.ref);
   } finally {
@@ -802,23 +817,25 @@ HandLandmarkerResult _processHandLandmarker(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpHandLandmarkerDetectImage(
-            ffi.Pointer<native.MpHandLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpHandLandmarkerDetectForVideo(
-            ffi.Pointer<native.MpHandLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpHandLandmarkerDetectImage(
+              ffi.Pointer<native.MpHandLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpHandLandmarkerDetectForVideo(
+              ffi.Pointer<native.MpHandLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return handLandmarkerResultFromNative(result.ref);
   } finally {
@@ -841,23 +858,25 @@ HolisticLandmarkerResult _processHolisticLandmarker(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpHolisticLandmarkerDetectImage(
-            ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpHolisticLandmarkerDetectForVideo(
-            ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpHolisticLandmarkerDetectImage(
+              ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpHolisticLandmarkerDetectForVideo(
+              ffi.Pointer<native.MpHolisticLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return holisticLandmarkerResultFromNative(result.ref);
   } finally {
@@ -880,23 +899,25 @@ ClassificationResult _processImageClassifier(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpImageClassifierClassifyImage(
-            ffi.Pointer<native.MpImageClassifierInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpImageClassifierClassifyForVideo(
-            ffi.Pointer<native.MpImageClassifierInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpImageClassifierClassifyImage(
+              ffi.Pointer<native.MpImageClassifierInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpImageClassifierClassifyForVideo(
+              ffi.Pointer<native.MpImageClassifierInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return native.classificationResultFromNative(result.ref);
   } finally {
@@ -919,23 +940,25 @@ EmbeddingResult _processImageEmbedder(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpImageEmbedderEmbedImage(
-            ffi.Pointer<native.MpImageEmbedderInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpImageEmbedderEmbedForVideo(
-            ffi.Pointer<native.MpImageEmbedderInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpImageEmbedderEmbedImage(
+              ffi.Pointer<native.MpImageEmbedderInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpImageEmbedderEmbedForVideo(
+              ffi.Pointer<native.MpImageEmbedderInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return native.embeddingResultFromNative(result.ref);
   } finally {
@@ -958,23 +981,25 @@ ImageSegmenterResult _processImageSegmenter(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpImageSegmenterSegmentImage(
-            ffi.Pointer<native.MpImageSegmenterInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpImageSegmenterSegmentForVideo(
-            ffi.Pointer<native.MpImageSegmenterInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpImageSegmenterSegmentImage(
+              ffi.Pointer<native.MpImageSegmenterInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpImageSegmenterSegmentForVideo(
+              ffi.Pointer<native.MpImageSegmenterInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return imageSegmenterResultFromNative(result.ref);
   } finally {
@@ -997,23 +1022,25 @@ DetectionResult _processObjectDetector(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpObjectDetectorDetectImage(
-            ffi.Pointer<native.MpObjectDetectorInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpObjectDetectorDetectForVideo(
-            ffi.Pointer<native.MpObjectDetectorInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpObjectDetectorDetectImage(
+              ffi.Pointer<native.MpObjectDetectorInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpObjectDetectorDetectForVideo(
+              ffi.Pointer<native.MpObjectDetectorInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return native.detectionResultFromNative(result.ref, timestampMs: timestampMs);
   } finally {
@@ -1036,23 +1063,25 @@ PoseLandmarkerResult _processPoseLandmarker(
   final native.MpImagePtr input = scope.image(image);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = timestampMs == null
-        ? native.MpPoseLandmarkerDetectImage(
-            ffi.Pointer<native.MpPoseLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            result,
-            error,
-          )
-        : native.MpPoseLandmarkerDetectForVideo(
-            ffi.Pointer<native.MpPoseLandmarkerInternal>.fromAddress(address),
-            input,
-            scope.imageProcessingOptions(processingOptions),
-            timestampMs,
-            result,
-            error,
-          );
-    scope.check(status, error);
+    scope.check(
+      timestampMs == null
+          ? native.MpPoseLandmarkerDetectImage(
+              ffi.Pointer<native.MpPoseLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              result,
+              error,
+            )
+          : native.MpPoseLandmarkerDetectForVideo(
+              ffi.Pointer<native.MpPoseLandmarkerInternal>.fromAddress(address),
+              input,
+              scope.imageProcessingOptions(processingOptions),
+              timestampMs,
+              result,
+              error,
+            ),
+      error,
+    );
     ownsResult = true;
     return poseLandmarkerResultFromNative(result.ref);
   } finally {
@@ -1148,7 +1177,7 @@ void _closeTask(_TaskKind kind, int address) {
   final native.NativeScope scope = native.NativeScope(task: kind.taskName);
   try {
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
-    final native.MpStatus status = switch (kind) {
+    scope.check(switch (kind) {
       _TaskKind.faceDetector => native.MpFaceDetectorClose(
         ffi.Pointer<native.MpFaceDetectorInternal>.fromAddress(address),
         error,
@@ -1193,8 +1222,7 @@ void _closeTask(_TaskKind kind, int address) {
         ffi.Pointer<native.MpPoseLandmarkerInternal>.fromAddress(address),
         error,
       ),
-    };
-    scope.check(status, error);
+    }, error);
   } finally {
     scope.release();
   }

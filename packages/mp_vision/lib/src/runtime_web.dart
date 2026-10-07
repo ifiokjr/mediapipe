@@ -29,7 +29,13 @@ final class WebVisionRuntime implements VisionRuntime {
 
   Future<({JSObject fileset, JSObject module})>? _loaded;
 
-  Future<({JSObject fileset, JSObject module})> _load() => _loaded ??= _loadOnce();
+  Future<({JSObject fileset, JSObject module})> _load() =>
+      _loaded ??= _loadOnce().catchError((Object error, StackTrace stackTrace) {
+        // A failed load stays failed for the app's lifetime if it is cached,
+        // so clear it and let the next task creation retry.
+        _loaded = null;
+        Error.throwWithStackTrace(error, stackTrace);
+      });
 
   Future<({JSObject fileset, JSObject module})> _loadOnce() async {
     final JSObject module = await importWebTaskModule(assets.moduleUri);
@@ -276,6 +282,7 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
   final StreamController<VisionLiveResult<T>> _controller =
       StreamController<VisionLiveResult<T>>.broadcast();
   Future<void> _pending = Future<void>.value();
+  Future<void>? _closing;
   bool _isClosed = false;
 
   @override
@@ -297,7 +304,9 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
 
     if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
 
-    return Future<T>.value(convert(callWebMethod<JSAny?>(_task, imageMethod, arguments)));
+    // `Future.sync` keeps a conversion failure asynchronous so callers never
+    // see this contract method throw synchronously.
+    return Future<T>.sync(() => convert(callWebMethod<JSAny?>(_task, imageMethod, arguments)));
   }
 
   @override
@@ -311,7 +320,7 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
 
     if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
 
-    return Future<T>.value(convert(callWebMethod<JSAny?>(_task, videoMethod, arguments)));
+    return Future<T>.sync(() => convert(callWebMethod<JSAny?>(_task, videoMethod, arguments)));
   }
 
   @override
@@ -322,27 +331,40 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
   ) {
     _ensureOpen();
 
-    return _pending = _pending
-        .then((_) async {
-          final T result = await processVideo(image, timestampMs, processingOptions);
-          if (!_isClosed) {
-            _controller.add(
-              VisionLiveResult<T>(result: result, input: image, timestampMs: timestampMs),
-            );
-          }
-        })
-        .catchError((Object error, StackTrace stackTrace) {
-          if (!_isClosed) _controller.addError(error, stackTrace);
-        });
+    final Future<void> operation = _pending.then((_) async {
+      try {
+        final T result = await processVideo(image, timestampMs, processingOptions);
+        if (!_isClosed) {
+          _controller.add(
+            VisionLiveResult<T>(result: result, input: image, timestampMs: timestampMs),
+          );
+        }
+      } on Object catch (error, stackTrace) {
+        // Report the failure on the results stream for fire-and-forget callers
+        // and surface it on the returned future for awaiting callers.
+        if (!_isClosed) _controller.addError(error, stackTrace);
+        rethrow;
+      }
+    });
+    _pending = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+
+    return operation;
   }
 
   @override
-  Future<void> close() async {
-    if (_isClosed) return;
+  Future<void> close() {
     _isClosed = true;
-    await _pending;
-    callWebMethod<JSAny?>(_task, 'close');
-    await _controller.close();
+
+    return _closing ??= _pending
+        .then((_) async {
+          callWebMethod<JSAny?>(_task, 'close');
+          await _controller.close();
+        })
+        .catchError((Object error, StackTrace stackTrace) {
+          // Let a failed close be retried instead of caching the rejection.
+          _closing = null;
+          Error.throwWithStackTrace(error, stackTrace);
+        });
   }
 }
 

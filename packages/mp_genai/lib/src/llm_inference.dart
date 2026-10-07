@@ -18,6 +18,14 @@ final class LlmGenerationChunk {
 
   /// Whether this is the final update.
   final bool isDone;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LlmGenerationChunk && text == other.text && isDone == other.isDone;
+
+  @override
+  int get hashCode => Object.hash(text, isDone);
 }
 
 /// A cancellable in-progress LLM generation.
@@ -82,18 +90,28 @@ final class LlmInference implements MpTask {
     try {
       await session.addQueryChunk(prompt);
       final LlmGeneration generation = await session.generate();
-      // Swallow the error on this branch so a caller that handles `response`
-      // does not also surface an unhandled zone error from the cleanup future.
       unawaited(
-        generation.response
-            .then<void>((_) {}, onError: (Object _, StackTrace _) {})
-            .whenComplete(session.close),
+        generation.response.then<void>(
+          // The caller observes the generation outcome through `response` or
+          // `chunks`; this branch only needs the temporary session released,
+          // and a failed release must not surface as an unhandled zone error.
+          (_) => _closeQuietly(session),
+          onError: (Object _, StackTrace _) => _closeQuietly(session),
+        ),
       );
 
       return generation;
     } on Object {
       await session.close();
       rethrow;
+    }
+  }
+
+  static Future<void> _closeQuietly(LlmSession session) async {
+    try {
+      await session.close();
+    } on Object {
+      // Deliberately ignored: see `generateResponse`.
     }
   }
 

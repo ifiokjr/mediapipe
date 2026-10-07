@@ -1,4 +1,4 @@
-// Run with: dart run examples/bin/core_model_assets.dart
+// Run with: dart run examples/cli/bin/core_model_assets.dart
 //
 // Shows the parts of `mp_core` that every task depends on: model assets and
 // their validation, image containers, audio containers, and the error contract.

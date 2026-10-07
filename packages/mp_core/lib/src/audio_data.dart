@@ -8,7 +8,9 @@ import 'package:meta/meta.dart';
 final class AudioData {
   /// Creates audio data and copies [samples].
   AudioData({required this.channelCount, required this.sampleRateHz, required Float32List samples})
-    : samples = Float32List.fromList(samples) {
+    : samples = _copySamples(channelCount, sampleRateHz, samples);
+
+  static Float32List _copySamples(int channelCount, double sampleRateHz, Float32List samples) {
     if (channelCount <= 0) {
       throw ArgumentError.value(channelCount, 'channelCount', 'must be greater than zero');
     }
@@ -24,6 +26,7 @@ final class AudioData {
         'must be a non-empty multiple of channelCount',
       );
     }
+    return Float32List.fromList(samples);
   }
 
   /// Number of interleaved channels.

@@ -26,8 +26,17 @@ final class WebAudioRuntime implements AudioRuntime {
   /// Locations of the JavaScript module and Wasm files.
   final WebTaskAssets assets;
 
-  @override
-  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async {
+  Future<({JSObject fileset, JSObject module})>? _loaded;
+
+  Future<({JSObject fileset, JSObject module})> _load() =>
+      _loaded ??= _loadOnce().catchError((Object error, StackTrace stackTrace) {
+        // A failed load stays failed for the app's lifetime if it is cached,
+        // so clear it and let the next task creation retry.
+        _loaded = null;
+        Error.throwWithStackTrace(error, stackTrace);
+      });
+
+  Future<({JSObject fileset, JSObject module})> _loadOnce() async {
     final JSObject module = await importWebTaskModule(assets.moduleUri);
     final JSObject resolver = requireWebObject(module, 'FilesetResolver');
     final JSPromise<JSObject> filesetPromise = callWebMethod<JSPromise<JSObject>>(
@@ -35,12 +44,19 @@ final class WebAudioRuntime implements AudioRuntime {
       'forAudioTasks',
       <JSAny?>[assets.wasmRoot.toString().toJS],
     );
-    final JSObject taskClass = requireWebObject(module, 'AudioClassifier');
+
+    return (fileset: await filesetPromise.toDart, module: module);
+  }
+
+  @override
+  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async {
+    final ({JSObject fileset, JSObject module}) loaded = await _load();
+    final JSObject taskClass = requireWebObject(loaded.module, 'AudioClassifier');
     final JSPromise<JSObject> taskPromise = callWebMethod<JSPromise<JSObject>>(
       taskClass,
       'createFromOptions',
       <JSAny?>[
-        await filesetPromise.toDart,
+        loaded.fileset,
         webJsify(<String, Object?>{
           'baseOptions': await resolveWebBaseOptions(options.baseOptions),
           ...webClassifierOptions(options.classifierOptions),
@@ -90,9 +106,26 @@ final class _WebAudioClassifier implements AudioClassifierBackend {
       mono.toJS,
       audio.sampleRateHz.toJS,
     ]);
-    final List<Object?> windows = webDartify(raw)! as List<Object?>;
+    final Object? decoded = webDartify(raw);
+    if (decoded is! List<Object?>) {
+      throw const MpException(
+        MpStatus.internal,
+        'The MediaPipe web runtime returned a malformed classification.',
+        task: 'AudioClassifier',
+      );
+    }
     return AudioClassifierResult(
-      windows.map((Object? value) => webClassificationResult(value! as Map<Object?, Object?>)),
+      decoded.map(
+        (Object? value) => webClassificationResult(
+          value is Map<Object?, Object?>
+              ? value
+              : throw const MpException(
+                  MpStatus.internal,
+                  'The MediaPipe web runtime returned a malformed classification window.',
+                  task: 'AudioClassifier',
+                ),
+        ),
+      ),
     );
   }
 
@@ -107,24 +140,30 @@ final class _WebAudioClassifier implements AudioClassifierBackend {
       );
     }
 
-    return _pending = _pending
-        .then((_) async {
-          final AudioClassifierResult result = await classify(audio);
-          if (_isClosed) return;
-          _controller.add(
-            AudioClassifierResult(
-              result.classifications.map(
-                (ClassificationResult classification) => ClassificationResult(
-                  classifications: classification.classifications,
-                  timestampMs: timestampMs + (classification.timestampMs ?? 0),
-                ),
+    final Future<void> operation = _pending.then((_) async {
+      try {
+        final AudioClassifierResult result = await classify(audio);
+        if (_isClosed) return;
+        _controller.add(
+          AudioClassifierResult(
+            result.classifications.map(
+              (ClassificationResult classification) => ClassificationResult(
+                classifications: classification.classifications,
+                timestampMs: timestampMs + (classification.timestampMs ?? 0),
               ),
             ),
-          );
-        })
-        .catchError((Object error, StackTrace stackTrace) {
-          if (!_isClosed) _controller.addError(error, stackTrace);
-        });
+          ),
+        );
+      } on Object catch (error, stackTrace) {
+        // Report the failure on the results stream for fire-and-forget callers
+        // and surface it on the returned future for awaiting callers.
+        if (!_isClosed) _controller.addError(error, stackTrace);
+        rethrow;
+      }
+    });
+    _pending = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+
+    return operation;
   }
 
   @override

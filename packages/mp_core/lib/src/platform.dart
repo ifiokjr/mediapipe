@@ -26,5 +26,11 @@ enum MpPlatform {
   unknown;
 
   /// Detects the current runtime without importing `dart:io` on web.
-  static MpPlatform get current => detectPlatform();
+  ///
+  /// The result is resolved once and memoized; the host runtime cannot change
+  /// during a process lifetime.
+  static final MpPlatform _current = detectPlatform();
+
+  /// Detects the current runtime without importing `dart:io` on web.
+  static MpPlatform get current => _current;
 }

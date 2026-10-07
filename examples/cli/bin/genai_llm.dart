@@ -1,4 +1,4 @@
-// Run with: dart run examples/bin/genai_llm.dart
+// Run with: dart run examples/cli/bin/genai_llm.dart
 //
 // Constructs an `LlmInference` engine, opens a session, and streams a response.
 //
@@ -8,7 +8,7 @@
 // which keeps it runnable in CI and on every developer machine.
 //
 //   MP_LLM_MODEL=models/gemma-2b-it-cpu-int4.bin \
-//     dart run examples/bin/genai_llm.dart
+//     dart run examples/cli/bin/genai_llm.dart
 
 import 'dart:io';
 
@@ -47,6 +47,27 @@ Future<void> main() async {
     // `response` must be consumed: it also closes the temporary session.
     stdout.writeln('\ncomplete: ${(await generation.response).length} characters');
 
+    stdout.writeln('\n== Cancellation ==');
+    final LlmGeneration cancellable = await engine.generateResponse(
+      'Count slowly from one to one hundred, writing every number as a word.',
+    );
+    int received = 0;
+    try {
+      await for (final LlmGenerationChunk chunk in cancellable.chunks) {
+        received += 1;
+        stdout.write(chunk.text);
+        if (received == 3) {
+          await cancellable.cancel();
+          stdout.write(' [cancel requested]');
+        }
+      }
+    } on MpException catch (error) {
+      // A cancelled generation settles its stream and response with
+      // MpStatus.cancelled instead of pretending to finish normally.
+      if (error.status != MpStatus.cancelled) rethrow;
+    }
+    stdout.writeln('\ncancelled after $received chunks');
+
     stdout.writeln('\n== Stateful session ==');
     final LlmSession session = await engine.createSession();
     try {
@@ -84,6 +105,6 @@ library, so `mp_genai` uses dedicated backends:
 
 Supply a model to run the full example:
 
-  MP_LLM_MODEL=models/gemma-2b-it-cpu-int4.bin dart run examples/bin/genai_llm.dart
+  MP_LLM_MODEL=models/gemma-2b-it-cpu-int4.bin dart run examples/cli/bin/genai_llm.dart
 ''');
 }

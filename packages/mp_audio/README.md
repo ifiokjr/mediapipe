@@ -56,8 +56,9 @@ Streaming mode uses strictly increasing millisecond timestamps and exposes
 results as a Dart stream. The runtime copies caller-owned sample buffers before
 crossing a native or browser boundary.
 
-The example in [`example/`](example/) classifies a synthesized clip and a
-timestamped frame sequence, so it runs without microphone hardware.
+The example at
+[`examples/cli/bin/audio_classification.dart`](../../examples/cli/bin/audio_classification.dart)
+classifies a real speech clip, so it runs without microphone hardware.
 
 ## Current platform contract
 

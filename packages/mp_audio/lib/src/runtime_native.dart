@@ -45,16 +45,19 @@ final class _NativeAudioClassifier implements AudioClassifierBackend {
   _NativeAudioClassifier(this._worker);
 
   final native.NativeTaskIsolate _worker;
-  final StreamController<AudioClassifierResult> _results =
-      StreamController<AudioClassifierResult>.broadcast();
   Future<void> _tail = Future<void>.value();
-  var _closed = false;
+  bool _closed = false;
 
   @override
   bool get isClosed => _closed;
 
   @override
-  Stream<AudioClassifierResult> get results => _results.stream;
+  Stream<AudioClassifierResult> get results => throw const MpException(
+    MpStatus.unimplemented,
+    'Streaming classification requires audioStream mode, which the native runtime rejects at '
+    'creation; use classify in audioClips mode.',
+    task: 'AudioClassifier',
+  );
 
   @override
   Future<AudioClassifierResult> classify(AudioData audio) =>
@@ -71,9 +74,8 @@ final class _NativeAudioClassifier implements AudioClassifierBackend {
   Future<void> close() => _run(() async {
     if (_closed) return;
     _closed = true;
-    await _worker.request<void>(_AudioClose.instance);
+    await _worker.request<void>(const _AudioClose());
     await _worker.dispose();
-    await _results.close();
   });
 
   Future<T> _run<T>(Future<T> Function() action) {
@@ -84,9 +86,7 @@ final class _NativeAudioClassifier implements AudioClassifierBackend {
 }
 
 final class _AudioClose {
-  const _AudioClose._();
-
-  static const _AudioClose instance = _AudioClose._();
+  const _AudioClose();
 }
 
 native.NativeTaskWorkerHandler _createAudioWorker(Object? initialMessage) {

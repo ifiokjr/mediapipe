@@ -60,26 +60,30 @@ streaming, model integrity, and the device-verification design.
 
 ## Working examples
 
-Each package ships a runnable example that creates a real task, runs inference,
-and closes it deterministically. The same entry points are compiled in CI for
-the browser and executed on device, so an example that stops compiling breaks
-the build.
+The CLI examples each create a real task, run inference against a
+digest-pinned public model, and close deterministically; the Flutter demo wires
+the camera path end to end. The same entry points run in CI against the
+built native runtime, so an example that stops working breaks the build.
 
-| Example                      | Demonstrates                                                                |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| `packages/mp_core/example`   | Model assets, image containers, and lifecycle without a runtime             |
-| `packages/mp_vision/example` | Face detection and image classification on a bundled sample image           |
-| `packages/mp_text/example`   | A Flutter app that detects language, classifies, and embeds text            |
-| `packages/mp_audio/example`  | Audio classification over a synthesized clip and a timestamped frame stream |
-| `packages/mp_genai/example`  | LLM session creation, streaming chunks, and cancellation                    |
-| `packages/mp_camera/example` | Camera frame conversion and latest-frame scheduling without a live camera   |
+| Example                                         | Demonstrates                                                                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `examples/cli/bin/core_model_assets.dart`       | Model assets, image and audio containers, and typed failures, runtime-free                     |
+| `examples/cli/bin/vision_face_detection.dart`   | Face detection over a real photograph with boxes and keypoints                                 |
+| `examples/cli/bin/vision_hand_landmarks.dart`   | Hand landmarks, handedness, and world coordinates                                              |
+| `examples/cli/bin/text_language_detection.dart` | Language identification across four languages                                                  |
+| `examples/cli/bin/text_tasks.dart`              | Language detection plus text embedding and cosine similarity                                   |
+| `examples/cli/bin/audio_classification.dart`    | Clip classification and the native streaming contract                                          |
+| `examples/cli/bin/genai_llm.dart`               | LLM session creation, streaming chunks, and cancellation                                       |
+| `examples/device_demo`                          | A live camera app: conversion, monotonic timestamps, latest-frame scheduling, and rep counting |
 
-Run an example directly:
+Run one:
 
 ```sh
-cd packages/mp_text/example
-repo-flutter run
+devenv shell native:build
+dart run examples/cli/bin/vision_face_detection.dart
 ```
+
+See the [examples page]({{ links.docs }}examples/) for the full list.
 
 ## API conventions
 

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:mp_core/mp_core.dart';
+
 /// One failed frame-processing attempt.
 final class LatestFrameFailure<T extends Object> {
   /// Creates a failure for [item].
@@ -59,7 +61,7 @@ final class LatestFrameScheduler<T extends Object> {
   ///
   /// When another item is already waiting, that older waiting item is dropped.
   void submit(T item) {
-    if (_closed) throw StateError('LatestFrameScheduler is closed.');
+    if (_closed) throw MpTaskClosedError('LatestFrameScheduler');
     _submittedCount += 1;
 
     if (_pending != null) _droppedCount += 1;
@@ -92,13 +94,22 @@ final class LatestFrameScheduler<T extends Object> {
         } on Object catch (error, stackTrace) {
           _failedCount += 1;
 
-          _failures.add(LatestFrameFailure<T>(item: item, error: error, stackTrace: stackTrace));
+          _reportFailure(LatestFrameFailure<T>(item: item, error: error, stackTrace: stackTrace));
         }
       }
     } finally {
       _processing = false;
       _idleCompleter?.complete();
       _idleCompleter = null;
+    }
+  }
+
+  void _reportFailure(LatestFrameFailure<T> failure) {
+    try {
+      _failures.add(failure);
+    } on Object {
+      // The synchronous controller runs failure listeners inline; a listener
+      // that throws must not terminate frame processing.
     }
   }
 }

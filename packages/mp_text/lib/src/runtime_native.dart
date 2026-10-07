@@ -248,10 +248,15 @@ LanguageDetectorResult _detectLanguage(int address, String text) {
     return LanguageDetectorResult(
       List<LanguagePrediction>.generate(result.ref.predictions_count, (int index) {
         final native.MpLanguageDetectorPrediction prediction = result.ref.predictions[index];
-        return LanguagePrediction(
-          languageCode: native.nativeString(prediction.language_code) ?? '',
-          probability: prediction.probability,
-        );
+        final String? languageCode = native.nativeString(prediction.language_code);
+        if (languageCode == null) {
+          throw const MpException(
+            MpStatus.dataLoss,
+            'The native language detector returned a prediction without a language code.',
+            task: 'LanguageDetector',
+          );
+        }
+        return LanguagePrediction(languageCode: languageCode, probability: prediction.probability);
       }, growable: false),
     );
   } finally {

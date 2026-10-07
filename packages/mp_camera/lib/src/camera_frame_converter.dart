@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:mp_core/mp_core.dart';
 
 import 'camera_frame.dart';
+import 'rotation_math.dart';
 
 /// Converts `package:camera` image buffers to tightly packed MP images.
 ///
@@ -40,7 +41,7 @@ final class MpCameraFrameConverter {
       image: image,
       timestampMs: timestampMs,
       processingOptions: ImageProcessingOptions(
-        rotationDegrees: _normalizeRotation(rotationDegrees),
+        rotationDegrees: normalizeRotationDegrees(rotationDegrees),
       ),
       mirroredPreview: mirroredPreview,
     );
@@ -59,17 +60,20 @@ final class MpCameraFrameConverter {
     _requireBufferLength(plane, minimumLength: rowStride * image.height, format: 'BGRA8888');
 
     final Uint8List rgba = Uint8List(image.width * image.height * 4);
+    final Uint8List bytes = plane.bytes;
+    final int width = image.width;
+    final int height = image.height;
     int destination = 0;
 
-    for (int y = 0; y < image.height; y += 1) {
+    for (int y = 0; y < height; y += 1) {
       int source = y * rowStride;
 
-      for (int x = 0; x < image.width; x += 1) {
-        final int blue = plane.bytes[source];
-        final int green = plane.bytes[source + 1];
-        final int red = plane.bytes[source + 2];
+      for (int x = 0; x < width; x += 1) {
+        final int blue = bytes[source];
+        final int green = bytes[source + 1];
+        final int red = bytes[source + 2];
 
-        final int alpha = plane.bytes[source + 3];
+        final int alpha = bytes[source + 3];
         rgba[destination] = red;
         rgba[destination + 1] = green;
         rgba[destination + 2] = blue;
@@ -116,17 +120,15 @@ final class MpCameraFrameConverter {
       final int yRow = y * rowStride;
       final int uvRow = yPlaneLength + (y ~/ 2) * rowStride;
 
-      for (int x = 0; x < image.width; x += 1) {
-        final int uv = uvRow + (x & ~1);
-        _writeYuvPixel(
-          rgb,
-          destination,
-          y: plane.bytes[yRow + x],
-          u: plane.bytes[uv + 1],
-          v: plane.bytes[uv],
-        );
+      // NV21 interleaves chroma per pixel pair; sample it once per pair.
+      for (int x = 0; x < image.width; x += 2) {
+        final int uv = uvRow + x;
+        final int u = plane.bytes[uv + 1];
+        final int v = plane.bytes[uv];
+        _writeYuvPixel(rgb, destination, y: plane.bytes[yRow + x], u: u, v: v);
+        _writeYuvPixel(rgb, destination + 3, y: plane.bytes[yRow + x + 1], u: u, v: v);
 
-        destination += 3;
+        destination += 6;
       }
     }
     return MpImage.uint8(
@@ -174,23 +176,30 @@ final class MpCameraFrameConverter {
     );
 
     final Uint8List rgb = Uint8List(image.width * image.height * 3);
-    int destination = 0;
+    final int rowSamples = image.width * 3;
+    final Uint8List yBytes = yPlane.bytes;
+    final Uint8List uBytes = uPlane.bytes;
+    final Uint8List vBytes = vPlane.bytes;
+    final int yRowStride = yPlane.bytesPerRow;
+    final int uRowStride = uPlane.bytesPerRow;
+    final int vRowStride = vPlane.bytesPerRow;
 
     for (int y = 0; y < image.height; y += 1) {
-      final int yRow = y * yPlane.bytesPerRow;
-      final int uvRow = (y ~/ 2) * uPlane.bytesPerRow;
-      final int vRow = (y ~/ 2) * vPlane.bytesPerRow;
+      final int yRow = y * yRowStride;
+      final int uvRow = (y ~/ 2) * uRowStride;
+      final int vRow = (y ~/ 2) * vRowStride;
+      int destination = y * rowSamples;
 
-      for (int x = 0; x < image.width; x += 1) {
-        _writeYuvPixel(
-          rgb,
-          destination,
-          y: yPlane.bytes[yRow + x * yPixelStride],
-          u: uPlane.bytes[uvRow + (x ~/ 2) * uPixelStride],
-          v: vPlane.bytes[vRow + (x ~/ 2) * vPixelStride],
-        );
+      // Dimensions are validated even, so every row is a whole number of
+      // chroma pairs; sample each chroma value once for two luma samples.
+      for (int x = 0; x < image.width; x += 2) {
+        final int chroma = x ~/ 2;
+        final int u = uBytes[uvRow + chroma * uPixelStride];
+        final int v = vBytes[vRow + chroma * vPixelStride];
+        _writeYuvPixel(rgb, destination, y: yBytes[yRow + x * yPixelStride], u: u, v: v);
+        _writeYuvPixel(rgb, destination + 3, y: yBytes[yRow + (x + 1) * yPixelStride], u: u, v: v);
 
-        destination += 3;
+        destination += 6;
       }
     }
     return MpImage.uint8(
@@ -218,9 +227,13 @@ final class MpCameraFrameConverter {
     destination[offset + 2] = _clampByte((298 * luminance + 516 * blueDifference + 128) >> 8);
   }
 
-  static int _clampByte(int value) => value.clamp(0, 255);
+  static int _clampByte(int value) {
+    // Branches avoid the dynamic dispatch of `num.clamp` in this per-pixel path.
+    if (value < 0) return 0;
+    if (value > 255) return 255;
 
-  static int _normalizeRotation(int value) => ((value % 360) + 360) % 360;
+    return value;
+  }
 
   static void _requirePlaneCount(CameraImage image, int count) {
     if (image.planes.length != count) {

@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mp_core/mp_core.dart';
 import 'package:mp_device_demo/playground/tracking_session.dart';
@@ -38,6 +37,32 @@ void main() {
     session.dispose();
     await first;
     await second;
+  });
+
+  test('live mode on an unsupported platform reports the demo fallback', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    final TrackingSession session = TrackingSession();
+    await session.configure(enabled: true, faceMode: false);
+
+    expect(session.status, contains('Live camera requires Android or iOS'));
+    expect(session.status, isNot(contains('UnsupportedError')));
+    expect(session.loading, isFalse);
+    expect(session.camera, isNull);
+    session.dispose();
+  });
+
+  test('statuses surface messages without exception prefixes', () {
+    expect(
+      describeSessionError(StateError('Camera permission denied. Enable it in Settings.')),
+      'Camera permission denied. Enable it in Settings.',
+    );
+    expect(
+      describeSessionError(const MpException(MpStatus.unavailable, 'No camera found.')),
+      'No camera found.',
+    );
+    expect(describeSessionError('plain failure'), 'plain failure');
   });
 }
 

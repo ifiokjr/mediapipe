@@ -65,8 +65,9 @@ Every model, session, chat, pipeline, and generator owns platform resources.
 Call `close()` when it is no longer needed. Unsupported API/platform
 combinations throw an `MpException` with `MpStatus.unimplemented`.
 
-The example in [`example/`](example/) creates a session, streams chunks, and
-demonstrates cancellation.
+The example at
+[`examples/cli/bin/genai_llm.dart`](../../examples/cli/bin/genai_llm.dart)
+creates a session, streams chunks, and demonstrates cancellation.
 
 ## Current qualification
 
