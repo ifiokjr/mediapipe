@@ -39,6 +39,15 @@ final class TaskLifecycle {
 
     return true;
   }
+
+  /// Marks a closed lifecycle open again.
+  ///
+  /// Lets implementations release resources on [close] while keeping the task
+  /// usable, so a failed cleanup can be retried instead of leaking the
+  /// underlying handles behind a permanently closed facade.
+  void reopen() {
+    _isClosed = false;
+  }
 }
 
 /// Validates timestamps for ordered video and live-stream inputs.

@@ -105,6 +105,18 @@ final class TextProofreaderChunk {
 
   /// Final ordered diff segments, populated by the upstream task when done.
   final List<TextCorrection> corrections;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TextProofreaderChunk &&
+          text == other.text &&
+          isDone == other.isDone &&
+          const ListEquality<TextCorrection>().equals(corrections, other.corrections);
+
+  @override
+  int get hashCode =>
+      Object.hash(text, isDone, const ListEquality<TextCorrection>().hash(corrections));
 }
 
 /// Platform implementation used by [TextProofreader].

@@ -63,8 +63,10 @@ For Flutter camera streams, add `mp_camera`. It converts BGRA8888, NV21, and
 stride-aware YUV420 frames, resolves image rotation, and keeps at most the
 newest waiting frame so inference does not accumulate stale camera buffers.
 
-A runnable example lives in [`example/`](example/). It detects faces in a
-bundled image and prints the landmarks.
+Runnable examples live in [`examples/cli`](../../examples/cli):
+`vision_face_detection.dart` detects faces in a real photograph, and
+`vision_hand_landmarks.dart` prints hand landmarks, handedness, and world
+coordinates from the same image.
 
 ## Failure contract
 

@@ -25,7 +25,9 @@ class MotionPlaygroundApp extends StatefulWidget {
 }
 
 class _MotionPlaygroundAppState extends State<MotionPlaygroundApp> {
-  bool _dark = false;
+  // Follow the system brightness until the user toggles the theme.
+  late bool _dark =
+      WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -502,11 +504,7 @@ class _PlaygroundState extends State<_Playground>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            _sectionTitle(
-              context,
-              _faceMode ? '01' : '01',
-              _faceMode ? 'Your alter ego' : 'Pick your move',
-            ),
+            _sectionTitle(context, '01', _faceMode ? 'Your alter ego' : 'Pick your move'),
             const SizedBox(height: 6),
             Text(
               _faceMode

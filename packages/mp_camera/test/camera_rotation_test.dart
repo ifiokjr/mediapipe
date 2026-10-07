@@ -69,5 +69,23 @@ void main() {
       expect(MpCameraRotation.isPreviewMirrored(front), isTrue);
       expect(MpCameraRotation.isPreviewMirrored(back), isFalse);
     });
+
+    test('external cameras follow the back-camera convention', () {
+      const CameraDescription external = CameraDescription(
+        name: 'external',
+        lensDirection: CameraLensDirection.external,
+        sensorOrientation: 90,
+      );
+
+      expect(
+        MpCameraRotation.degrees(
+          external,
+          DeviceOrientation.landscapeLeft,
+          platform: TargetPlatform.android,
+        ),
+        0,
+      );
+      expect(MpCameraRotation.isPreviewMirrored(external), isFalse);
+    });
   });
 }

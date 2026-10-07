@@ -216,7 +216,7 @@ final class ImageGenerator implements MpTask {
     ImageGeneratorCondition? condition,
   }) {
     _lifecycle.ensureOpen();
-    _validateGenerationInput(prompt, iterations);
+    _validateGenerationInput(prompt, iterations, seed: seed);
     return _backend.generate(prompt, iterations: iterations, seed: seed, condition: condition);
   }
 
@@ -228,7 +228,7 @@ final class ImageGenerator implements MpTask {
     ImageGeneratorCondition? condition,
   }) {
     _lifecycle.ensureOpen();
-    _validateGenerationInput(prompt, iterations);
+    _validateGenerationInput(prompt, iterations, seed: seed);
     return _backend.setInputs(prompt, iterations: iterations, seed: seed, condition: condition);
   }
 
@@ -253,13 +253,17 @@ final class ImageGenerator implements MpTask {
   }
 }
 
-void _validateGenerationInput(String prompt, int iterations) {
+void _validateGenerationInput(String prompt, int iterations, {required int seed}) {
   if (prompt.trim().isEmpty) {
     throw ArgumentError.value(prompt, 'prompt', 'must not be empty');
   }
 
   if (iterations <= 0) {
     throw ArgumentError.value(iterations, 'iterations', 'must be positive');
+  }
+
+  if (seed < 0) {
+    throw ArgumentError.value(seed, 'seed', 'must not be negative');
   }
 }
 

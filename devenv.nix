@@ -287,7 +287,7 @@ in
     "test:examples" = {
       exec = ''
         set -euo pipefail
-        for example in core_model_assets vision_face_detection text_language_detection text_tasks audio_classification; do
+        for example in core_model_assets vision_face_detection vision_hand_landmarks text_language_detection text_tasks audio_classification; do
           (cd examples/cli && repo-dart run "bin/''${example}.dart" >/dev/null)
         done
       '';

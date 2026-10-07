@@ -178,7 +178,7 @@ final class TrackingSession extends ChangeNotifier {
         });
         status = 'Find your light. Step into frame.';
       } on Object catch (error) {
-        status = 'Could not start: $error';
+        status = 'Could not start: ${describeSessionError(error)}';
         try {
           await _release();
         } on Object catch (cleanupError) {
@@ -231,7 +231,7 @@ final class TrackingSession extends ChangeNotifier {
   void _frameError(Object error) {
     pose = <NormalizedLandmark>[];
     face = <NormalizedLandmark>[];
-    status = 'Tracking interrupted: $error';
+    status = 'Tracking interrupted: ${describeSessionError(error)}';
     _notify();
   }
 
@@ -299,6 +299,26 @@ final class TrackingSession extends ChangeNotifier {
     );
     super.dispose();
   }
+}
+
+/// Renders [error] for the status line without implementation-detail prefixes.
+///
+/// `StateError('Camera permission denied…')` should read as the message, not
+/// "Bad state: Camera permission denied…".
+String describeSessionError(Object error) {
+  if (error is MpException) return error.message;
+  final String text = error.toString();
+
+  for (final String prefix in const <String>[
+    'Bad state: ',
+    'Invalid argument(s): ',
+    'Exception: ',
+    'FormatException: ',
+  ]) {
+    if (text.startsWith(prefix)) return text.substring(prefix.length);
+  }
+
+  return text;
 }
 
 /// Rotates pixels before inference so landmark, angle, and preview coordinates

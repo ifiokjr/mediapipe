@@ -30,6 +30,28 @@ final class WebGenAiRuntime implements GenAiRuntime {
   /// Locations of the JavaScript module and Wasm files.
   final WebTaskAssets assets;
 
+  Future<({JSObject fileset, JSObject module})>? _loaded;
+
+  Future<({JSObject fileset, JSObject module})> _load() =>
+      _loaded ??= _loadOnce().catchError((Object error, StackTrace stackTrace) {
+        // A failed load stays failed for the app's lifetime if it is cached,
+        // so clear it and let the next task creation retry.
+        _loaded = null;
+        Error.throwWithStackTrace(error, stackTrace);
+      });
+
+  Future<({JSObject fileset, JSObject module})> _loadOnce() async {
+    final JSObject module = await importWebTaskModule(assets.moduleUri);
+    final JSObject resolver = requireWebObject(module, 'FilesetResolver');
+    final JSPromise<JSObject> filesetPromise = callWebMethod<JSPromise<JSObject>>(
+      resolver,
+      'forGenAiTasks',
+      <JSAny?>[assets.wasmRoot.toString().toJS],
+    );
+
+    return (fileset: await filesetPromise.toDart, module: module);
+  }
+
   @override
   Future<FunctionCallingBackend> createGenerativeModel(GenerativeModelOptions options) async =>
       throw const MpException(
@@ -56,19 +78,13 @@ final class WebGenAiRuntime implements GenAiRuntime {
 
   @override
   Future<LlmInferenceBackend> createLlmInference(LlmInferenceOptions options) async {
-    final JSObject module = await importWebTaskModule(assets.moduleUri);
-    final JSObject resolver = requireWebObject(module, 'FilesetResolver');
-    final JSPromise<JSObject> filesetPromise = callWebMethod<JSPromise<JSObject>>(
-      resolver,
-      'forGenAiTasks',
-      <JSAny?>[assets.wasmRoot.toString().toJS],
-    );
-    final JSObject taskClass = requireWebObject(module, 'LlmInference');
+    final ({JSObject fileset, JSObject module}) loaded = await _load();
+    final JSObject taskClass = requireWebObject(loaded.module, 'LlmInference');
     final JSPromise<JSObject> taskPromise = callWebMethod<JSPromise<JSObject>>(
       taskClass,
       'createFromOptions',
       <JSAny?>[
-        await filesetPromise.toDart,
+        loaded.fileset,
         webJsify(<String, Object?>{
           'baseOptions': await _llmBaseOptions(options),
           'maxTokens': options.maxTokens,

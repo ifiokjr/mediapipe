@@ -98,7 +98,9 @@ counter.
   `playground_app.dart` composes the responsive interface.
 
 The earlier face-detector and motion telemetry example remains available with
-`repo-flutter run -t lib/device_telemetry.dart` from this directory.
+`repo-flutter run -t lib/device_telemetry.dart` from this directory. That entry
+point reads motion sensors directly, so it needs a physical device; the
+playground above also runs in the browser with its synthetic preview.
 
 ## Checks
 

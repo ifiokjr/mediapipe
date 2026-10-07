@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mp_core/mp_core.dart';
 
@@ -427,7 +428,26 @@ class TrackingOverlay extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant TrackingOverlay oldDelegate) => true;
+  bool shouldRepaint(covariant TrackingOverlay oldDelegate) =>
+      oldDelegate.style != style ||
+      oldDelegate.accent != accent ||
+      oldDelegate.mirrored != mirrored ||
+      oldDelegate.showPoints != showPoints ||
+      oldDelegate.opacity != opacity ||
+      !setEquals(oldDelegate.accessories, accessories) ||
+      !_sameLandmarks(oldDelegate.pose, pose) ||
+      !_sameLandmarks(oldDelegate.face, face);
+
+  /// Length-and-value comparison that avoids allocating while checking.
+  static bool _sameLandmarks(List<NormalizedLandmark> a, List<NormalizedLandmark> b) {
+    if (a.length != b.length) return false;
+
+    for (int index = 0; index < a.length; index += 1) {
+      if (!identical(a[index], b[index]) && a[index] != b[index]) return false;
+    }
+
+    return true;
+  }
 }
 
 final class _V3 {

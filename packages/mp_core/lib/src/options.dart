@@ -3,6 +3,9 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+const ListEquality<int> _intListEquality = ListEquality<int>();
+const ListEquality<String> _stringListEquality = ListEquality<String>();
+
 /// The delegate requested for task execution.
 enum MpDelegate {
   /// Execute with the CPU backend.
@@ -101,10 +104,13 @@ final class ModelAssetPath extends ModelAsset {
 @immutable
 final class ModelAssetBytes extends ModelAsset {
   /// Creates an immutable copy of [bytes].
-  ModelAssetBytes(Uint8List bytes, {this.name}) : bytes = Uint8List.fromList(bytes), super._() {
+  ModelAssetBytes(Uint8List bytes, {this.name}) : bytes = _copyBytes(bytes), super._();
+
+  static Uint8List _copyBytes(Uint8List bytes) {
     if (bytes.isEmpty) {
       throw ArgumentError.value(bytes, 'bytes', 'must not be empty');
     }
+    return Uint8List.fromList(bytes);
   }
 
   /// The model bytes.
@@ -116,12 +122,10 @@ final class ModelAssetBytes extends ModelAsset {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ModelAssetBytes &&
-          name == other.name &&
-          const ListEquality<int>().equals(bytes, other.bytes);
+      other is ModelAssetBytes && name == other.name && _intListEquality.equals(bytes, other.bytes);
 
   @override
-  int get hashCode => Object.hash(name, const ListEquality<int>().hash(bytes));
+  int get hashCode => Object.hash(name, _intListEquality.hash(bytes));
 }
 
 /// A model retrieved from a URI by the active platform backend.
@@ -200,7 +204,8 @@ final class ClassifierOptions {
       throw ArgumentError.value(maxResults, 'maxResults', 'must be greater than zero');
     }
 
-    if (scoreThreshold != null && (scoreThreshold! < 0 || scoreThreshold! > 1)) {
+    if (scoreThreshold != null &&
+        (!scoreThreshold!.isFinite || scoreThreshold! < 0 || scoreThreshold! > 1)) {
       throw ArgumentError.value(scoreThreshold, 'scoreThreshold', 'must be between 0 and 1');
     }
 
@@ -231,16 +236,16 @@ final class ClassifierOptions {
           displayNamesLocale == other.displayNamesLocale &&
           maxResults == other.maxResults &&
           scoreThreshold == other.scoreThreshold &&
-          const ListEquality<String>().equals(categoryAllowlist, other.categoryAllowlist) &&
-          const ListEquality<String>().equals(categoryDenylist, other.categoryDenylist);
+          _stringListEquality.equals(categoryAllowlist, other.categoryAllowlist) &&
+          _stringListEquality.equals(categoryDenylist, other.categoryDenylist);
 
   @override
   int get hashCode => Object.hash(
     displayNamesLocale,
     maxResults,
     scoreThreshold,
-    const ListEquality<String>().hash(categoryAllowlist),
-    const ListEquality<String>().hash(categoryDenylist),
+    _stringListEquality.hash(categoryAllowlist),
+    _stringListEquality.hash(categoryDenylist),
   );
 }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -202,7 +203,7 @@ class _LiveInferencePageState extends State<LiveInferencePage> {
     return 'flat';
   }
 
-  double _magnitude(double x, double y, double z) => (x * x + y * y + z * z) * 0.5;
+  double _magnitude(double x, double y, double z) => math.sqrt(x * x + y * y + z * z);
 
   void _onFrame(CameraImage cameraImage) {
     final CameraController? controller = _controller;

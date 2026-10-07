@@ -6,7 +6,7 @@ import 'dart:isolate';
 import 'package:mp_core/mp_core.dart';
 // The generated bindings expose their own MpStatus, so hide it and keep the
 // hand-written status enum used by the public API.
-import 'package:mp_core/native.dart' hide MpStatus;
+import 'package:mp_core/native.dart';
 import 'package:test/test.dart';
 
 void main() {

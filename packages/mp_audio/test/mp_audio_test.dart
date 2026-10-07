@@ -35,6 +35,7 @@ void main() {
 
     final Future<AudioClassifierResult> nextResult = classifier.results.first;
     await classifier.classifyAsync(_audio(), 5);
+    expect(() => classifier.classifyAsync(_audio(), -1), throwsArgumentError);
     runtime.backend.controller.add(AudioClassifierResult(const <ClassificationResult>[]));
 
     expect(await nextResult, AudioClassifierResult(const <ClassificationResult>[]));
@@ -55,6 +56,22 @@ void main() {
 
     expect(runtime.backend.closeCount, 1);
     expect(() => classifier.classify(_audio()), throwsA(isA<MpTaskClosedError>()));
+  });
+
+  test('unsupported runtimes fail honestly', () async {
+    await expectLater(
+      AudioClassifier.create(
+        AudioClassifierOptions(baseOptions: _baseOptions()),
+        runtime: const UnsupportedAudioRuntime(MpPlatform.unknown),
+      ),
+      throwsA(
+        isA<MpException>().having(
+          (MpException error) => error.status,
+          'status',
+          MpStatus.unimplemented,
+        ),
+      ),
+    );
   });
 }
 

@@ -9,9 +9,41 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:mp_core/mp_core.dart';
+
+/// Sentences in four languages shared by the text examples.
+const List<String> sampleSentences = <String>[
+  'This sentence is written in English.',
+  'Bonjour tout le monde, comment allez-vous ?',
+  'Guten Tag, wie geht es Ihnen heute?',
+  'こんにちは、今日はいい天気ですね。',
+];
+
+/// Formats a category the way the examples print it.
+String formatCategory(Category category) =>
+    '${category.displayName ?? category.categoryName ?? '#${category.index}'} '
+    '${category.score.toStringAsFixed(3)}';
+
+/// Runs an example [body] with uniform CLI error handling.
+///
+/// Every example script funnels through this wrapper so a failed download,
+/// digest mismatch, or task failure prints one clear message and exits with a
+/// non-zero status instead of an unhandled async stack trace.
+Future<void> runExample(String name, Future<void> Function() body) async {
+  try {
+    await body();
+  } on MpException catch (error) {
+    stderr.writeln('$name failed: $error');
+    exitCode = 1;
+  } on Object catch (error, stackTrace) {
+    stderr.writeln('$name failed unexpectedly: $error');
+    stderr.writeln(stackTrace.toString().split('\n').take(8).join('\n'));
+    exitCode = 1;
+  }
+}
 
 /// A pinned test asset.
 final class MpExampleAsset {
@@ -26,9 +58,6 @@ final class MpExampleAsset {
 
   /// The lowercase SHA-256 digest of the downloaded bytes.
   final String sha256;
-
-  /// The asset as a digest-verified [ModelAsset].
-  ModelAsset get modelAsset => ModelAsset.uri(Uri.parse(url), sha256: sha256);
 }
 
 const String _vision = 'https://storage.googleapis.com/mediapipe-assets/tasks/testdata/vision/';
@@ -141,7 +170,9 @@ final class MpAssetCache {
   /// Returns the bytes for [asset], downloading and caching them on first use.
   ///
   /// The digest is verified here rather than left to the runtime so an example
-  /// fails with the expected and actual hashes instead of a task-creation error.
+  /// fails with the expected and actual hashes instead of a task-creation
+  /// error. Cached files are re-verified so a corrupted cache cannot feed
+  /// unreviewed bytes to a model.
   Future<Uint8List> bytes(MpExampleAsset asset, {http.Client? client}) async {
     final Uint8List? cached = _memory[asset.url];
     if (cached != null) return cached;
@@ -161,20 +192,26 @@ final class MpAssetCache {
           );
         }
         result = response.bodyBytes;
-        directory.createSync(recursive: true);
-        file.writeAsBytesSync(result, flush: true);
       } finally {
         if (client == null) httpClient.close();
       }
+    }
+    final String actual = crypto.sha256.convert(result).toString();
+    if (actual != asset.sha256) {
+      throw MpException(
+        MpStatus.dataLoss,
+        '${asset.name} digest mismatch: expected ${asset.sha256}, got $actual.',
+      );
+    }
+    if (!file.existsSync()) {
+      directory.createSync(recursive: true);
+      file.writeAsBytesSync(result, flush: true);
     }
     _memory[asset.url] = result;
     return result;
   }
 
-  /// Returns a digest-verified [ModelAsset] backed by the downloaded bytes.
-  ///
-  /// The runtime re-verifies the digest when it loads the model, so this only
-  /// needs to hand over the bytes.
+  /// Returns a [ModelAsset] backed by the digest-verified downloaded bytes.
   Future<ModelAsset> model(MpExampleAsset asset, {http.Client? client}) async {
     final Uint8List data = await bytes(asset, client: client);
     return ModelAsset.bytes(data, name: asset.name);
@@ -187,7 +224,13 @@ final class MpAssetCache {
 /// whatever JPEG or PNG the asset contains into 8-bit sRGB. Set [width] and
 /// [height] to resize; classifier models usually require a fixed input size.
 MpImage mpImageFromBytes(Uint8List bytes, {int? width, int? height}) {
-  img.Image? decoded = img.decodeImage(bytes);
+  img.Image? decoded;
+  try {
+    decoded = img.decodeImage(bytes);
+  } on Object {
+    // Format probes can throw on truncated buffers; treat both outcomes alike.
+    decoded = null;
+  }
   if (decoded == null) {
     throw const MpException(MpStatus.invalidArgument, 'The example image could not be decoded.');
   }

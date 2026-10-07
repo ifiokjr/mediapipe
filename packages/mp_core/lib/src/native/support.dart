@@ -11,6 +11,9 @@ import 'bindings.g.dart' as bindings;
 
 const int _maximumRemoteModelBytes = 512 * 1024 * 1024;
 
+const String _unknownImageFormatMessage =
+    'The native task returned an image with an unknown format.';
+
 /// Resolves URI-backed model assets before crossing the native ABI.
 Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
   if (asset case ModelAssetUri(:final uri, sha256: final expectedSha256)) {
@@ -93,7 +96,7 @@ final class NativeScope {
     if (values.isEmpty) return ffi.nullptr;
     final ffi.Pointer<ffi.Pointer<ffi.Char>> result = _arena<ffi.Pointer<ffi.Char>>(values.length);
 
-    for (var index = 0; index < values.length; index += 1) {
+    for (int index = 0; index < values.length; index += 1) {
       result[index] = string(values[index]);
     }
 
@@ -329,17 +332,6 @@ List<Category> categoriesFromNative(bindings.MpCategories value) => List<Categor
   growable: false,
 );
 
-/// Converts one native classifications head before its owner is released.
-Classifications classificationsFromNative(bindings.MpClassifications value) => Classifications(
-  categories: List<Category>.generate(
-    value.categories_count,
-    (int index) => categoryFromNative(value.categories[index]),
-    growable: false,
-  ),
-  headIndex: value.head_index,
-  headName: nativeString(value.head_name),
-);
-
 /// Converts a native detection result before its owner is released.
 DetectionResult detectionResultFromNative(bindings.MpDetectionResult value, {int? timestampMs}) =>
     DetectionResult(
@@ -405,13 +397,13 @@ List<Landmark> landmarksFromNative(bindings.MpLandmarks value) =>
 MpMatrix matrixFromNative(bindings.MpMatrix value) {
   final Float32List rowMajor = Float32List(value.rows * value.cols);
 
-  for (var column = 0; column < value.cols; column += 1) {
-    for (var row = 0; row < value.rows; row += 1) {
+  for (int column = 0; column < value.cols; column += 1) {
+    for (int row = 0; row < value.rows; row += 1) {
       rowMajor[row * value.cols + column] = value.data[column * value.rows + row];
     }
   }
 
-  return MpMatrix(rows: value.rows, columns: value.cols, values: rowMajor);
+  return MpMatrix.adopt(rows: value.rows, columns: value.cols, values: rowMajor);
 }
 
 /// Copies a native image into an immutable Dart image.
@@ -460,7 +452,7 @@ MpImage imageFromNative(bindings.MpImagePtr image, {String? task}) {
       ),
       bindings.MpImageFormat.kMpImageFormatUnknown => throw MpException(
         MpStatus.dataLoss,
-        'The native task returned an image with an unknown format.',
+        _unknownImageFormatMessage,
         task: task,
       ),
     };
@@ -480,10 +472,11 @@ MpImage _uint8ImageFromNative(
 ) {
   final ffi.Pointer<ffi.Pointer<ffi.Uint8>> output = scope.allocator<ffi.Pointer<ffi.Uint8>>();
   scope.check(bindings.MpImageDataUint8(image, output, error), error);
-  return MpImage.uint8(
+  return MpImageUint8.adopt(
     width: width,
     height: height,
     format: format,
+    // Copy out of native memory once; the adopt constructor takes ownership.
     data: Uint8List.fromList(output.value.asTypedList(samples)),
   );
 }
@@ -499,7 +492,7 @@ MpImage _uint16ImageFromNative(
 ) {
   final ffi.Pointer<ffi.Pointer<ffi.Uint16>> output = scope.allocator<ffi.Pointer<ffi.Uint16>>();
   scope.check(bindings.MpImageDataUint16(image, output, error), error);
-  return MpImage.uint16(
+  return MpImageUint16.adopt(
     width: width,
     height: height,
     format: format,
@@ -518,7 +511,7 @@ MpImage _floatImageFromNative(
 ) {
   final ffi.Pointer<ffi.Pointer<ffi.Float>> output = scope.allocator<ffi.Pointer<ffi.Float>>();
   scope.check(bindings.MpImageDataFloat32(image, output, error), error);
-  return MpImage.float32(
+  return MpImageFloat32.adopt(
     width: width,
     height: height,
     format: format,
@@ -532,13 +525,13 @@ EmbeddingResult embeddingResultFromNative(bindings.MpEmbeddingResult value) {
     final bindings.MpEmbedding embedding = value.embeddings[index];
     final String? headName = nativeString(embedding.head_name);
     if (embedding.float_embedding != ffi.nullptr) {
-      return Embedding.float(
+      return Embedding.floatAdopted(
         Float32List.fromList(embedding.float_embedding.asTypedList(embedding.values_count)),
         headIndex: embedding.head_index,
         headName: headName,
       );
     }
-    return Embedding.quantized(
+    return Embedding.quantizedAdopted(
       Uint8List.fromList(
         embedding.quantized_embedding.cast<ffi.Uint8>().asTypedList(embedding.values_count),
       ),
@@ -586,7 +579,7 @@ MpImageFormat _dartImageFormat(bindings.MpImageFormat format) => switch (format)
   bindings.MpImageFormat.kMpImageFormatVec32F4 => MpImageFormat.float32x4,
   bindings.MpImageFormat.kMpImageFormatUnknown => throw const MpException(
     MpStatus.dataLoss,
-    'The native task returned an image with an unknown format.',
+    _unknownImageFormatMessage,
   ),
 };
 

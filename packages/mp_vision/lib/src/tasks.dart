@@ -13,12 +13,14 @@ abstract base class _VisionTask<T> implements MpTask {
   final VisionTaskBackend<T> _backend;
   final TaskLifecycle _lifecycle;
   final TimestampTracker _timestamps = TimestampTracker();
+  Future<void>? _closeFuture;
 
   @override
   bool get isClosed => _lifecycle.isClosed;
 
   Stream<VisionLiveResult<T>> get liveResults {
     _lifecycle.ensureOpen();
+    _requireMode(VisionRunningMode.liveStream, 'live results');
 
     return _backend.results;
   }
@@ -37,9 +39,14 @@ abstract base class _VisionTask<T> implements MpTask {
   ) {
     _lifecycle.ensureOpen();
     _requireMode(VisionRunningMode.video, 'video processing');
-    _timestamps.add(timestampMs);
 
-    return _backend.processVideo(image, timestampMs, processingOptions);
+    // Record the timestamp only after the backend accepts the frame so a
+    // rejected frame can be retried with the same timestamp.
+    return _backend.processVideo(image, timestampMs, processingOptions).then((T result) {
+      _timestamps.add(timestampMs);
+
+      return result;
+    });
   }
 
   Future<void> processLive(
@@ -49,9 +56,10 @@ abstract base class _VisionTask<T> implements MpTask {
   ) {
     _lifecycle.ensureOpen();
     _requireMode(VisionRunningMode.liveStream, 'live-stream processing');
-    _timestamps.add(timestampMs);
 
-    return _backend.processLive(image, timestampMs, processingOptions);
+    return _backend.processLive(image, timestampMs, processingOptions).then((_) {
+      _timestamps.add(timestampMs);
+    });
   }
 
   void _requireMode(VisionRunningMode expected, String operation) {
@@ -63,9 +71,16 @@ abstract base class _VisionTask<T> implements MpTask {
   }
 
   @override
-  Future<void> close() async {
-    if (!_lifecycle.markClosed()) return;
-    await _backend.close();
+  Future<void> close() {
+    if (!_lifecycle.markClosed()) return _closeFuture ?? Future<void>.value();
+
+    return _closeFuture = _backend.close().catchError((Object error, StackTrace stackTrace) {
+      // Reopen the facade so the failed cleanup can be retried instead of
+      // leaking the backend's isolate and native handles forever.
+      _closeFuture = null;
+      _lifecycle.reopen();
+      Error.throwWithStackTrace(error, stackTrace);
+    });
   }
 }
 
@@ -82,7 +97,8 @@ final class FaceDetector extends _VisionTask<DetectionResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<DetectionResult>> get results => liveResults;
 
   /// Detects faces in an unrelated still [image].
@@ -122,7 +138,8 @@ final class FaceLandmarker extends _VisionTask<FaceLandmarkerResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<FaceLandmarkerResult>> get results => liveResults;
 
   /// Detects facial landmarks in an unrelated still [image].
@@ -164,7 +181,8 @@ final class GestureRecognizer extends _VisionTask<GestureRecognizerResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<GestureRecognizerResult>> get results => liveResults;
 
   /// Recognizes gestures in an unrelated still [image].
@@ -206,7 +224,8 @@ final class HandLandmarker extends _VisionTask<HandLandmarkerResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<HandLandmarkerResult>> get results => liveResults;
 
   /// Detects hand landmarks in an unrelated still [image].
@@ -248,7 +267,8 @@ final class HolisticLandmarker extends _VisionTask<HolisticLandmarkerResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<HolisticLandmarkerResult>> get results => liveResults;
 
   /// Detects holistic landmarks in an unrelated still [image].
@@ -290,7 +310,8 @@ final class ImageClassifier extends _VisionTask<ClassificationResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<ClassificationResult>> get results => liveResults;
 
   /// Classifies an unrelated still [image].
@@ -332,7 +353,8 @@ final class ImageEmbedder extends _VisionTask<EmbeddingResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<EmbeddingResult>> get results => liveResults;
 
   /// Extracts embeddings from an unrelated still [image].
@@ -372,7 +394,8 @@ final class ImageSegmenter extends _VisionTask<ImageSegmenterResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<ImageSegmenterResult>> get results => liveResults;
 
   /// Segments an unrelated still [image].
@@ -402,6 +425,7 @@ final class InteractiveSegmenter implements MpTask {
 
   final InteractiveSegmenterBackend _backend;
   final TaskLifecycle _lifecycle = TaskLifecycle('InteractiveSegmenter');
+  Future<void>? _closeFuture;
 
   /// Creates an interactive segmenter using [runtime], or the platform adapter.
   static Future<InteractiveSegmenter> create(
@@ -425,9 +449,14 @@ final class InteractiveSegmenter implements MpTask {
   }
 
   @override
-  Future<void> close() async {
-    if (!_lifecycle.markClosed()) return;
-    await _backend.close();
+  Future<void> close() {
+    if (!_lifecycle.markClosed()) return _closeFuture ?? Future<void>.value();
+
+    return _closeFuture = _backend.close().catchError((Object error, StackTrace stackTrace) {
+      _closeFuture = null;
+      _lifecycle.reopen();
+      Error.throwWithStackTrace(error, stackTrace);
+    });
   }
 }
 
@@ -449,7 +478,8 @@ final class ObjectDetector extends _VisionTask<DetectionResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<DetectionResult>> get results => liveResults;
 
   /// Detects objects in an unrelated still [image].
@@ -489,7 +519,8 @@ final class PoseLandmarker extends _VisionTask<PoseLandmarkerResult> {
   ///
   /// Subscribe before submitting the first frame. The stream is broadcast with
   /// no replay buffer, so a result that is emitted while no listener is attached
-  /// is dropped rather than retained.
+  /// is dropped rather than retained. Processing failures are reported here and
+  /// on the future returned by the submitting method.
   Stream<VisionLiveResult<PoseLandmarkerResult>> get results => liveResults;
 
   /// Detects pose landmarks in an unrelated still [image].

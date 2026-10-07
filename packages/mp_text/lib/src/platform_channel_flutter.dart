@@ -78,7 +78,8 @@ Future<_ResolvedModelFile> _resolveModelFile(ModelAsset asset) async {
       final String safeName = rawName.replaceAll(RegExp('[^A-Za-z0-9._-]'), '_');
       final File file = File('${directory.path}${Platform.pathSeparator}$safeName');
       try {
-        file.writeAsBytesSync(bytes, flush: true);
+        // Async I/O keeps multi-hundred-megabyte model writes off the UI isolate.
+        await file.writeAsBytes(bytes, flush: true);
         return _ResolvedModelFile(file.path, directory);
       } on Object {
         directory.deleteSync(recursive: true);

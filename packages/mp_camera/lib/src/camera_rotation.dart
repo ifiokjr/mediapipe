@@ -2,6 +2,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'rotation_math.dart';
+
 /// Resolves camera sensor and device orientation into MP image rotation.
 ///
 /// Android camera buffers need device-orientation compensation. iOS camera
@@ -23,19 +25,22 @@ final class MpCameraRotation {
     TargetPlatform? platform,
   }) {
     final TargetPlatform target = platform ?? defaultTargetPlatform;
-    final int sensor = _normalize(camera.sensorOrientation);
+    final int sensor = normalizeRotationDegrees(camera.sensorOrientation);
     if (target != TargetPlatform.android) return sensor;
 
-    final int device = _deviceDegrees[orientation]!;
+    final int? device = _deviceDegrees[orientation];
+    if (device == null) {
+      throw ArgumentError.value(orientation.name, 'orientation', 'is not a known orientation');
+    }
     return switch (camera.lensDirection) {
-      CameraLensDirection.front => _normalize(sensor + device),
-      CameraLensDirection.back || CameraLensDirection.external => _normalize(sensor - device),
+      // External webcams report the same sensor convention as back cameras.
+      CameraLensDirection.front => normalizeRotationDegrees(sensor + device),
+      CameraLensDirection.back ||
+      CameraLensDirection.external => normalizeRotationDegrees(sensor - device),
     };
   }
 
   /// Whether a camera preview is conventionally mirrored.
   static bool isPreviewMirrored(CameraDescription camera) =>
       camera.lensDirection == CameraLensDirection.front;
-
-  static int _normalize(int value) => ((value % 360) + 360) % 360;
 }

@@ -55,8 +55,8 @@ final class NativeTaskIsolate {
   final List<StreamSubscription<Object?>> _lifecycleSubscriptions;
   final SendPort _commands;
   final Map<int, Completer<Object?>> _pending = <int, Completer<Object?>>{};
-  var _nextRequestId = 0;
-  var _disposed = false;
+  int _nextRequestId = 0;
+  bool _disposed = false;
 
   /// Starts a worker with [factory] and its sendable [initialMessage].
   static Future<NativeTaskIsolate> spawn({
@@ -98,34 +98,39 @@ final class NativeTaskIsolate {
         earlyTermination = error;
       }
     });
-    final Isolate isolate = await Isolate.spawn<_NativeTaskBootstrap>(
-      _runNativeTaskWorker,
-      _NativeTaskBootstrap(responses.sendPort, factory, initialMessage),
-      debugName: debugName,
-      onError: errors.sendPort,
-      onExit: exits.sendPort,
-    );
+    Future<void> teardownWorker(Isolate? isolate) async {
+      isolate?.kill(priority: Isolate.immediate);
+      await responseSubscription.cancel();
+      await errorSubscription.cancel();
+      await exitSubscription.cancel();
+      responses.close();
+      errors.close();
+      exits.close();
+    }
+
+    final Isolate isolate;
+    try {
+      isolate = await Isolate.spawn<_NativeTaskBootstrap>(
+        _runNativeTaskWorker,
+        _NativeTaskBootstrap(responses.sendPort, factory, initialMessage),
+        debugName: debugName,
+        onError: errors.sendPort,
+        onExit: exits.sendPort,
+      );
+    } on Object {
+      // `Isolate.spawn` itself failed; nothing can ever deliver on these ports.
+      await teardownWorker(null);
+      rethrow;
+    }
     late final _NativeTaskReady handshake;
     try {
       handshake = await ready.future;
     } on Object {
-      isolate.kill(priority: Isolate.immediate);
-      await responseSubscription.cancel();
-      await errorSubscription.cancel();
-      await exitSubscription.cancel();
-      responses.close();
-      errors.close();
-      exits.close();
+      await teardownWorker(isolate);
       rethrow;
     }
     if (handshake.error case final Object error) {
-      isolate.kill(priority: Isolate.immediate);
-      await responseSubscription.cancel();
-      await errorSubscription.cancel();
-      await exitSubscription.cancel();
-      responses.close();
-      errors.close();
-      exits.close();
+      await teardownWorker(isolate);
       Error.throwWithStackTrace(nativeTaskFailure(error), handshake.stackTrace ?? StackTrace.empty);
     }
     final NativeTaskIsolate result = NativeTaskIsolate._(
@@ -178,10 +183,9 @@ final class NativeTaskIsolate {
 
   void _handleResponse(Object? message) {
     if (message is! _NativeTaskResponse) {
-      for (final Completer<Object?> pending in _pending.values) {
-        pending.completeError(StateError('Native task worker returned an invalid response.'));
-      }
-      _pending.clear();
+      // A malformed response means the worker protocol is broken; fail every
+      // pending request, reject new ones, and stop the unresponsive isolate.
+      _handleTermination(StateError('Native task worker returned an invalid response.'));
       return;
     }
     final Completer<Object?>? completer = _pending.remove(message.requestId);
@@ -200,7 +204,10 @@ final class NativeTaskIsolate {
       pending.completeError(error);
     }
     _pending.clear();
-    unawaited(_releaseResources(kill: false));
+    // Kill even when termination came from the error port: the worker may
+    // still be alive with an open command port. An exit-triggered call is a
+    // no-op because the isolate is already gone.
+    unawaited(_releaseResources(kill: true));
   }
 }
 

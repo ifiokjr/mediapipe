@@ -105,6 +105,110 @@ void main() {
         () => MpCameraFrameConverter.convert(image, timestampMs: -1, rotationDegrees: 0),
         throwsArgumentError,
       );
+      expect(
+        () => MpCameraFrameConverter.convert(image, timestampMs: 0, rotationDegrees: 45),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects malformed plane layouts with descriptive errors', () {
+      final CameraImage oddNv21 = _cameraImage(
+        width: 3,
+        height: 2,
+        format: ImageFormatGroup.nv21,
+        planes: [
+          _plane(<int>[0], bytesPerRow: 3, bytesPerPixel: 1),
+        ],
+      );
+      expect(
+        () => MpCameraFrameConverter.convert(oddNv21, timestampMs: 0, rotationDegrees: 0),
+        throwsStateError,
+      );
+
+      final CameraImage oddYuv = _cameraImage(
+        width: 3,
+        height: 2,
+        format: ImageFormatGroup.yuv420,
+        planes: [
+          _plane(<int>[0], bytesPerRow: 3, bytesPerPixel: 1),
+          _plane(<int>[0], bytesPerRow: 2, bytesPerPixel: 1),
+          _plane(<int>[0], bytesPerRow: 2, bytesPerPixel: 1),
+        ],
+      );
+      expect(
+        () => MpCameraFrameConverter.convert(oddYuv, timestampMs: 0, rotationDegrees: 0),
+        throwsStateError,
+      );
+
+      final CameraImage wrongPlaneCount = _cameraImage(
+        width: 2,
+        height: 2,
+        format: ImageFormatGroup.yuv420,
+        planes: [_plane(List<int>.filled(16, 0), bytesPerRow: 2, bytesPerPixel: 1)],
+      );
+      expect(
+        () => MpCameraFrameConverter.convert(wrongPlaneCount, timestampMs: 0, rotationDegrees: 0),
+        throwsStateError,
+      );
+
+      final CameraImage shortStride = _cameraImage(
+        width: 2,
+        height: 1,
+        format: ImageFormatGroup.bgra8888,
+        planes: [
+          _plane(<int>[0, 0, 0, 255, 0, 0, 0, 255], bytesPerRow: 4, bytesPerPixel: 4),
+        ],
+      );
+      expect(
+        () => MpCameraFrameConverter.convert(shortStride, timestampMs: 0, rotationDegrees: 0),
+        throwsStateError,
+      );
+
+      final CameraImage shortBuffer = _cameraImage(
+        width: 2,
+        height: 2,
+        format: ImageFormatGroup.nv21,
+        planes: [
+          _plane(
+            <int>[16, 16, 16, 16, 128, 128, 128, 128, 128, 128],
+            bytesPerRow: 4,
+            bytesPerPixel: 1,
+          ),
+        ],
+      );
+      expect(
+        () => MpCameraFrameConverter.convert(shortBuffer, timestampMs: 0, rotationDegrees: 0),
+        throwsStateError,
+      );
+    });
+
+    test('clamps out-of-range luma into the RGB gamut', () {
+      // y=255 with balanced chroma overshoots 255 before clamping; y=1 with
+      // balanced chroma undershoots zero.
+      final CameraImage image = _cameraImage(
+        width: 2,
+        height: 2,
+        format: ImageFormatGroup.nv21,
+        planes: [
+          _plane(
+            <int>[255, 255, 255, 255, 1, 1, 1, 1, 128, 128, 128, 128],
+            bytesPerRow: 4,
+            bytesPerPixel: 1,
+          ),
+        ],
+      );
+
+      final MpCameraFrame frame = MpCameraFrameConverter.convert(
+        image,
+        timestampMs: 0,
+        rotationDegrees: 0,
+      );
+      final Uint8List pixels = (frame.image as MpImageUint8).data;
+
+      expect(pixels.sublist(0, 3), <int>[255, 255, 255]);
+      expect(pixels.sublist(3, 6), <int>[255, 255, 255]);
+      expect(pixels.sublist(6, 9), <int>[0, 0, 0]);
+      expect(pixels.sublist(9, 12), <int>[0, 0, 0]);
     });
   });
 }

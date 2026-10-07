@@ -26,6 +26,23 @@ void main() {
       );
     });
 
+    test('runtime-built chunks compare by value, not identity', () {
+      final String dynamicText = String.fromCharCode(97);
+      expect(dynamicText, isNot(same('a')));
+      expect(
+        LlmGenerationChunk(text: dynamicText, isDone: false),
+        equals(const LlmGenerationChunk(text: 'a', isDone: false)),
+      );
+      expect(
+        RagGenerationChunk(text: dynamicText, isDone: false),
+        equals(const RagGenerationChunk(text: 'a', isDone: false)),
+      );
+      expect(
+        LlmGenerationChunk(text: dynamicText, isDone: false).hashCode,
+        equals(const LlmGenerationChunk(text: 'a', isDone: false).hashCode),
+      );
+    });
+
     test('RagGenerationChunk compares text and completion', () {
       expect(
         const RagGenerationChunk(text: 'a', isDone: false),
@@ -62,6 +79,38 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(runtime.engine.lastSession?.queries, <String>['Hello']);
     expect(runtime.engine.lastSession?.closeCount, 1);
+  });
+
+  test('updateOptions rejects immutable fields and forwards mutable ones', () async {
+    final LlmInference inference = await LlmInference.create(
+      LlmInferenceOptions(baseOptions: _baseOptions()),
+      runtime: runtime,
+    );
+    final LlmSession session = await inference.createSession();
+
+    expect(
+      () => session.updateOptions(LlmSessionOptions(loraAsset: ModelAsset.path('/tmp/other.lora'))),
+      throwsArgumentError,
+    );
+    await session.updateOptions(LlmSessionOptions(temperature: 0.25));
+    expect(runtime.engine.lastSession?.lastUpdatedOptions?.temperature, 0.25);
+
+    await inference.close();
+  });
+
+  test('cancel requests cancellation from the backend', () async {
+    final LlmInference inference = await LlmInference.create(
+      LlmInferenceOptions(baseOptions: _baseOptions()),
+      runtime: runtime,
+    );
+    final LlmSession session = await inference.createSession();
+    final LlmGeneration generation = await session.generate();
+
+    await generation.cancel();
+
+    expect(runtime.engine.lastSession?.cancelCount, 1);
+
+    await inference.close();
   });
 
   test('stateful sessions forward multimodal inputs and clone context', () async {
@@ -171,6 +220,8 @@ final class _FakeSessionBackend implements LlmSessionBackend {
   final List<MpImage> images = <MpImage>[];
   final List<Uint8List> audio = <Uint8List>[];
   int closeCount = 0;
+  int cancelCount = 0;
+  LlmSessionOptions? lastUpdatedOptions;
 
   @override
   bool get isClosed => closeCount > 0;
@@ -199,7 +250,7 @@ final class _FakeSessionBackend implements LlmSessionBackend {
     );
   }
 
-  Future<void> _cancel() async {}
+  Future<void> _cancel() async => cancelCount++;
 
   @override
   Future<int> sizeInTokens(String text) async => text.split(' ').length;
@@ -215,7 +266,7 @@ final class _FakeSessionBackend implements LlmSessionBackend {
   }
 
   @override
-  Future<void> updateOptions(LlmSessionOptions options) async {}
+  Future<void> updateOptions(LlmSessionOptions options) async => lastUpdatedOptions = options;
 
   @override
   Future<void> close() async => closeCount++;

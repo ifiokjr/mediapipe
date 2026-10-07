@@ -74,6 +74,14 @@ final class TextSummarizerChunk {
 
   /// Whether this is the final update.
   final bool isDone;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TextSummarizerChunk && text == other.text && isDone == other.isDone;
+
+  @override
+  int get hashCode => Object.hash(text, isDone);
 }
 
 /// Platform implementation used by [TextSummarizer].

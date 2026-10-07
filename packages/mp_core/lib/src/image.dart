@@ -105,7 +105,10 @@ sealed class MpImage {
   int get byteLength => sampleCount * format.bytesPerChannel;
 
   /// Required number of samples for this image's dimensions and format.
-  int get expectedSampleCount => width * height * format.channels;
+  int get expectedSampleCount => _expectedSampleCount(width, height, format);
+
+  static int _expectedSampleCount(int width, int height, MpImageFormat format) =>
+      width * height * format.channels;
 
   static void _validate({
     required int width,
@@ -122,13 +125,16 @@ sealed class MpImage {
       throw ArgumentError.value(format, 'format', 'requires ${format.storage.name} storage');
     }
 
-    final int expected = width * height * format.channels;
+    final int expected = _expectedSampleCount(width, height, format);
 
     if (sampleCount != expected) {
       throw ArgumentError.value(sampleCount, 'data.length', 'must equal $expected');
     }
   }
 }
+
+const ListEquality<int> _intListEquality = ListEquality<int>();
+const ListEquality<double> _doublePixelEquality = ListEquality<double>();
 
 /// An image backed by unsigned 8-bit samples.
 @immutable
@@ -139,8 +145,17 @@ final class MpImageUint8 extends MpImage {
     required super.height,
     required super.format,
     required Uint8List data,
-  }) : data = Uint8List.fromList(data),
-       super._() {
+  }) : data = _copyUint8(width, height, format, data),
+       super._();
+
+  /// Adopts an already owned [data] buffer without copying it.
+  @internal
+  MpImageUint8.adopt({
+    required super.width,
+    required super.height,
+    required super.format,
+    required this.data,
+  }) : super._() {
     MpImage._validate(
       width: width,
       height: height,
@@ -148,6 +163,17 @@ final class MpImageUint8 extends MpImage {
       storage: MpImageStorage.uint8,
       sampleCount: data.length,
     );
+  }
+
+  static Uint8List _copyUint8(int width, int height, MpImageFormat format, Uint8List data) {
+    MpImage._validate(
+      width: width,
+      height: height,
+      format: format,
+      storage: MpImageStorage.uint8,
+      sampleCount: data.length,
+    );
+    return Uint8List.fromList(data);
   }
 
   /// Tightly packed pixel samples.
@@ -163,10 +189,10 @@ final class MpImageUint8 extends MpImage {
           width == other.width &&
           height == other.height &&
           format == other.format &&
-          const ListEquality<int>().equals(data, other.data);
+          _intListEquality.equals(data, other.data);
 
   @override
-  int get hashCode => Object.hash(width, height, format, const ListEquality<int>().hash(data));
+  int get hashCode => Object.hash(width, height, format, _intListEquality.hash(data));
 }
 
 /// An image backed by unsigned 16-bit samples.
@@ -178,8 +204,17 @@ final class MpImageUint16 extends MpImage {
     required super.height,
     required super.format,
     required Uint16List data,
-  }) : data = Uint16List.fromList(data),
-       super._() {
+  }) : data = _copyUint16(width, height, format, data),
+       super._();
+
+  /// Adopts an already owned [data] buffer without copying it.
+  @internal
+  MpImageUint16.adopt({
+    required super.width,
+    required super.height,
+    required super.format,
+    required this.data,
+  }) : super._() {
     MpImage._validate(
       width: width,
       height: height,
@@ -187,6 +222,17 @@ final class MpImageUint16 extends MpImage {
       storage: MpImageStorage.uint16,
       sampleCount: data.length,
     );
+  }
+
+  static Uint16List _copyUint16(int width, int height, MpImageFormat format, Uint16List data) {
+    MpImage._validate(
+      width: width,
+      height: height,
+      format: format,
+      storage: MpImageStorage.uint16,
+      sampleCount: data.length,
+    );
+    return Uint16List.fromList(data);
   }
 
   /// Tightly packed pixel samples.
@@ -202,10 +248,10 @@ final class MpImageUint16 extends MpImage {
           width == other.width &&
           height == other.height &&
           format == other.format &&
-          const ListEquality<int>().equals(data, other.data);
+          _intListEquality.equals(data, other.data);
 
   @override
-  int get hashCode => Object.hash(width, height, format, const ListEquality<int>().hash(data));
+  int get hashCode => Object.hash(width, height, format, _intListEquality.hash(data));
 }
 
 /// An image backed by 32-bit floating-point samples.
@@ -217,8 +263,17 @@ final class MpImageFloat32 extends MpImage {
     required super.height,
     required super.format,
     required Float32List data,
-  }) : data = Float32List.fromList(data),
-       super._() {
+  }) : data = _copyFloat32(width, height, format, data),
+       super._();
+
+  /// Adopts an already owned [data] buffer without copying it.
+  @internal
+  MpImageFloat32.adopt({
+    required super.width,
+    required super.height,
+    required super.format,
+    required this.data,
+  }) : super._() {
     MpImage._validate(
       width: width,
       height: height,
@@ -226,6 +281,17 @@ final class MpImageFloat32 extends MpImage {
       storage: MpImageStorage.float32,
       sampleCount: data.length,
     );
+  }
+
+  static Float32List _copyFloat32(int width, int height, MpImageFormat format, Float32List data) {
+    MpImage._validate(
+      width: width,
+      height: height,
+      format: format,
+      storage: MpImageStorage.float32,
+      sampleCount: data.length,
+    );
+    return Float32List.fromList(data);
   }
 
   /// Tightly packed pixel samples.
@@ -241,10 +307,10 @@ final class MpImageFloat32 extends MpImage {
           width == other.width &&
           height == other.height &&
           format == other.format &&
-          const ListEquality<double>().equals(data, other.data);
+          _doublePixelEquality.equals(data, other.data);
 
   @override
-  int get hashCode => Object.hash(width, height, format, const ListEquality<double>().hash(data));
+  int get hashCode => Object.hash(width, height, format, _doublePixelEquality.hash(data));
 }
 
 /// Input transforms applied before a vision task runs.
@@ -284,16 +350,16 @@ final class NormalizedRect {
     required this.right,
     required this.bottom,
   }) {
-    for (final MapEntry<String, double> entry in <String, double>{
-      'left': left,
-      'top': top,
-      'right': right,
-      'bottom': bottom,
-    }.entries) {
-      if (entry.value < 0 || entry.value > 1) {
-        throw ArgumentError.value(entry.value, entry.key, 'must be between 0 and 1');
+    void requireUnitInterval(String name, double value) {
+      if (!value.isFinite || value < 0 || value > 1) {
+        throw ArgumentError.value(value, name, 'must be between 0 and 1');
       }
     }
+
+    requireUnitInterval('left', left);
+    requireUnitInterval('top', top);
+    requireUnitInterval('right', right);
+    requireUnitInterval('bottom', bottom);
 
     if (left >= right) throw ArgumentError.value(left, 'left', 'must be less than right');
 

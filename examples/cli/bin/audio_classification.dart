@@ -1,4 +1,4 @@
-// Run with: dart run examples/bin/audio_classification.dart
+// Run with: dart run examples/cli/bin/audio_classification.dart
 //
 // Classifies a real 16 kHz speech clip with YAMNet, then replays the same clip
 // as timestamped chunks through streaming mode to show how a microphone
@@ -16,7 +16,7 @@ import 'package:mp_examples/mp_examples.dart';
 /// roughly 100 ms chunks keeps the timestamp arithmetic readable.
 const int _chunkSamples = 1600;
 
-Future<void> main() async {
+Future<void> main() => runExample('audio_classification', () async {
   final MpAssetCache cache = MpAssetCache.defaults();
   final Uint8List wav = await cache.bytes(MpExampleInputs.speech16k);
   final AudioData audio = mpAudioFromWav(wav);
@@ -27,7 +27,7 @@ Future<void> main() async {
 
   await _classifyClip(cache, audio);
   await _classifyStream(cache, audio);
-}
+});
 
 Future<void> _classifyClip(MpAssetCache cache, AudioData audio) async {
   stdout.writeln('\n== Clip classification ==');
@@ -43,10 +43,7 @@ Future<void> _classifyClip(MpAssetCache cache, AudioData audio) async {
     for (final ClassificationResult window in result.classifications) {
       for (final Classifications head in window.classifications) {
         for (final Category category in head.categories) {
-          stdout.writeln(
-            '  ${category.displayName ?? category.categoryName ?? '#${category.index}'} '
-            '${category.score.toStringAsFixed(3)}',
-          );
+          stdout.writeln('  ${formatCategory(category)}');
         }
       }
     }

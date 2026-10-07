@@ -67,8 +67,9 @@ Listen to `scheduler.failures` in development and monitor `droppedCount` to
 choose an appropriate camera resolution. A dropped queued frame is expected in
 real-time inference; retaining stale frames is usually worse.
 
-The example in [`example/`](example/) exercises conversion and scheduling with
-synthetic frames, so it runs without a live camera.
+The conversion and scheduling paths run in CI against synthetic frames, and the
+live-camera integration is exercised end to end by the
+[`examples/device_demo`](../../examples/device_demo) Flutter app.
 
 ## Failure contract
 

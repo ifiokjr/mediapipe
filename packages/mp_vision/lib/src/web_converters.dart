@@ -79,21 +79,25 @@ HandLandmarkerResult webHandLandmarkerResult(JSAny? value) {
   );
 }
 
-/// Converts a web holistic-landmarker result and copies its masks immediately.
+/// Converts a web holistic-landmarker result and releases its wasm handles.
 HolisticLandmarkerResult webHolisticLandmarkerResult(JSAny? value) {
   final JSObject result = value! as JSObject;
-  final List<JSObject> masks = _objectArray(result['poseSegmentationMasks']);
-  return HolisticLandmarkerResult(
-    faceLandmarks: _normalizedLandmarkGroups(_property(result, 'faceLandmarks')),
-    faceBlendshapes: _classifications(_property(result, 'faceBlendshapes')),
-    poseLandmarks: _normalizedLandmarkGroups(_property(result, 'poseLandmarks')),
-    poseWorldLandmarks: _landmarkGroups(_property(result, 'poseWorldLandmarks')),
-    poseSegmentationMasks: masks.map(_copyFloatMask),
-    leftHandLandmarks: _normalizedLandmarkGroups(_property(result, 'leftHandLandmarks')),
-    leftHandWorldLandmarks: _landmarkGroups(_property(result, 'leftHandWorldLandmarks')),
-    rightHandLandmarks: _normalizedLandmarkGroups(_property(result, 'rightHandLandmarks')),
-    rightHandWorldLandmarks: _landmarkGroups(_property(result, 'rightHandWorldLandmarks')),
-  );
+  try {
+    final List<JSObject> masks = _objectArray(result['poseSegmentationMasks']);
+    return HolisticLandmarkerResult(
+      faceLandmarks: _normalizedLandmarkGroups(_property(result, 'faceLandmarks')),
+      faceBlendshapes: _classifications(_property(result, 'faceBlendshapes')),
+      poseLandmarks: _normalizedLandmarkGroups(_property(result, 'poseLandmarks')),
+      poseWorldLandmarks: _landmarkGroups(_property(result, 'poseWorldLandmarks')),
+      poseSegmentationMasks: masks.map(_copyFloatMask),
+      leftHandLandmarks: _normalizedLandmarkGroups(_property(result, 'leftHandLandmarks')),
+      leftHandWorldLandmarks: _landmarkGroups(_property(result, 'leftHandWorldLandmarks')),
+      rightHandLandmarks: _normalizedLandmarkGroups(_property(result, 'rightHandLandmarks')),
+      rightHandWorldLandmarks: _landmarkGroups(_property(result, 'rightHandWorldLandmarks')),
+    );
+  } finally {
+    callWebMethod<JSAny?>(result, 'close');
+  }
 }
 
 /// Converts a web embedding result.

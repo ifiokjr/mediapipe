@@ -88,6 +88,29 @@ void main() {
           return 8;
         case 'summarizer.summarize':
           return <String, Object?>{'summary': 'Summary.'};
+        case 'summarizer.stream':
+          final String requestId = arguments['requestId']! as String;
+          unawaited(
+            Future<void>(() async {
+              await _sendEvent(messenger, <String, Object?>{
+                'kind': 'data',
+                'requestId': requestId,
+                'text': 'Sum',
+                'isDone': false,
+              });
+              await _sendEvent(messenger, <String, Object?>{
+                'kind': 'data',
+                'requestId': requestId,
+                'text': 'mary.',
+                'isDone': true,
+              });
+              await _sendEvent(messenger, <String, Object?>{
+                'kind': 'done',
+                'requestId': requestId,
+              });
+            }),
+          );
+          return null;
         case 'summarizer.close':
           return null;
       }
@@ -143,9 +166,14 @@ void main() {
     );
 
     final TextSummarizerResult result = await summarizer.summarize('Long text');
+    final List<TextSummarizerChunk> chunks = await summarizer
+        .summarizeStreaming('Long text')
+        .toList();
     await summarizer.close();
 
     expect(result.summary, 'Summary.');
+    expect(chunks.map((TextSummarizerChunk chunk) => chunk.text), <String>['Sum', 'mary.']);
+    expect(chunks.last.isDone, isTrue);
     final Map<Object?, Object?> createArguments = calls.first.arguments! as Map<Object?, Object?>;
     expect(createArguments['mode'], 'tldr');
     expect(createArguments['modelPath'], model.absolute.path);

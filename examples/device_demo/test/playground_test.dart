@@ -40,6 +40,20 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('the theme follows the platform brightness until toggled', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.binding.platformDispatcher.clearPlatformBrightnessTestValue);
+    await tester.pumpWidget(const MotionPlaygroundApp());
+
+    expect(find.byTooltip('Use light theme'), findsOneWidget);
+    await tester.tap(find.byTooltip('Use light theme'));
+    await tester.pump();
+    expect(find.byTooltip('Use dark theme'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('phone layout scrolls to all ten exercises without overflow', (
     WidgetTester tester,
   ) async {

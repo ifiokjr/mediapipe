@@ -107,6 +107,41 @@ void main() {
     );
   });
 
+  test('generation task options require the CPU delegate', () {
+    final BaseOptions gpu = BaseOptions(
+      modelAsset: ModelAsset.path('model.litertlm'),
+      delegate: MpDelegate.gpu,
+    );
+
+    expect(() => TextProofreaderOptions(baseOptions: gpu), throwsArgumentError);
+    expect(() => TextSummarizerOptions(baseOptions: gpu), throwsArgumentError);
+  });
+
+  test('streaming chunk types compare by value at runtime', () {
+    final String dynamicText = 'Short ${String.fromCharCode(116)}ext.';
+    expect(dynamicText, isNot(same('Short text.')));
+    expect(
+      TextSummarizerChunk(text: dynamicText, isDone: false),
+      const TextSummarizerChunk(text: 'Short text.', isDone: false),
+    );
+    expect(
+      const TextSummarizerChunk(text: 'Short text.', isDone: false),
+      TextSummarizerChunk(text: dynamicText, isDone: false),
+    );
+    expect(
+      TextProofreaderChunk(text: dynamicText, isDone: true),
+      isNot(
+        TextProofreaderChunk(
+          text: 'Short text.',
+          isDone: true,
+          corrections: const <TextCorrection>[
+            TextCorrection(type: TextCorrectionType.same, text: 'x'),
+          ],
+        ),
+      ),
+    );
+  });
+
   test('proofreader results own an immutable correction list', () {
     final List<TextCorrection> source = <TextCorrection>[
       const TextCorrection(type: TextCorrectionType.same, text: 'kept'),

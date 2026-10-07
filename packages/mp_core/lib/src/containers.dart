@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 const ListEquality<Object?> _objectListEquality = ListEquality<Object?>();
 const ListEquality<double> _doubleListEquality = ListEquality<double>();
+const ListEquality<int> _intListEquality = ListEquality<int>();
 
 /// A scored label returned by a classifier or detector.
 @immutable
@@ -129,6 +130,19 @@ final class Embedding {
     );
   }
 
+  /// Adopts an already owned floating-point vector without copying it.
+  @internal
+  factory Embedding.floatAdopted(Float32List values, {required int headIndex, String? headName}) {
+    if (values.isEmpty) throw ArgumentError.value(values, 'values', 'must not be empty');
+    return Embedding._(
+      type: EmbeddingType.float,
+      headIndex: headIndex,
+      headName: headName,
+      floatValues: values,
+      quantizedValues: null,
+    );
+  }
+
   /// Creates a scalar-quantized embedding.
   factory Embedding.quantized(Uint8List values, {required int headIndex, String? headName}) {
     if (values.isEmpty) throw ArgumentError.value(values, 'values', 'must not be empty');
@@ -138,6 +152,19 @@ final class Embedding {
       headName: headName,
       floatValues: null,
       quantizedValues: Uint8List.fromList(values),
+    );
+  }
+
+  /// Adopts an already owned scalar-quantized vector without copying it.
+  @internal
+  factory Embedding.quantizedAdopted(Uint8List values, {required int headIndex, String? headName}) {
+    if (values.isEmpty) throw ArgumentError.value(values, 'values', 'must not be empty');
+    return Embedding._(
+      type: EmbeddingType.quantized,
+      headIndex: headIndex,
+      headName: headName,
+      floatValues: null,
+      quantizedValues: values,
     );
   }
 
@@ -166,16 +193,22 @@ final class Embedding {
           type == other.type &&
           headIndex == other.headIndex &&
           headName == other.headName &&
-          const DeepCollectionEquality().equals(floatValues, other.floatValues) &&
-          const DeepCollectionEquality().equals(quantizedValues, other.quantizedValues);
+          _doubleListEquality.equals(
+            floatValues ?? const <double>[],
+            other.floatValues ?? const <double>[],
+          ) &&
+          _intListEquality.equals(
+            quantizedValues ?? const <int>[],
+            other.quantizedValues ?? const <int>[],
+          );
 
   @override
   int get hashCode => Object.hash(
     type,
     headIndex,
     headName,
-    const DeepCollectionEquality().hash(floatValues),
-    const DeepCollectionEquality().hash(quantizedValues),
+    _doubleListEquality.hash(floatValues ?? const <double>[]),
+    _intListEquality.hash(quantizedValues ?? const <int>[]),
   );
 }
 
@@ -212,19 +245,31 @@ double cosineSimilarity(Embedding first, Embedding second) {
     throw ArgumentError('Embeddings must have the same number of dimensions.');
   }
 
-  final Iterable<num> firstValues = first.floatValues ?? first.quantizedValues!;
-  final Iterable<num> secondValues = second.floatValues ?? second.quantizedValues!;
   double dot = 0;
   double firstMagnitude = 0;
   double secondMagnitude = 0;
-  final Iterator<num> firstIterator = firstValues.iterator;
-  final Iterator<num> secondIterator = secondValues.iterator;
-  while (firstIterator.moveNext() && secondIterator.moveNext()) {
-    final double firstValue = firstIterator.current.toDouble();
-    final double secondValue = secondIterator.current.toDouble();
-    dot += firstValue * secondValue;
-    firstMagnitude += firstValue * firstValue;
-    secondMagnitude += secondValue * secondValue;
+
+  // Iterate the typed lists directly so no sample is boxed through `num`.
+  switch ((
+    first.floatValues ?? first.quantizedValues!,
+    second.floatValues ?? second.quantizedValues!,
+  )) {
+    case (final Float32List firstValues, final Float32List secondValues):
+      for (int index = 0; index < firstValues.length; index += 1) {
+        final double firstValue = firstValues[index];
+        final double secondValue = secondValues[index];
+        dot += firstValue * secondValue;
+        firstMagnitude += firstValue * firstValue;
+        secondMagnitude += secondValue * secondValue;
+      }
+    case (final Uint8List firstValues, final Uint8List secondValues):
+      for (int index = 0; index < firstValues.length; index += 1) {
+        final int firstValue = firstValues[index];
+        final int secondValue = secondValues[index];
+        dot += firstValue * secondValue;
+        firstMagnitude += firstValue * firstValue;
+        secondMagnitude += secondValue * secondValue;
+      }
   }
   if (firstMagnitude == 0 || secondMagnitude == 0) {
     throw ArgumentError('Cosine similarity is undefined for a zero vector.');
@@ -461,12 +506,22 @@ final class MpMatrix {
   /// Creates a matrix and copies [values].
   MpMatrix({required this.rows, required this.columns, required Float32List values})
     : values = Float32List.fromList(values) {
+    _validateDimensions(rows: rows, columns: columns, length: values.length);
+  }
+
+  /// Adopts an already owned [values] buffer without copying it.
+  @internal
+  MpMatrix.adopt({required this.rows, required this.columns, required this.values}) {
+    _validateDimensions(rows: rows, columns: columns, length: values.length);
+  }
+
+  static void _validateDimensions({required int rows, required int columns, required int length}) {
     if (rows <= 0) throw ArgumentError.value(rows, 'rows', 'must be greater than zero');
     if (columns <= 0) {
       throw ArgumentError.value(columns, 'columns', 'must be greater than zero');
     }
-    if (values.length != rows * columns) {
-      throw ArgumentError.value(values.length, 'values.length', 'must equal rows * columns');
+    if (length != rows * columns) {
+      throw ArgumentError.value(length, 'values.length', 'must equal rows * columns');
     }
   }
 

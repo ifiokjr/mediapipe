@@ -1,14 +1,12 @@
-// Run with: dart run examples/bin/vision_face_detection.dart
+// Run with: dart run examples/cli/bin/vision_face_detection.dart
 //
 // Detects faces in a real photograph using the same BlazeFace model the
-// upstream MediaPipe test suite uses. The model and image are downloaded once
-// and cached, and the model digest is verified before inference runs.
+// upstream MediaPipe test suite uses. The model and image are downloaded once,
+// cached, and verified against their pinned SHA-256 digests before inference.
 //
-// The native runtime is resolved from the MP SDK's native asset hook. When
-// running outside a Flutter build, point the SDK at a locally built runtime:
-//
-//   MP_NATIVE_LIBRARY=.mp-sdk/macos-arm64 \
-//     dart run examples/bin/vision_face_detection.dart
+// The native runtime is resolved by the mp_core native asset hook from the
+// `.mp-sdk` directory built by `native:build`; the browser adapter needs no
+// native runtime.
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -17,7 +15,7 @@ import 'package:mp_core/mp_core.dart';
 import 'package:mp_examples/mp_examples.dart';
 import 'package:mp_vision/mp_vision.dart';
 
-Future<void> main() async {
+Future<void> main() => runExample('vision_face_detection', () async {
   final MpAssetCache cache = MpAssetCache.defaults();
   final FaceDetector detector = await FaceDetector.create(
     FaceDetectorOptions(
@@ -46,4 +44,4 @@ Future<void> main() async {
   } finally {
     await detector.close();
   }
-}
+});

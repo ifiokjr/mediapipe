@@ -18,6 +18,7 @@ hooks:
       native_library_directory: .mp-sdk
 
 dependencies:
+  crypto: ^3.0.7
   http: ^1.6.0
   image: ^4.10.1
   mp_audio: ^0.1.1

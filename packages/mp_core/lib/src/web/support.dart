@@ -9,6 +9,9 @@ import '../errors.dart';
 import '../image.dart';
 import '../options.dart';
 
+/// Matches the native runtime's remote-model safety limit.
+const int _maximumRemoteModelBytes = 512 * 1024 * 1024;
+
 /// A pinned ECMAScript module and its adjacent MediaPipe Wasm directory.
 final class WebTaskAssets {
   /// Creates a web asset location.
@@ -131,7 +134,14 @@ Future<Uint8List> _downloadWebBytes(Uri uri) async {
 
     final JSArrayBuffer buffer = await bufferPromise.toDart;
 
-    return Uint8List.view(buffer.toDart);
+    final Uint8List bytes = Uint8List.view(buffer.toDart);
+    if (bytes.length > _maximumRemoteModelBytes) {
+      throw const MpException(
+        MpStatus.resourceExhausted,
+        'The remote model exceeds the 512 MiB safety limit.',
+      );
+    }
+    return bytes;
   } on MpException {
     rethrow;
   } on Object catch (error) {
@@ -169,29 +179,67 @@ int? webOptionalInt(Object? value) => switch (value) {
 };
 
 /// Converts a JSON-like MediaPipe web classification result.
+///
+/// Every field is validated so a malformed runtime response surfaces as an
+/// [MpException] instead of a null-check or cast error.
 ClassificationResult webClassificationResult(Map<Object?, Object?> result) {
-  final List<Object?> heads = result['classifications']! as List<Object?>;
+  final List<Object?> heads = _requireList(result['classifications'], 'classifications');
   return ClassificationResult(
     timestampMs: webOptionalInt(result['timestampMs']),
     classifications: heads.map((Object? value) {
-      final Map<Object?, Object?> head = value! as Map<Object?, Object?>;
-      final List<Object?> categories = head['categories']! as List<Object?>;
+      final Map<Object?, Object?> head = _requireMap(value, 'classification head');
+      final List<Object?> categories = _requireList(head['categories'], 'categories');
       return Classifications(
-        headIndex: (head['headIndex']! as num).toInt(),
-        headName: webEmptyToNull(head['headName'] as String?),
+        headIndex: _requireInt(head['headIndex'], 'headIndex'),
+        headName: _optionalString(head['headName'], 'headName'),
         categories: categories.map((Object? categoryValue) {
-          final Map<Object?, Object?> category = categoryValue! as Map<Object?, Object?>;
+          final Map<Object?, Object?> category = _requireMap(categoryValue, 'category');
           return Category(
-            index: (category['index']! as num).toInt(),
-            score: (category['score']! as num).toDouble(),
-            categoryName: webEmptyToNull(category['categoryName'] as String?),
-            displayName: webEmptyToNull(category['displayName'] as String?),
+            index: _requireInt(category['index'], 'category index'),
+            score: _requireDouble(category['score'], 'category score'),
+            categoryName: _optionalString(category['categoryName'], 'categoryName'),
+            displayName: _optionalString(category['displayName'], 'displayName'),
           );
         }),
       );
     }),
   );
 }
+
+List<Object?> _requireList(Object? value, String field) {
+  if (value is! List<Object?>) {
+    throw _malformedResult(field);
+  }
+  return value;
+}
+
+Map<Object?, Object?> _requireMap(Object? value, String field) {
+  if (value is! Map<Object?, Object?>) {
+    throw _malformedResult(field);
+  }
+  return value;
+}
+
+int _requireInt(Object? value, String field) {
+  if (value is num) return value.toInt();
+  throw _malformedResult(field);
+}
+
+double _requireDouble(Object? value, String field) {
+  if (value is num) return value.toDouble();
+  throw _malformedResult(field);
+}
+
+String? _optionalString(Object? value, String field) {
+  if (value == null) return null;
+  if (value is String) return webEmptyToNull(value);
+  throw _malformedResult(field);
+}
+
+MpException _malformedResult(String field) => MpException(
+  MpStatus.internal,
+  'The MediaPipe web runtime returned a malformed result: expected $field.',
+);
 
 /// Treats MediaPipe's empty optional strings as absent values.
 String? webEmptyToNull(String? value) => value == null || value.isEmpty ? null : value;
@@ -202,18 +250,34 @@ String? webEmptyToNull(String? value) => value == null || value.isEmpty ? null :
 /// deterministically converted to that representation at this boundary.
 JSObject webImageData(MpImage image) {
   final Uint8ClampedList rgba = Uint8ClampedList(image.width * image.height * 4);
+  final int pixelCount = image.width * image.height;
 
-  for (int pixel = 0; pixel < image.width * image.height; pixel += 1) {
-    final int output = pixel * 4;
-
-    switch (image) {
-      case MpImageUint8(:final format, :final data):
-        _writeUint8Pixel(rgba, output, data, pixel * format.channels, format);
-      case MpImageUint16(:final format, :final data):
-        _writeUint16Pixel(rgba, output, data, pixel * format.channels, format);
-      case MpImageFloat32(:final format, :final data):
-        _writeFloatPixel(rgba, output, data, pixel * format.channels, format);
-    }
+  // Resolve the storage subtype once per image rather than once per pixel.
+  switch (image) {
+    case MpImageUint8(:final format, :final data):
+      for (
+        int pixel = 0, input = 0, output = 0;
+        pixel < pixelCount;
+        pixel += 1, input += format.channels, output += 4
+      ) {
+        _writeUint8Pixel(rgba, output, data, input, format);
+      }
+    case MpImageUint16(:final format, :final data):
+      for (
+        int pixel = 0, input = 0, output = 0;
+        pixel < pixelCount;
+        pixel += 1, input += format.channels, output += 4
+      ) {
+        _writeUint16Pixel(rgba, output, data, input, format);
+      }
+    case MpImageFloat32(:final format, :final data):
+      for (
+        int pixel = 0, input = 0, output = 0;
+        pixel < pixelCount;
+        pixel += 1, input += format.channels, output += 4
+      ) {
+        _writeFloatPixel(rgba, output, data, input, format);
+      }
   }
 
   final JSAny? constructor = globalContext['ImageData'];
