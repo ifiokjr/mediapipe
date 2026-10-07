@@ -1,0 +1,771 @@
+{
+  "schema_version": "0.9",
+  "kind": "monochange.releaseRecord",
+  "created_at": "2026-10-07T08:37:42Z",
+  "command": "release",
+  "version": "0.1.2",
+  "versions": {
+    "mp": "0.1.2"
+  },
+  "release_targets": [
+    {
+      "id": "mp",
+      "kind": "group",
+      "version": "0.1.2",
+      "version_format": "primary",
+      "tag": true,
+      "release": true,
+      "tag_name": "v0.1.2",
+      "rendered_title": "v0.1.2 (2026-10-07)",
+      "rendered_changelog_title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+      "members": [
+        "mp_core",
+        "mp_vision",
+        "mp_camera",
+        "mp_text",
+        "mp_audio",
+        "mp_genai"
+      ]
+    }
+  ],
+  "released_packages": [
+    "mp_audio",
+    "mp_camera",
+    "mp_core",
+    "mp_genai",
+    "mp_text",
+    "mp_vision"
+  ],
+  "changed_files": [
+    "CHANGELOG.md",
+    "docs/pubspec.yaml",
+    "examples/cli/pubspec.yaml",
+    "examples/device_demo/pubspec.yaml",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_audio/pubspec.yaml",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_camera/pubspec.yaml",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_core/pubspec.yaml",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_genai/pubspec.yaml",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_text/example/pubspec.yaml",
+    "packages/mp_text/pubspec.yaml",
+    "packages/mp_vision/CHANGELOG.md",
+    "packages/mp_vision/pubspec.yaml",
+    "pubspec.yaml"
+  ],
+  "package_publications": [
+    {
+      "package": "mp_audio",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.2",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_camera",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.2",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_core",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.2",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_genai",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.2",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_text",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.2",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_vision",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.2",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    }
+  ],
+  "updated_changelogs": [
+    "CHANGELOG.md",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_vision/CHANGELOG.md"
+  ],
+  "deleted_changesets": [
+    ".changeset/monostyle-style-pass.md",
+    ".changeset/quality-pass-features.md",
+    ".changeset/quality-pass-fixes.md"
+  ],
+  "changesets": [
+    {
+      "path": ".changeset/monostyle-style-pass.md",
+      "summary": "Monostyle style pass",
+      "details": "Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.",
+      "targets": [
+        {
+          "id": "mp_audio",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_camera",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_genai",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_text",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "0eb3654a2b3965a6c29ac16bf67c171a0df9a7d8",
+            "short_sha": "0eb3654",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/0eb3654a2b3965a6c29ac16bf67c171a0df9a7d8",
+            "authored_at": "2026-10-05T10:49:43+01:00",
+            "committed_at": "2026-10-05T10:49:43+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#19",
+            "title": "chore(style): add monostyle with inline annotations",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/19",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "0eb3654a2b3965a6c29ac16bf67c171a0df9a7d8",
+            "short_sha": "0eb3654",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/0eb3654a2b3965a6c29ac16bf67c171a0df9a7d8",
+            "authored_at": "2026-10-05T10:49:43+01:00",
+            "committed_at": "2026-10-05T10:49:43+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#19",
+            "title": "chore(style): add monostyle with inline annotations",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/19",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/quality-pass-features.md",
+      "summary": "New capabilities from the quality pass",
+      "details": "- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_genai",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_text",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "a8fdc985eb369b0991254a4b104b77064a901874",
+            "short_sha": "a8fdc98",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/a8fdc985eb369b0991254a4b104b77064a901874",
+            "authored_at": "2026-10-07T08:35:52+01:00",
+            "committed_at": "2026-10-07T08:36:03+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "ifiokotung@gmail.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#27",
+            "title": "fix: harden lifecycles, cut hot-path copies, and raise demo quality",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/27",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "a8fdc985eb369b0991254a4b104b77064a901874",
+            "short_sha": "a8fdc98",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/a8fdc985eb369b0991254a4b104b77064a901874",
+            "authored_at": "2026-10-07T08:35:52+01:00",
+            "committed_at": "2026-10-07T08:36:03+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "ifiokotung@gmail.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#27",
+            "title": "fix: harden lifecycles, cut hot-path copies, and raise demo quality",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/27",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/quality-pass-fixes.md",
+      "summary": "Correctness and performance fixes",
+      "details": "Lifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds.",
+      "targets": [
+        {
+          "id": "mp_audio",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_camera",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_genai",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_text",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "a8fdc985eb369b0991254a4b104b77064a901874",
+            "short_sha": "a8fdc98",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/a8fdc985eb369b0991254a4b104b77064a901874",
+            "authored_at": "2026-10-07T08:35:52+01:00",
+            "committed_at": "2026-10-07T08:36:03+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "ifiokotung@gmail.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#27",
+            "title": "fix: harden lifecycles, cut hot-path copies, and raise demo quality",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/27",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "a8fdc985eb369b0991254a4b104b77064a901874",
+            "short_sha": "a8fdc98",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/a8fdc985eb369b0991254a4b104b77064a901874",
+            "authored_at": "2026-10-07T08:35:52+01:00",
+            "committed_at": "2026-10-07T08:36:03+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "ifiokotung@gmail.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#27",
+            "title": "fix: harden lifecycles, cut hot-path copies, and raise demo quality",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/27",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    }
+  ],
+  "changelogs": [
+    {
+      "owner_id": "mp",
+      "owner_kind": "group",
+      "output": "default",
+      "stream": "default",
+      "path": "CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+        "summary": [
+          "Grouped release for `mp`."
+        ],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### New capabilities from the quality pass\n\n_Packages:_ 🟠 _mp_core_, 🟠 _mp_text_, 🟠 _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Packages:_ 🟢 _mp_core_, 🟢 _mp_vision_, 🟢 _mp_camera_, 🟢 _mp_text_, 🟢 _mp_audio_, 🟢 _mp_genai_\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)",
+              "#### Correctness and performance fixes\n\n_Packages:_ 🟢 _mp_core_, 🟢 _mp_vision_, 🟢 _mp_camera_, 🟢 _mp_text_, 🟢 _mp_audio_, 🟢 _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)\n\nGrouped release for `mp`.\n\n### Features\n\n#### New capabilities from the quality pass\n\n_Packages:_ 🟠 _mp_core_, 🟠 _mp_text_, 🟠 _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does.\n\n### Fixes\n\n- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Packages:_ 🟢 _mp_core_, 🟢 _mp_vision_, 🟢 _mp_camera_, 🟢 _mp_text_, 🟢 _mp_audio_, 🟢 _mp_genai_\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)\n#### Correctness and performance fixes\n\n_Packages:_ 🟢 _mp_core_, 🟢 _mp_vision_, 🟢 _mp_camera_, 🟢 _mp_text_, 🟢 _mp_audio_, 🟢 _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+    },
+    {
+      "owner_id": "mp_audio",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_audio/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)",
+              "#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)\n\n### Fixes\n\n- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)\n#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+    },
+    {
+      "owner_id": "mp_camera",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_camera/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)",
+              "#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)\n\n### Fixes\n\n- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)\n#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+    },
+    {
+      "owner_id": "mp_core",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_core/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### New capabilities from the quality pass\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)",
+              "#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)\n\n### Features\n\n#### New capabilities from the quality pass\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does.\n\n### Fixes\n\n- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)\n#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+    },
+    {
+      "owner_id": "mp_genai",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_genai/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### New capabilities from the quality pass\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)",
+              "#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)\n\n### Features\n\n#### New capabilities from the quality pass\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does.\n\n### Fixes\n\n- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)\n#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+    },
+    {
+      "owner_id": "mp_text",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_text/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### New capabilities from the quality pass\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)",
+              "#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)\n\n### Features\n\n#### New capabilities from the quality pass\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\n- `mp_core`: `TaskLifecycle.reopen()` lets a task whose backend cleanup failed\n  stay usable so `close()` can be retried instead of leaking the underlying\n  isolate and native handles.\n- `mp_genai`, `mp_text`: streaming chunk types (`LlmGenerationChunk`,\n  `RagGenerationChunk`, `TextSummarizerChunk`, `TextProofreaderChunk`) now\n  implement value equality and hashing, so runtime-built instances compare by\n  content the way every result type already does.\n\n### Fixes\n\n- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)\n#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+    },
+    {
+      "owner_id": "mp_vision",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_vision/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)",
+              "#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)\n\n### Fixes\n\n- **Monostyle style pass.** Blank-line breathing room around control flow and returns, group splits, and collapsed blank runs, applied by `monostyle fix` and kept where the pinned formatters put them. No behavior change.\n  _Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #19](https://github.com/ifiokjr/mediapipe/pull/19)\n#### Correctness and performance fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #27](https://github.com/ifiokjr/mediapipe/pull/27)\n\nLifecycle and error handling:\n\n- `mp_core`: `NativeTaskIsolate` no longer leaks its ports and subscriptions\n  when `Isolate.spawn` itself fails, kills a worker that reports an uncaught\n  error or returns a malformed response instead of orphaning it, and shares one\n  teardown path for every spawn failure. `LlmInference.generateResponse` in\n  `mp_genai` can no longer surface an unhandled zone error when closing its\n  temporary session.\n- `mp_vision`: a failed `close()` reopens the task so cleanup can be retried;\n  frames rejected by a backend no longer burn their timestamp; live-stream\n  failures now reach both the results stream and the returned future on every\n  platform; the web module load is retried after a transient failure; and the\n  holistic landmarker releases its wasm result object after conversion.\n- `mp_text`: the web backends serialize calls, drain in-flight work on close,\n  and validate converted JavaScript results, failing with `MpException` instead\n  of null-check and cast errors. A native language prediction without a code\n  fails explicitly instead of decoding as an empty string.\n- `mp_camera`: `LatestFrameScheduler.submit` throws `MpTaskClosedError` after\n  close like every task, a throwing failures listener cannot terminate frame\n  processing, and unknown device orientations fail with an `ArgumentError`\n  instead of a null-check crash.\n\nValidation:\n\n- `mp_core`: NaN and infinity coordinates are rejected by `NormalizedRect`,\n  NaN score thresholds by `ClassifierOptions`, and containers validate inputs\n  before copying them.\n\nPerformance:\n\n- `mp_core`: native results copy pixel and embedding buffers once instead of\n  twice, `cosineSimilarity` no longer boxes every sample, platform detection is\n  memoized, and web image conversion dispatches per image rather than per pixel.\n- `mp_camera`: NV21, YUV420, and BGRA conversion loops hoist strides, sample\n  chroma once per pixel pair, and clamp with branches instead of `num.clamp`.\n- `mp_audio`, `mp_text`, `mp_genai`: each web runtime resolves its module and\n  wasm fileset once per runtime instance and reuses it across task creations.\n- `mp_genai`, `mp_text`: model files are written to disk asynchronously so\n  multi-hundred-megabyte writes stay off the UI isolate.\n\nAPI hygiene:\n\n- `mp_core`: the generated FFI `MpStatus` is no longer exported from\n  `native.dart`, removing the collision with the Dart-side `MpStatus`; dead\n  conversion helpers were removed.\n- `mp_genai`: the `collection` dependency that was already used is declared,\n  and `ImageGenerator` rejects negative seeds."
+    }
+  ],
+  "provider": {
+    "kind": "github",
+    "owner": "ifiokjr",
+    "repo": "mediapipe",
+    "host": null
+  }
+}
