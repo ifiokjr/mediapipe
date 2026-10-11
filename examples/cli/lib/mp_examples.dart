@@ -185,24 +185,9 @@ final class MpAssetCache {
     if (cached != null) return cached;
 
     final File file = File('${directory.path}/${asset.name}');
-    final Uint8List result;
-    if (file.existsSync()) {
-      result = file.readAsBytesSync();
-    } else {
-      final http.Client httpClient = client ?? http.Client();
-      try {
-        final http.Response response = await httpClient.get(Uri.parse(asset.url));
-        if (response.statusCode != 200) {
-          throw MpException(
-            MpStatus.unavailable,
-            'Could not download ${asset.name}: HTTP ${response.statusCode}.',
-          );
-        }
-        result = response.bodyBytes;
-      } finally {
-        if (client == null) httpClient.close();
-      }
-    }
+    final Uint8List result = file.existsSync()
+        ? file.readAsBytesSync()
+        : await _download(asset, client);
     final String actual = crypto.sha256.convert(result).toString();
     if (actual != asset.sha256) {
       throw MpException(
@@ -215,7 +200,25 @@ final class MpAssetCache {
       file.writeAsBytesSync(result, flush: true);
     }
     _memory[asset.url] = result;
+
     return result;
+  }
+
+  Future<Uint8List> _download(MpExampleAsset asset, http.Client? client) async {
+    final http.Client httpClient = client ?? http.Client();
+    try {
+      final http.Response response = await httpClient.get(Uri.parse(asset.url));
+      if (response.statusCode != 200) {
+        throw MpException(
+          MpStatus.unavailable,
+          'Could not download ${asset.name}: HTTP ${response.statusCode}.',
+        );
+      }
+
+      return response.bodyBytes;
+    } finally {
+      if (client == null) httpClient.close();
+    }
   }
 
   /// Returns a [ModelAsset] backed by the digest-verified downloaded bytes.

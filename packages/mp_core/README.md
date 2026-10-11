@@ -88,6 +88,9 @@ results. Check `MpStatus` before treating a failure as a model or input problem.
 
 <!-- {/unsupportedContract} -->
 
+The runtime-free walkthrough of the containers and lifecycle in
+[`example/`](example/) runs on every platform, including the browser.
+
 ## Where to go next
 
 <!-- {=docsLinks} -->
@@ -95,7 +98,7 @@ results. Check `MpStatus` before treating a failure as a model or input problem.
 - [Package and API documentation](https://ifiokjr.github.io/mediapipe/)
 - [Platform support matrix](https://ifiokjr.github.io/mediapipe/platforms/)
 - [Guides](https://ifiokjr.github.io/mediapipe/guides/models/)
-- [Examples](https://github.com/ifiokjr/mediapipe/tree/main/examples) — runnable inference demos, plus a runtime-free walkthrough of the containers and lifecycle in [`example/`](example/)
+- [Examples](https://github.com/ifiokjr/mediapipe/tree/main/examples)
 
 <!-- {/docsLinks} -->
 
