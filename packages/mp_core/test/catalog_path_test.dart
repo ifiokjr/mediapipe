@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
+import 'package:mp_core/src/native/artifact.dart';
 import 'package:test/test.dart';
 
 import '../hook/build.dart' as build_hook;
@@ -16,9 +17,9 @@ void main() {
   test(
     'resolves the published catalog when no local directory is configured',
     () async {
-      final Map<String, Object?> catalog = _catalogTargets();
+      final NativeArtifactCatalog catalog = _catalog();
       final String host = '${OS.current.name}-${Architecture.current.name}';
-      if (!catalog.containsKey(host)) {
+      if (!catalog.artifacts.containsKey(host)) {
         markTestSkipped('No published runtime for $host.');
         return;
       }
@@ -50,21 +51,7 @@ void main() {
   );
 }
 
-/// Reads the artifact targets from the committed catalog without pulling in the
-/// hook's networking dependencies.
-Map<String, Object?> _catalogTargets() {
-  final File catalog = File('hook/native_artifacts.json');
-  final String source = catalog.readAsStringSync();
-  final RegExpMatch? start = RegExp(r'"artifacts"\s*:\s*\{').firstMatch(source);
-
-  if (start == null) return const <String, Object?>{};
-  final Map<String, Object?> targets = <String, Object?>{};
-  for (final RegExpMatch match in RegExp(
-    r'^\s{4}"([a-z0-9-]+)"\s*:',
-    multiLine: true,
-  ).allMatches(source.substring(start.end))) {
-    targets[match.group(1)!] = true;
-  }
-
-  return targets;
-}
+/// Reads the artifact catalog the way the build hook itself does, so the test
+/// can never drift from the hook's understanding of the file.
+NativeArtifactCatalog _catalog() =>
+    NativeArtifactCatalog.parse(File('hook/native_artifacts.json').readAsStringSync());

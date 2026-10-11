@@ -391,14 +391,21 @@ final class _WebInteractiveSegmenter implements InteractiveSegmenterBackend {
     }
 
     return switch (prompt) {
-      StrokePrompt(:final strokes) => _segmentStrokes(image, strokes),
+      StrokePrompt(:final strokes) => _segmentStrokes(image, strokes, processingOptions),
       KeypointPrompt() || ScribblePrompt() => _segmentLegacy(image, prompt, processingOptions),
     };
   }
 
-  Future<ImageSegmenterResult> _segmentStrokes(MpImage image, List<PromptStroke> strokes) async {
+  Future<ImageSegmenterResult> _segmentStrokes(
+    MpImage image,
+    List<PromptStroke> strokes,
+    ImageProcessingOptions? processingOptions,
+  ) async {
     final JSObject task = await (_split ??= createSplit());
-    callWebMethod<JSAny?>(task, 'setImage', <JSAny?>[webImageData(image)]);
+    callWebMethod<JSAny?>(task, 'setImage', <JSAny?>[
+      webImageData(image),
+      if (processingOptions != null) webJsify(_processingOptions(processingOptions)),
+    ]);
     final JSAny? mask = callWebMethod<JSAny?>(task, 'segment', <JSAny?>[
       webJsify(
         strokes

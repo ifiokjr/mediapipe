@@ -145,6 +145,13 @@ abstract final class MpExampleInputs {
     url: '${_vision}cats_and_dogs.jpg',
     sha256: 'a2eaa7ad3a1aae4e623dd362a5f737e8a88d122597ecd1a02b3e1444db56df9c',
   );
+
+  /// A raised hand pointing up, the upstream hand-landmarker test image.
+  static const MpExampleAsset pointingUp = MpExampleAsset(
+    name: 'pointing_up.jpg',
+    url: '${_vision}pointing_up.jpg',
+    sha256: 'ecf8ca2611d08fa25948a4fc10710af9120e88243a54da6356bacea17ff3e36e',
+  );
 }
 
 /// A small on-disk cache for example assets.

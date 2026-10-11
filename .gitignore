@@ -38,3 +38,4 @@ devenv.local.nix
 .monochange/local/
 publish-*.json
 .mdt/cache/
+.video_agent/

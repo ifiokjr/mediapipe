@@ -31,7 +31,7 @@ directory or `MP_EXAMPLE_CACHE`.
 | ----------------------------------------------- | ----------------------------------------------------------------------------- |
 | `examples/cli/bin/core_model_assets.dart`       | Model assets, image and audio containers, timestamp rules, and typed failures |
 | `examples/cli/bin/vision_face_detection.dart`   | Face detection over a real photograph with bounding boxes and keypoints       |
-| `examples/cli/bin/vision_hand_landmarks.dart`   | Hand landmarks, handedness, and world coordinates on the same photograph      |
+| `examples/cli/bin/vision_hand_landmarks.dart`   | Hand landmarks, handedness, and world coordinates on a raised-hand photo      |
 | `examples/cli/bin/text_language_detection.dart` | Language identification across four languages                                 |
 | `examples/cli/bin/text_tasks.dart`              | Language detection plus text embedding and cosine similarity                  |
 | `examples/cli/bin/audio_classification.dart`    | Clip classification and the native streaming contract                         |

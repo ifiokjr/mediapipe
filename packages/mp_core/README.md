@@ -95,7 +95,7 @@ results. Check `MpStatus` before treating a failure as a model or input problem.
 - [Package and API documentation](https://ifiokjr.github.io/mediapipe/)
 - [Platform support matrix](https://ifiokjr.github.io/mediapipe/platforms/)
 - [Guides](https://ifiokjr.github.io/mediapipe/guides/models/)
-- [Examples](https://github.com/ifiokjr/mediapipe/tree/main/examples)
+- [Examples](https://github.com/ifiokjr/mediapipe/tree/main/examples) — runnable inference demos, plus a runtime-free walkthrough of the containers and lifecycle in [`example/`](example/)
 
 <!-- {/docsLinks} -->
 
