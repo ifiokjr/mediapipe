@@ -244,7 +244,9 @@ final class _TypedPendingStream<T> implements _PendingStream {
   _TypedPendingStream(this.convert);
 
   final T Function(Map<Object?, Object?> event) convert;
-  final StreamController<T> controller = StreamController<T>.broadcast();
+  // Single-subscription: events that land before the caller attaches are
+  // buffered instead of dropped on the floor.
+  final StreamController<T> controller = StreamController<T>();
   final Completer<void> completion = Completer<void>();
   bool _streamClosed = false;
 
@@ -326,7 +328,7 @@ final class _MobileTextBridge {
     required String task,
     required T Function(Map<Object?, Object?> event) convert,
   }) {
-    final String requestId = '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
+    final String requestId = '${_nextRequest++}';
     final _TypedPendingStream<T> pending = _TypedPendingStream<T>(convert);
     _pending[requestId] = pending;
     unawaited(

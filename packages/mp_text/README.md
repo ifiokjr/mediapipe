@@ -64,8 +64,10 @@ On the web, import `package:mp_text/mp_text_web.dart` when configuring a custom
 CDN or self-hosted MediaPipe module location. Native models may come from a
 path, bytes, or an integrity-checked HTTPS URI.
 
-The Flutter example in [`example/`](example/) detects language, classifies, and
-embeds text against a model you supply.
+The app in [`example/`](example/) is the plugin fixture that CI compiles and
+launches on a device. Runnable inference examples live in
+[`examples/cli`](../../examples/cli): `text_language_detection.dart` identifies
+four languages, and `text_tasks.dart` adds embedding with cosine similarity.
 
 ## Failure contract
 

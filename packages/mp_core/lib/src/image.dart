@@ -149,7 +149,10 @@ final class MpImageUint8 extends MpImage {
        super._();
 
   /// Adopts an already owned [data] buffer without copying it.
-  @internal
+  ///
+  /// The buffer must not be mutated or retained by the caller afterwards.
+  /// Freshly filled buffers — for example camera-frame conversions — can skip
+  /// the megabyte-scale copy that the default constructor performs.
   MpImageUint8.adopt({
     required super.width,
     required super.height,
@@ -208,7 +211,8 @@ final class MpImageUint16 extends MpImage {
        super._();
 
   /// Adopts an already owned [data] buffer without copying it.
-  @internal
+  ///
+  /// The buffer must not be mutated or retained by the caller afterwards.
   MpImageUint16.adopt({
     required super.width,
     required super.height,
@@ -267,7 +271,8 @@ final class MpImageFloat32 extends MpImage {
        super._();
 
   /// Adopts an already owned [data] buffer without copying it.
-  @internal
+  ///
+  /// The buffer must not be mutated or retained by the caller afterwards.
   MpImageFloat32.adopt({
     required super.width,
     required super.height,

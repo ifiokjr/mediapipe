@@ -82,7 +82,9 @@ final class MpCameraFrameConverter {
         destination += 4;
       }
     }
-    return MpImage.uint8(
+    // The converter just filled this buffer and owns it; adopt it instead of
+    // paying a second full-image memcpy.
+    return MpImageUint8.adopt(
       width: image.width,
       height: image.height,
       format: MpImageFormat.srgba,
@@ -131,7 +133,7 @@ final class MpCameraFrameConverter {
         destination += 6;
       }
     }
-    return MpImage.uint8(
+    return MpImageUint8.adopt(
       width: image.width,
       height: image.height,
       format: MpImageFormat.srgb,
@@ -202,7 +204,7 @@ final class MpCameraFrameConverter {
         destination += 6;
       }
     }
-    return MpImage.uint8(
+    return MpImageUint8.adopt(
       width: image.width,
       height: image.height,
       format: MpImageFormat.srgb,

@@ -457,16 +457,15 @@ class _PlaygroundState extends State<_Playground>
               ),
             if (_live && !_faceMode)
               OutlinedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _paused = !_paused;
-                    final int reps = _counter.reps;
-                    final int burpeeReps = _burpees.reps;
-                    _reset();
-                    _counter.reps = reps;
-                    _burpees.reps = burpeeReps;
-                  });
-                },
+                onPressed: () => setState(() {
+                  _paused = !_paused;
+                  // Pausing discards the partial movement while keeping the
+                  // completed reps; counters already expose that as pause.
+                  if (_paused) {
+                    _counter.interrupt();
+                    _burpees.interrupt();
+                  }
+                }),
                 icon: Icon(_paused ? Icons.play_arrow_rounded : Icons.pause_rounded),
                 label: Text(_paused ? 'Resume' : 'Pause'),
               ),

@@ -15,7 +15,8 @@ Its `submittedCount`, `processedCount`, `droppedCount`, and `failedCount` values
 
 ## Respect platform semantics
 
-- Vision and audio `results` streams are broadcast with no replay buffer. Subscribe before submitting the first frame or chunk; a result emitted with no listener attached is dropped.
+- Vision and audio `results` streams are broadcast with no replay buffer. Subscribe before submitting the first frame or chunk; a result emitted with no listener attached is dropped. Processing failures are reported on the stream and on the future returned by the submitting call.
+- Text, generative, and RAG streaming APIs buffer events until you subscribe, so a fast first chunk is never lost.
 - Native and web vision currently serialize calls through their video APIs, then publish each copied result on `results`. There is no upstream callback path, so results arrive in order but not concurrently with a still-running inference.
 - Native callback entry points remain disabled until the bridge can copy callback-owned memory safely from native worker threads. Until then, `liveStream` mode is a compatibility shim over the video API rather than true streaming inference.
 - Web audio treats each chunk as an independent clip and adjusts its timestamp.

@@ -145,6 +145,13 @@ abstract final class MpExampleInputs {
     url: '${_vision}cats_and_dogs.jpg',
     sha256: 'a2eaa7ad3a1aae4e623dd362a5f737e8a88d122597ecd1a02b3e1444db56df9c',
   );
+
+  /// A raised hand pointing up, the upstream hand-landmarker test image.
+  static const MpExampleAsset pointingUp = MpExampleAsset(
+    name: 'pointing_up.jpg',
+    url: '${_vision}pointing_up.jpg',
+    sha256: 'ecf8ca2611d08fa25948a4fc10710af9120e88243a54da6356bacea17ff3e36e',
+  );
 }
 
 /// A small on-disk cache for example assets.
@@ -178,24 +185,9 @@ final class MpAssetCache {
     if (cached != null) return cached;
 
     final File file = File('${directory.path}/${asset.name}');
-    final Uint8List result;
-    if (file.existsSync()) {
-      result = file.readAsBytesSync();
-    } else {
-      final http.Client httpClient = client ?? http.Client();
-      try {
-        final http.Response response = await httpClient.get(Uri.parse(asset.url));
-        if (response.statusCode != 200) {
-          throw MpException(
-            MpStatus.unavailable,
-            'Could not download ${asset.name}: HTTP ${response.statusCode}.',
-          );
-        }
-        result = response.bodyBytes;
-      } finally {
-        if (client == null) httpClient.close();
-      }
-    }
+    final Uint8List result = file.existsSync()
+        ? file.readAsBytesSync()
+        : await _download(asset, client);
     final String actual = crypto.sha256.convert(result).toString();
     if (actual != asset.sha256) {
       throw MpException(
@@ -208,7 +200,25 @@ final class MpAssetCache {
       file.writeAsBytesSync(result, flush: true);
     }
     _memory[asset.url] = result;
+
     return result;
+  }
+
+  Future<Uint8List> _download(MpExampleAsset asset, http.Client? client) async {
+    final http.Client httpClient = client ?? http.Client();
+    try {
+      final http.Response response = await httpClient.get(Uri.parse(asset.url));
+      if (response.statusCode != 200) {
+        throw MpException(
+          MpStatus.unavailable,
+          'Could not download ${asset.name}: HTTP ${response.statusCode}.',
+        );
+      }
+
+      return response.bodyBytes;
+    } finally {
+      if (client == null) httpClient.close();
+    }
   }
 
   /// Returns a [ModelAsset] backed by the digest-verified downloaded bytes.

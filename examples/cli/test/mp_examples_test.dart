@@ -94,6 +94,29 @@ void main() {
     );
   });
 
+  test('every pinned example asset carries a lowercase SHA-256 digest', () {
+    const List<MpExampleAsset> assets = <MpExampleAsset>[
+      MpExampleModels.faceDetector,
+      MpExampleModels.faceLandmarker,
+      MpExampleModels.handLandmarker,
+      MpExampleModels.poseLandmarker,
+      MpExampleModels.imageClassifier,
+      MpExampleModels.languageDetector,
+      MpExampleModels.textEmbedder,
+      MpExampleModels.textEmbedderQa,
+      MpExampleModels.audioClassifier,
+      MpExampleInputs.speech16k,
+      MpExampleInputs.catsAndDogs,
+      MpExampleInputs.pointingUp,
+    ];
+
+    final RegExp digest = RegExp(r'^[a-f0-9]{64}$');
+    for (final MpExampleAsset asset in assets) {
+      expect(digest.hasMatch(asset.sha256), isTrue, reason: asset.name);
+      expect(Uri.parse(asset.url).isAbsolute, isTrue, reason: asset.name);
+    }
+  });
+
   test('mpAudioFromWav decodes mono 16-bit PCM with metadata', () {
     final Uint8List wav = _wav(
       sampleRate: 8000,

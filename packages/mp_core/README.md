@@ -88,6 +88,9 @@ results. Check `MpStatus` before treating a failure as a model or input problem.
 
 <!-- {/unsupportedContract} -->
 
+The runtime-free walkthrough of the containers and lifecycle in
+[`example/`](example/) runs on every platform, including the browser.
+
 ## Where to go next
 
 <!-- {=docsLinks} -->

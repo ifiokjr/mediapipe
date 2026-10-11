@@ -1254,7 +1254,7 @@ final class _MobileGenAiBridge {
   }
 
   _GenerationOperation startGeneration(int handle) {
-    final String requestId = '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
+    final String requestId = '${_nextRequest++}';
     final _PendingGeneration pending = _PendingGeneration();
     _pending[requestId] = pending;
     unawaited(
@@ -1274,7 +1274,7 @@ final class _MobileGenAiBridge {
   }
 
   _RagStreamOperation startRagGeneration(int handle, String query, RagRetrievalOptions options) {
-    final String requestId = '${DateTime.now().microsecondsSinceEpoch}-${_nextRequest++}';
+    final String requestId = '${_nextRequest++}';
     final _PendingRagGeneration pending = _PendingRagGeneration();
     _pending[requestId] = pending;
     unawaited(
