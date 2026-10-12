@@ -48,7 +48,10 @@ jobs:
     if: github.repository == 'ifiokjr/mediapipe' && github.event_name == 'schedule'
     permissions:
       actions: write # Dispatch the OIDC-eligible workflow_dispatch run.
-      contents: read
+      # GitHub lists draft releases only to tokens with push access. With
+      # `contents: read` the query below always came back empty, so a release
+      # whose packages did not all fit in the first batch stayed half-published.
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
