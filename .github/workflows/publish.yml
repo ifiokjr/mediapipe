@@ -13,8 +13,10 @@ name: Publish
 #   2. The first run publishes the first batch of at most four packages (the
 #      pub.dev publish rate limit) in dependency order.
 #   3. The scheduled drain dispatches the next batch on the same tag ref until
-#      every package of the release is published, then publishes (un-drafts)
-#      the GitHub release.
+#      every package of the release is published, then publishes the GitHub
+#      release and removes the draft release-pr.yml created (monochange
+#      publishes a fresh release because GitHub's by-tag lookup cannot see
+#      drafts, so the draft has to be reconciled away afterwards).
 #
 # Manual retries must be dispatched ON the release tag ref:
 #
@@ -48,7 +50,10 @@ jobs:
     if: github.repository == 'ifiokjr/mediapipe' && github.event_name == 'schedule'
     permissions:
       actions: write # Dispatch the OIDC-eligible workflow_dispatch run.
-      contents: read
+      # Draft releases are only visible to tokens with write access; a
+      # read-only token makes the listing below silently miss every draft,
+      # so the drain never dispatches and releases stay drafted forever.
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -237,6 +242,46 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: monochange step publish-release --from-ref HEAD --format json
         shell: devenv shell -- bash -e {0}
+
+      - name: Reconcile the published release
+        # monochange resolves releases through GitHub's by-tag endpoint,
+        # which never returns drafts, so the step above cannot un-draft the
+        # release release-pr.yml created; it publishes a second release and
+        # leaves the draft behind. Fail loudly when nothing is published and
+        # delete the superseded draft, which would otherwise keep the drain
+        # dispatching forever.
+        if: >-
+          steps.release.outputs.present == 'true' &&
+          (steps.batch.outputs.count == '0' || steps.batch.outputs.final == 'true')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          releases="$(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+              | jq -s 'add // []'
+          )"
+          published_count="$(
+            jq --arg tag "$RELEASE_TAG" \
+              '[.[] | select(.tag_name == $tag and .draft == false)] | length' \
+              <<<"$releases"
+          )"
+          if [ "$published_count" -eq 0 ]; then
+            echo "::error::No published GitHub release exists for $RELEASE_TAG."
+            exit 1
+          fi
+          while IFS= read -r draft_id; do
+            [ -n "$draft_id" ] || continue
+            echo "Deleting superseded draft release $draft_id for $RELEASE_TAG."
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/$draft_id"
+          done < <(
+            jq --arg tag "$RELEASE_TAG" \
+              '.[] | select(.tag_name == $tag and .draft == true) | .id' \
+              <<<"$releases"
+          )
+          echo "Release $RELEASE_TAG is published."
+        shell: bash
 
       - name: Upload MonoChange reports
         if: always() && steps.release.outputs.present == 'true'
