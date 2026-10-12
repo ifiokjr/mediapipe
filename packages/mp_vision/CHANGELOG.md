@@ -1,3 +1,39 @@
+## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)
+
+### Fixes
+
+#### Round-two correctness and polish fixes
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)
+
+- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead
+  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer
+  once per frame instead of twice with an extra megabyte-scale memcpy.
+- `mp_text`: streaming text tasks buffer platform events until the caller
+  subscribes, so a fast first chunk is never dropped between the method call
+  and `listen`.
+- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a
+  wall-clock prefix, keeping them deterministic across tests and traces.
+- `mp_vision`: the web interactive segmenter now forwards
+  `processingOptions` (rotation and region of interest) on the signed-stroke
+  path instead of silently dropping them.
+
+### Documentation
+
+#### Example and documentation updates
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)
+
+- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)
+  are now instructive walkthroughs of each package's options, containers,
+  lifecycle, and error contract instead of single-assert stubs, and remain
+  runnable on any platform including the browser.
+- The CLI hand-landmarks demo reads the upstream raised-hand test image
+  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned
+  example asset digest is now regression-tested for format.
+- The mp_text README describes the example fixture accurately and points at the
+  runnable CLI demos.
+
 ## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)
 
 ### Fixes

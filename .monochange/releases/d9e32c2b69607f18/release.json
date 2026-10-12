@@ -1,0 +1,879 @@
+{
+  "schema_version": "0.9",
+  "kind": "monochange.releaseRecord",
+  "created_at": "2026-10-12T17:27:42Z",
+  "command": "release",
+  "version": "0.1.3",
+  "versions": {
+    "mp": "0.1.3"
+  },
+  "release_targets": [
+    {
+      "id": "mp",
+      "kind": "group",
+      "version": "0.1.3",
+      "version_format": "primary",
+      "tag": true,
+      "release": true,
+      "tag_name": "v0.1.3",
+      "rendered_title": "v0.1.3 (2026-10-12)",
+      "rendered_changelog_title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+      "members": [
+        "mp_core",
+        "mp_vision",
+        "mp_camera",
+        "mp_text",
+        "mp_audio",
+        "mp_genai"
+      ]
+    }
+  ],
+  "released_packages": [
+    "mp_audio",
+    "mp_camera",
+    "mp_core",
+    "mp_genai",
+    "mp_text",
+    "mp_vision"
+  ],
+  "changed_files": [
+    "CHANGELOG.md",
+    "docs/pubspec.yaml",
+    "examples/cli/pubspec.yaml",
+    "examples/device_demo/pubspec.yaml",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_audio/pubspec.yaml",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_camera/pubspec.yaml",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_core/pubspec.yaml",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_genai/pubspec.yaml",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_text/example/pubspec.yaml",
+    "packages/mp_text/pubspec.yaml",
+    "packages/mp_vision/CHANGELOG.md",
+    "packages/mp_vision/pubspec.yaml",
+    "pubspec.yaml"
+  ],
+  "package_publications": [
+    {
+      "package": "mp_audio",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.3",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_camera",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.3",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_core",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.3",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_genai",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.3",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_text",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.3",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_vision",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.3",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    }
+  ],
+  "updated_changelogs": [
+    "CHANGELOG.md",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_vision/CHANGELOG.md"
+  ],
+  "deleted_changesets": [
+    ".changeset/mp-core-hooks-2-2.md",
+    ".changeset/quality-round-2-examples.md",
+    ".changeset/quality-round-2-features.md",
+    ".changeset/quality-round-2-fixes.md"
+  ],
+  "changesets": [
+    {
+      "path": ".changeset/mp-core-hooks-2-2.md",
+      "summary": "Resolve alongside newer native-asset toolchains",
+      "details": "`mp_core` now accepts `code_assets` 2.x and `hooks` 2.2, the versions newer\nFlutter SDKs and other build-hook packages resolve. Applications that depend on\nboth `mp_core` and a package requiring `code_assets` 2.x no longer fail version\nsolving. Older Flutter workspaces keep resolving the 1.x line.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "2c2c9dc71605f3e1b026985f21bfad4b307ec001",
+            "short_sha": "2c2c9dc",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/2c2c9dc71605f3e1b026985f21bfad4b307ec001",
+            "authored_at": "2026-10-12T18:25:58+01:00",
+            "committed_at": "2026-10-12T18:25:58+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#31",
+            "title": "fix(mp_core): accept code_assets 2.x and hooks 2.2",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/31",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "2c2c9dc71605f3e1b026985f21bfad4b307ec001",
+            "short_sha": "2c2c9dc",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/2c2c9dc71605f3e1b026985f21bfad4b307ec001",
+            "authored_at": "2026-10-12T18:25:58+01:00",
+            "committed_at": "2026-10-12T18:25:58+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#31",
+            "title": "fix(mp_core): accept code_assets 2.x and hooks 2.2",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/31",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/quality-round-2-examples.md",
+      "summary": "Example and documentation updates",
+      "details": "- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos.",
+      "targets": [
+        {
+          "id": "mp_audio",
+          "kind": "package",
+          "bump": "none",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "docs"
+        },
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "none",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "docs"
+        },
+        {
+          "id": "mp_genai",
+          "kind": "package",
+          "bump": "none",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "docs"
+        },
+        {
+          "id": "mp_text",
+          "kind": "package",
+          "bump": "none",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "docs"
+        },
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "none",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "docs"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "short_sha": "e3a6232",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "authored_at": "2026-10-11T22:07:30+01:00",
+            "committed_at": "2026-10-11T22:07:30+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#29",
+            "title": "feat: copy-free camera frames, buffered streaming, and honest demos",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/29",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "short_sha": "e3a6232",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "authored_at": "2026-10-11T22:07:30+01:00",
+            "committed_at": "2026-10-11T22:07:30+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#29",
+            "title": "feat: copy-free camera frames, buffered streaming, and honest demos",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/29",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": [
+          {
+            "provider": "github",
+            "host": "github.com",
+            "id": "#27",
+            "title": null,
+            "url": "https://github.com/ifiokjr/mediapipe/issues/27",
+            "relationship": "referenced_by_review_request"
+          }
+        ]
+      }
+    },
+    {
+      "path": ".changeset/quality-round-2-features.md",
+      "summary": "Copy-free image buffers",
+      "details": "`MpImageUint8.adopt`, `MpImageUint16.adopt`, and `MpImageFloat32.adopt` are now\npublic. An image produced from a freshly filled buffer — a camera-frame\nconversion, a decoder output — can hand the buffer over instead of paying a\nfull-image defensive copy first. The default constructors keep their copying\nbehavior, so this is an opt-in fast path.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "short_sha": "e3a6232",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "authored_at": "2026-10-11T22:07:30+01:00",
+            "committed_at": "2026-10-11T22:07:30+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#29",
+            "title": "feat: copy-free camera frames, buffered streaming, and honest demos",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/29",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "short_sha": "e3a6232",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "authored_at": "2026-10-11T22:07:30+01:00",
+            "committed_at": "2026-10-11T22:07:30+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#29",
+            "title": "feat: copy-free camera frames, buffered streaming, and honest demos",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/29",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": [
+          {
+            "provider": "github",
+            "host": "github.com",
+            "id": "#27",
+            "title": null,
+            "url": "https://github.com/ifiokjr/mediapipe/issues/27",
+            "relationship": "referenced_by_review_request"
+          }
+        ]
+      }
+    },
+    {
+      "path": ".changeset/quality-round-2-fixes.md",
+      "summary": "Round-two correctness and polish fixes",
+      "details": "- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them.",
+      "targets": [
+        {
+          "id": "mp_camera",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_genai",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_text",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "short_sha": "e3a6232",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "authored_at": "2026-10-11T22:07:30+01:00",
+            "committed_at": "2026-10-11T22:07:30+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#29",
+            "title": "feat: copy-free camera frames, buffered streaming, and honest demos",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/29",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "short_sha": "e3a6232",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e3a62321f69cfafe3909888ece6f9d14908f9fab",
+            "authored_at": "2026-10-11T22:07:30+01:00",
+            "committed_at": "2026-10-11T22:07:30+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#29",
+            "title": "feat: copy-free camera frames, buffered streaming, and honest demos",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/29",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": [
+          {
+            "provider": "github",
+            "host": "github.com",
+            "id": "#27",
+            "title": null,
+            "url": "https://github.com/ifiokjr/mediapipe/issues/27",
+            "relationship": "referenced_by_review_request"
+          }
+        ]
+      }
+    }
+  ],
+  "changelogs": [
+    {
+      "owner_id": "mp",
+      "owner_kind": "group",
+      "output": "default",
+      "stream": "default",
+      "path": "CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+        "summary": [
+          "Grouped release for `mp`."
+        ],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Copy-free image buffers\n\n_Packages:_ 🟠 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n`MpImageUint8.adopt`, `MpImageUint16.adopt`, and `MpImageFloat32.adopt` are now\npublic. An image produced from a freshly filled buffer — a camera-frame\nconversion, a decoder output — can hand the buffer over instead of paying a\nfull-image defensive copy first. The default constructors keep their copying\nbehavior, so this is an opt-in fast path."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Resolve alongside newer native-asset toolchains\n\n_Packages:_ 🟢 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #31](https://github.com/ifiokjr/mediapipe/pull/31)\n\n`mp_core` now accepts `code_assets` 2.x and `hooks` 2.2, the versions newer\nFlutter SDKs and other build-hook packages resolve. Applications that depend on\nboth `mp_core` and a package requiring `code_assets` 2.x no longer fail version\nsolving. Older Flutter workspaces keep resolving the 1.x line.",
+              "#### Round-two correctness and polish fixes\n\n_Packages:_ 🟢 _mp_vision_, 🟢 _mp_camera_, 🟢 _mp_text_, 🟢 _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them."
+            ]
+          },
+          {
+            "title": "Documentation",
+            "collapsed": false,
+            "entries": [
+              "#### Example and documentation updates\n\n_Packages:_ ⚪ _mp_core_, ⚪ _mp_vision_, ⚪ _mp_text_, ⚪ _mp_audio_, ⚪ _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)\n\nGrouped release for `mp`.\n\n### Features\n\n#### Copy-free image buffers\n\n_Packages:_ 🟠 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n`MpImageUint8.adopt`, `MpImageUint16.adopt`, and `MpImageFloat32.adopt` are now\npublic. An image produced from a freshly filled buffer — a camera-frame\nconversion, a decoder output — can hand the buffer over instead of paying a\nfull-image defensive copy first. The default constructors keep their copying\nbehavior, so this is an opt-in fast path.\n\n### Fixes\n\n#### Resolve alongside newer native-asset toolchains\n\n_Packages:_ 🟢 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #31](https://github.com/ifiokjr/mediapipe/pull/31)\n\n`mp_core` now accepts `code_assets` 2.x and `hooks` 2.2, the versions newer\nFlutter SDKs and other build-hook packages resolve. Applications that depend on\nboth `mp_core` and a package requiring `code_assets` 2.x no longer fail version\nsolving. Older Flutter workspaces keep resolving the 1.x line.\n\n#### Round-two correctness and polish fixes\n\n_Packages:_ 🟢 _mp_vision_, 🟢 _mp_camera_, 🟢 _mp_text_, 🟢 _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them.\n\n### Documentation\n\n#### Example and documentation updates\n\n_Packages:_ ⚪ _mp_core_, ⚪ _mp_vision_, ⚪ _mp_text_, ⚪ _mp_audio_, ⚪ _mp_genai_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+    },
+    {
+      "owner_id": "mp_audio",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_audio/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Documentation",
+            "collapsed": false,
+            "entries": [
+              "#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)\n\n### Documentation\n\n#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+    },
+    {
+      "owner_id": "mp_camera",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_camera/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)\n\n### Fixes\n\n#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them."
+    },
+    {
+      "owner_id": "mp_core",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_core/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Copy-free image buffers\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n`MpImageUint8.adopt`, `MpImageUint16.adopt`, and `MpImageFloat32.adopt` are now\npublic. An image produced from a freshly filled buffer — a camera-frame\nconversion, a decoder output — can hand the buffer over instead of paying a\nfull-image defensive copy first. The default constructors keep their copying\nbehavior, so this is an opt-in fast path."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Resolve alongside newer native-asset toolchains\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #31](https://github.com/ifiokjr/mediapipe/pull/31)\n\n`mp_core` now accepts `code_assets` 2.x and `hooks` 2.2, the versions newer\nFlutter SDKs and other build-hook packages resolve. Applications that depend on\nboth `mp_core` and a package requiring `code_assets` 2.x no longer fail version\nsolving. Older Flutter workspaces keep resolving the 1.x line."
+            ]
+          },
+          {
+            "title": "Documentation",
+            "collapsed": false,
+            "entries": [
+              "#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)\n\n### Features\n\n#### Copy-free image buffers\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n`MpImageUint8.adopt`, `MpImageUint16.adopt`, and `MpImageFloat32.adopt` are now\npublic. An image produced from a freshly filled buffer — a camera-frame\nconversion, a decoder output — can hand the buffer over instead of paying a\nfull-image defensive copy first. The default constructors keep their copying\nbehavior, so this is an opt-in fast path.\n\n### Fixes\n\n#### Resolve alongside newer native-asset toolchains\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #31](https://github.com/ifiokjr/mediapipe/pull/31)\n\n`mp_core` now accepts `code_assets` 2.x and `hooks` 2.2, the versions newer\nFlutter SDKs and other build-hook packages resolve. Applications that depend on\nboth `mp_core` and a package requiring `code_assets` 2.x no longer fail version\nsolving. Older Flutter workspaces keep resolving the 1.x line.\n\n### Documentation\n\n#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+    },
+    {
+      "owner_id": "mp_genai",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_genai/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them."
+            ]
+          },
+          {
+            "title": "Documentation",
+            "collapsed": false,
+            "entries": [
+              "#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)\n\n### Fixes\n\n#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them.\n\n### Documentation\n\n#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+    },
+    {
+      "owner_id": "mp_text",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_text/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them."
+            ]
+          },
+          {
+            "title": "Documentation",
+            "collapsed": false,
+            "entries": [
+              "#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)\n\n### Fixes\n\n#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them.\n\n### Documentation\n\n#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+    },
+    {
+      "owner_id": "mp_vision",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_vision/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them."
+            ]
+          },
+          {
+            "title": "Documentation",
+            "collapsed": false,
+            "entries": [
+              "#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)\n\n### Fixes\n\n#### Round-two correctness and polish fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead\n  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer\n  once per frame instead of twice with an extra megabyte-scale memcpy.\n- `mp_text`: streaming text tasks buffer platform events until the caller\n  subscribes, so a fast first chunk is never dropped between the method call\n  and `listen`.\n- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a\n  wall-clock prefix, keeping them deterministic across tests and traces.\n- `mp_vision`: the web interactive segmenter now forwards\n  `processingOptions` (rotation and region of interest) on the signed-stroke\n  path instead of silently dropping them.\n\n### Documentation\n\n#### Example and documentation updates\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)\n\n- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)\n  are now instructive walkthroughs of each package's options, containers,\n  lifecycle, and error contract instead of single-assert stubs, and remain\n  runnable on any platform including the browser.\n- The CLI hand-landmarks demo reads the upstream raised-hand test image\n  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned\n  example asset digest is now regression-tested for format.\n- The mp_text README describes the example fixture accurately and points at the\n  runnable CLI demos."
+    }
+  ],
+  "provider": {
+    "kind": "github",
+    "owner": "ifiokjr",
+    "repo": "mediapipe",
+    "host": null
+  }
+}
