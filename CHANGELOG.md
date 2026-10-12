@@ -5,6 +5,73 @@ share one version and are released together.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)
+
+Grouped release for `mp`.
+
+### Features
+
+#### Copy-free image buffers
+
+_Packages:_ 🟠 _mp_core_
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)
+
+`MpImageUint8.adopt`, `MpImageUint16.adopt`, and `MpImageFloat32.adopt` are now
+public. An image produced from a freshly filled buffer — a camera-frame
+conversion, a decoder output — can hand the buffer over instead of paying a
+full-image defensive copy first. The default constructors keep their copying
+behavior, so this is an opt-in fast path.
+
+### Fixes
+
+#### Resolve alongside newer native-asset toolchains
+
+_Packages:_ 🟢 _mp_core_
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #31](https://github.com/ifiokjr/mediapipe/pull/31)
+
+`mp_core` now accepts `code_assets` 2.x and `hooks` 2.2, the versions newer
+Flutter SDKs and other build-hook packages resolve. Applications that depend on
+both `mp_core` and a package requiring `code_assets` 2.x no longer fail version
+solving. Older Flutter workspaces keep resolving the 1.x line.
+
+#### Round-two correctness and polish fixes
+
+_Packages:_ 🟢 _mp_vision_, 🟢 _mp_camera_, 🟢 _mp_text_, 🟢 _mp_genai_
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)
+
+- `mp_camera`: frame conversion adopts the freshly filled pixel buffers instead
+  of copying them again, so a 1080p frame now allocates its RGB/RGBA buffer
+  once per frame instead of twice with an extra megabyte-scale memcpy.
+- `mp_text`: streaming text tasks buffer platform events until the caller
+  subscribes, so a fast first chunk is never dropped between the method call
+  and `listen`.
+- `mp_genai`, `mp_text`: streaming request ids are a plain counter instead of a
+  wall-clock prefix, keeping them deterministic across tests and traces.
+- `mp_vision`: the web interactive segmenter now forwards
+  `processingOptions` (rotation and region of interest) on the signed-stroke
+  path instead of silently dropping them.
+
+### Documentation
+
+#### Example and documentation updates
+
+_Packages:_ ⚪ _mp_core_, ⚪ _mp_vision_, ⚪ _mp_text_, ⚪ _mp_audio_, ⚪ _mp_genai_
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #29](https://github.com/ifiokjr/mediapipe/pull/29) · _Related issues:_ [#27](https://github.com/ifiokjr/mediapipe/issues/27)
+
+- The bare package examples (`mp_core`, `mp_audio`, `mp_genai`, `mp_vision`)
+  are now instructive walkthroughs of each package's options, containers,
+  lifecycle, and error contract instead of single-assert stubs, and remain
+  runnable on any platform including the browser.
+- The CLI hand-landmarks demo reads the upstream raised-hand test image
+  (`pointing_up.jpg`) instead of the cats-and-dogs photo, and every pinned
+  example asset digest is now regression-tested for format.
+- The mp_text README describes the example fixture accurately and points at the
+  runnable CLI demos.
+
 ## [0.1.2](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.2) (2026-10-07)
 
 Grouped release for `mp`.
