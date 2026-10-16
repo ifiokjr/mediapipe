@@ -347,5 +347,7 @@ MpImageUint8 uprightImage(MpImageUint8 image, int rotation) {
     }
   }
 
-  return MpImageUint8(width: width, height: height, format: image.format, data: pixels);
+  // The rotation just filled this buffer and owns it; adopt skips the second
+  // full-image memcpy of the copying constructor.
+  return MpImageUint8.adopt(width: width, height: height, format: image.format, data: pixels);
 }

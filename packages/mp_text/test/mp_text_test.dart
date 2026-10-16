@@ -154,6 +154,35 @@ void main() {
     expect(result.corrections.clear, throwsUnsupportedError);
   });
 
+  test('a failed close reopens the task so cleanup can be retried', () async {
+    final _FlakyCloseTextRuntime flakyRuntime = _FlakyCloseTextRuntime();
+    final LanguageDetector detector = await LanguageDetector.create(
+      LanguageDetectorOptions(baseOptions: _baseOptions()),
+      runtime: flakyRuntime,
+    );
+    final TextClassifier classifier = await TextClassifier.create(
+      TextClassifierOptions(baseOptions: _baseOptions()),
+      runtime: flakyRuntime,
+    );
+    final TextEmbedder embedder = await TextEmbedder.create(
+      TextEmbedderOptions(baseOptions: _baseOptions()),
+      runtime: flakyRuntime,
+    );
+
+    Future<void> retryClose(MpTask task, String name, _FlakyCloseBackend backend) async {
+      await expectLater(task.close(), throwsStateError, reason: '$name first close fails');
+      expect(task.isClosed, isFalse, reason: '$name reopens after a failed close');
+
+      await task.close();
+      expect(task.isClosed, isTrue, reason: '$name closes on retry');
+      expect(backend.closeCount, 2, reason: '$name retried the backend close');
+    }
+
+    await retryClose(detector, 'LanguageDetector', flakyRuntime.languageDetector);
+    await retryClose(classifier, 'TextClassifier', flakyRuntime.classifier);
+    await retryClose(embedder, 'TextEmbedder', flakyRuntime.embedder);
+  });
+
   test('unsupported runtimes fail honestly', () async {
     await expectLater(
       LanguageDetector.create(
@@ -202,6 +231,55 @@ final class _FakeTextRuntime implements TextRuntime {
 
     return summarizer;
   }
+}
+
+final class _FlakyCloseBackend
+    implements MpTask, LanguageDetectorBackend, TextClassifierBackend, TextEmbedderBackend {
+  int closeCount = 0;
+
+  @override
+  bool get isClosed => false;
+
+  @override
+  Future<LanguageDetectorResult> detect(String text) => throw UnimplementedError();
+
+  @override
+  Future<ClassificationResult> classify(String text) => throw UnimplementedError();
+
+  @override
+  Future<EmbeddingResult> embed(String text, {TextEmbedderFormatContext? formatContext}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> close() async {
+    closeCount++;
+    if (closeCount == 1) throw StateError('close failed');
+  }
+}
+
+final class _FlakyCloseTextRuntime implements TextRuntime {
+  final _FlakyCloseBackend languageDetector = _FlakyCloseBackend();
+  final _FlakyCloseBackend classifier = _FlakyCloseBackend();
+  final _FlakyCloseBackend embedder = _FlakyCloseBackend();
+
+  @override
+  Future<LanguageDetectorBackend> createLanguageDetector(LanguageDetectorOptions options) async =>
+      languageDetector;
+
+  @override
+  Future<TextClassifierBackend> createTextClassifier(TextClassifierOptions options) async =>
+      classifier;
+
+  @override
+  Future<TextEmbedderBackend> createTextEmbedder(TextEmbedderOptions options) async => embedder;
+
+  @override
+  Future<TextProofreaderBackend> createTextProofreader(TextProofreaderOptions options) =>
+      throw UnimplementedError();
+
+  @override
+  Future<TextSummarizerBackend> createTextSummarizer(TextSummarizerOptions options) =>
+      throw UnimplementedError();
 }
 
 base class _FakeTask implements MpTask {

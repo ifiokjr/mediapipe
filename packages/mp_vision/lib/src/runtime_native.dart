@@ -171,9 +171,12 @@ final class _NativeVisionBackend<T> implements VisionTaskBackend<T> {
   @override
   Future<void> close() => _run(() async {
     if (_closed) return;
-    _closed = true;
+    // Only seal the backend after the native task is gone: a failed close
+    // throws with `_closed` still false, so the facade can reopen and retry
+    // instead of leaking the worker isolate and the native task.
     await _worker.request<void>(const _VisionClose());
     await _worker.dispose();
+    _closed = true;
     await _results.close();
   });
 
@@ -213,9 +216,9 @@ final class _NativeInteractiveSegmenter implements InteractiveSegmenterBackend {
   Future<void> close() {
     final Future<void> operation = _tail.then((_) async {
       if (_closed) return;
-      _closed = true;
       await _worker.request<void>(const _VisionClose());
       await _worker.dispose();
+      _closed = true;
     });
     _tail = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return operation;
@@ -691,8 +694,9 @@ DetectionResult _processFaceDetector(
   final ffi.Pointer<native.MpFaceDetectorResult> result = scope
       .allocator<native.MpFaceDetectorResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -717,7 +721,7 @@ DetectionResult _processFaceDetector(
     return native.detectionResultFromNative(result.ref, timestampMs: timestampMs);
   } finally {
     if (ownsResult) native.MpFaceDetectorCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -732,8 +736,9 @@ FaceLandmarkerResult _processFaceLandmarker(
   final ffi.Pointer<native.MpFaceLandmarkerResult> result = scope
       .allocator<native.MpFaceLandmarkerResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -758,7 +763,7 @@ FaceLandmarkerResult _processFaceLandmarker(
     return faceLandmarkerResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpFaceLandmarkerCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -773,8 +778,9 @@ GestureRecognizerResult _processGestureRecognizer(
   final ffi.Pointer<native.MpGestureRecognizerResult> result = scope
       .allocator<native.MpGestureRecognizerResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -799,7 +805,7 @@ GestureRecognizerResult _processGestureRecognizer(
     return gestureRecognizerResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpGestureRecognizerCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -814,8 +820,9 @@ HandLandmarkerResult _processHandLandmarker(
   final ffi.Pointer<native.MpHandLandmarkerResult> result = scope
       .allocator<native.MpHandLandmarkerResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -840,7 +847,7 @@ HandLandmarkerResult _processHandLandmarker(
     return handLandmarkerResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpHandLandmarkerCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -855,8 +862,9 @@ HolisticLandmarkerResult _processHolisticLandmarker(
   final ffi.Pointer<native.MpHolisticLandmarkerResult> result = scope
       .allocator<native.MpHolisticLandmarkerResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -881,7 +889,7 @@ HolisticLandmarkerResult _processHolisticLandmarker(
     return holisticLandmarkerResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpHolisticLandmarkerCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -896,8 +904,9 @@ ClassificationResult _processImageClassifier(
   final ffi.Pointer<native.MpImageClassifierResult> result = scope
       .allocator<native.MpImageClassifierResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -922,7 +931,7 @@ ClassificationResult _processImageClassifier(
     return native.classificationResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpImageClassifierCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -937,8 +946,9 @@ EmbeddingResult _processImageEmbedder(
   final ffi.Pointer<native.ImageEmbedderResult> result = scope
       .allocator<native.ImageEmbedderResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -963,7 +973,7 @@ EmbeddingResult _processImageEmbedder(
     return native.embeddingResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpImageEmbedderCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -978,8 +988,9 @@ ImageSegmenterResult _processImageSegmenter(
   final ffi.Pointer<native.MpImageSegmenterResult> result = scope
       .allocator<native.MpImageSegmenterResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -1004,7 +1015,7 @@ ImageSegmenterResult _processImageSegmenter(
     return imageSegmenterResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpImageSegmenterCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -1019,8 +1030,9 @@ DetectionResult _processObjectDetector(
   final ffi.Pointer<native.MpObjectDetectorResult> result = scope
       .allocator<native.MpObjectDetectorResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -1045,7 +1057,7 @@ DetectionResult _processObjectDetector(
     return native.detectionResultFromNative(result.ref, timestampMs: timestampMs);
   } finally {
     if (ownsResult) native.MpObjectDetectorCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -1060,8 +1072,9 @@ PoseLandmarkerResult _processPoseLandmarker(
   final ffi.Pointer<native.MpPoseLandmarkerResult> result = scope
       .allocator<native.MpPoseLandmarkerResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
       timestampMs == null
@@ -1086,7 +1099,7 @@ PoseLandmarkerResult _processPoseLandmarker(
     return poseLandmarkerResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpPoseLandmarkerCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }
@@ -1101,8 +1114,9 @@ ImageSegmenterResult _segmentInteractive(
   final ffi.Pointer<native.MpImageSegmenterResult> result = scope
       .allocator<native.MpImageSegmenterResult>();
   var ownsResult = false;
-  final native.MpImagePtr input = scope.image(image);
+  native.MpImagePtr? input;
   try {
+    input = scope.image(image);
     final ffi.Pointer<native.MpRegionOfInterest> region = _interactiveRegion(scope, prompt);
     final ffi.Pointer<ffi.Pointer<ffi.Char>> error = scope.errorOutput();
     scope.check(
@@ -1120,7 +1134,7 @@ ImageSegmenterResult _segmentInteractive(
     return imageSegmenterResultFromNative(result.ref);
   } finally {
     if (ownsResult) native.MpInteractiveSegmenterLegacyCloseResult(result);
-    native.MpImageFree(input);
+    if (input != null) native.MpImageFree(input);
     scope.release();
   }
 }

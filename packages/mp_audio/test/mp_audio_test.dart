@@ -58,6 +58,21 @@ void main() {
     expect(() => classifier.classify(_audio()), throwsA(isA<MpTaskClosedError>()));
   });
 
+  test('a failed close reopens the classifier so cleanup can be retried', () async {
+    final _FlakyAudioRuntime flakyRuntime = _FlakyAudioRuntime();
+    final AudioClassifier classifier = await AudioClassifier.create(
+      AudioClassifierOptions(baseOptions: _baseOptions()),
+      runtime: flakyRuntime,
+    );
+
+    await expectLater(classifier.close(), throwsStateError);
+    expect(classifier.isClosed, isFalse);
+
+    await classifier.close();
+    expect(classifier.isClosed, isTrue);
+    expect(flakyRuntime.backend.closeCount, 2);
+  });
+
   test('unsupported runtimes fail honestly', () async {
     await expectLater(
       AudioClassifier.create(
@@ -89,6 +104,37 @@ final class _FakeAudioRuntime implements AudioRuntime {
   @override
   Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async =>
       backend;
+}
+
+final class _FlakyAudioRuntime implements AudioRuntime {
+  final _FlakyAudioClassifier backend = _FlakyAudioClassifier();
+
+  @override
+  Future<AudioClassifierBackend> createAudioClassifier(AudioClassifierOptions options) async =>
+      backend;
+}
+
+final class _FlakyAudioClassifier implements AudioClassifierBackend {
+  int closeCount = 0;
+
+  @override
+  bool get isClosed => false;
+
+  @override
+  Stream<AudioClassifierResult> get results => const Stream<AudioClassifierResult>.empty();
+
+  @override
+  Future<AudioClassifierResult> classify(AudioData audio) async =>
+      AudioClassifierResult(const <ClassificationResult>[]);
+
+  @override
+  Future<void> classifyAsync(AudioData audio, int timestampMs) async {}
+
+  @override
+  Future<void> close() async {
+    closeCount++;
+    if (closeCount == 1) throw StateError('close failed');
+  }
 }
 
 final class _FakeAudioClassifier implements AudioClassifierBackend {

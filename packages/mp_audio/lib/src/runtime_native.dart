@@ -73,9 +73,10 @@ final class _NativeAudioClassifier implements AudioClassifierBackend {
   @override
   Future<void> close() => _run(() async {
     if (_closed) return;
-    _closed = true;
+    // Seal only after the native task is gone so a failed close stays retriable.
     await _worker.request<void>(const _AudioClose());
     await _worker.dispose();
+    _closed = true;
   });
 
   Future<T> _run<T>(Future<T> Function() action) {

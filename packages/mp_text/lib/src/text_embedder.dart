@@ -83,6 +83,7 @@ final class TextEmbedder implements MpTask {
 
   final TextEmbedderBackend _backend;
   final TaskLifecycle _lifecycle = TaskLifecycle('TextEmbedder');
+  Future<void>? _closeFuture;
 
   /// Creates an embedder using [runtime], or the active platform adapter.
   static Future<TextEmbedder> create(TextEmbedderOptions options, {TextRuntime? runtime}) async =>
@@ -99,8 +100,15 @@ final class TextEmbedder implements MpTask {
   }
 
   @override
-  Future<void> close() async {
-    if (!_lifecycle.markClosed()) return;
-    await _backend.close();
+  Future<void> close() {
+    if (!_lifecycle.markClosed()) return _closeFuture ?? Future<void>.value();
+
+    return _closeFuture = _backend.close().catchError((Object error, StackTrace stackTrace) {
+      // Reopen the facade so the failed cleanup can be retried instead of
+      // leaking the backend's isolate and native handles forever.
+      _closeFuture = null;
+      _lifecycle.reopen();
+      Error.throwWithStackTrace(error, stackTrace);
+    });
   }
 }
