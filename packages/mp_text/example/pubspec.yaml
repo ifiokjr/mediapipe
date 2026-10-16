@@ -12,9 +12,9 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  mp_core: ^0.1.3
-  mp_genai: ^0.1.3
-  mp_text: ^0.1.3
+  mp_core: ^0.1.4
+  mp_genai: ^0.1.4
+  mp_text: ^0.1.4
 
 dev_dependencies:
   flutter_test:
