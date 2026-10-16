@@ -66,6 +66,7 @@ final class AudioClassifier implements MpTask {
   final AudioClassifierBackend _backend;
   final TaskLifecycle _lifecycle = TaskLifecycle('AudioClassifier');
   final TimestampTracker _timestamps = TimestampTracker();
+  Future<void>? _closeFuture;
 
   /// Creates a classifier using [runtime], or the active platform adapter.
   static Future<AudioClassifier> create(
@@ -117,8 +118,15 @@ final class AudioClassifier implements MpTask {
   }
 
   @override
-  Future<void> close() async {
-    if (!_lifecycle.markClosed()) return;
-    await _backend.close();
+  Future<void> close() {
+    if (!_lifecycle.markClosed()) return _closeFuture ?? Future<void>.value();
+
+    return _closeFuture = _backend.close().catchError((Object error, StackTrace stackTrace) {
+      // Reopen the facade so the failed cleanup can be retried instead of
+      // leaking the backend's isolate and native handles forever.
+      _closeFuture = null;
+      _lifecycle.reopen();
+      Error.throwWithStackTrace(error, stackTrace);
+    });
   }
 }
