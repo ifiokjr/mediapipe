@@ -6,8 +6,8 @@ inputs:
       nixpkgs:
         follows: nixpkgs
   ifiokjr-nixpkgs:
-    # Carries monochange 0.20.0 and mdt 0.9.6.
-    url: github:ifiokjr/nixpkgs/3c2b86c5e0c46968e76295cc6b414194d8a7a61f
+    # Carries monochange 0.20.1 and mdt 0.9.6.
+    url: github:ifiokjr/nixpkgs/3bff487ba391c27ef479d1f02c4b93d0c35bcedf
     inputs:
       nixpkgs:
         follows: nixpkgs
