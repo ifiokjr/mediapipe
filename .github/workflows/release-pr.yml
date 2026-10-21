@@ -18,8 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
+      # Upload the release files as git blobs and a tree. This pushes no
+      # branch; the monochange GitHub App writes the release commit and pull
+      # request on monochange.dev, and this run proves its repository with an
+      # OIDC token.
       contents: write
+      # Add the attribution line to the release pull request body.
       pull-requests: write
+      id-token: write
     outputs:
       is_release_commit: ${{ steps.release-record.outputs.is_release_commit }}
     steps:
@@ -34,12 +40,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure release identity
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch --force --tags origin
+      - name: Fetch release tags
+        run: git fetch --force --tags origin
         shell: bash
 
       - name: Detect a merged release commit
@@ -79,36 +81,21 @@ jobs:
           fi
         shell: bash
 
-      - name: Require release PR token
-        if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
-        env:
-          RELEASE_PR_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
-        run: |
-          if [ -z "$RELEASE_PR_TOKEN" ]; then
-            echo "::error::RELEASE_PR_TOKEN is not configured."
-            exit 1
-          fi
-        shell: bash
-
-      - name: Configure GitHub authentication
-        if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
-        env:
-          # A repository-scoped PAT makes release-branch pushes trigger CI.
-          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
-        run: gh auth setup-git
-        shell: bash
-
       - name: Open or refresh the release PR
         if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # monochange.dev's GitHub App creates a verified release commit and
+          # opens the release pull request as the monochange bot, so the pull
+          # request's own workflows run without a personal access token.
+          MONOCHANGE_RELEASE_BACKEND: hosted
         run: monochange run release
         shell: devenv shell -- bash -e {0}
 
       - name: Add release PR attribution
         if: steps.release-record.outputs.is_release_commit != 'true' && steps.changesets.outputs.present == 'true'
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           pr_number="$(
