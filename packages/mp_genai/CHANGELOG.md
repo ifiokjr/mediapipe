@@ -1,3 +1,9 @@
+## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-23)
+
+### Changed
+
+- **No package-specific changes were recorded; `mp_genai` was updated to 0.1.4 as part of group `mp`.**
+
 ## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)
 
 ### Fixes
