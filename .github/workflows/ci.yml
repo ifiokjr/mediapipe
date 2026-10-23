@@ -28,10 +28,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: ifiokjr/monostyle@be483a75d05cdc6d64493a3dd67025e3ecd79551 # v0.3.25
+      - uses: ifiokjr/monostyle@ab5d8d2f6af6ea12d5655a11ab61b92c2365ddfe # v0.3.27
         if: always()
         with:
-          version: 0.3.25
+          version: 0.3.27
 
       - name: Set up toolchains
         uses: ./.github/actions/devenv
