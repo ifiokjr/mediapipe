@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # Pull requests run against any base so every layer of a stacked set of
+  # pull requests is verified, not only the one currently targeting main.
   pull_request:
-    branches: [main]
   merge_group:
     branches: [main]
 
