@@ -47,7 +47,9 @@ production clients.
 
 `MpImage` validates dimensions, sample storage, and tightly packed layout when it is constructed. It supports the pixel formats accepted by MediaPipe’s C image API. `AudioData` similarly validates channel count, sample rate, and interleaved samples.
 
-Immutable input objects avoid a subtle class of use-after-return bugs in asynchronous camera and native calls. That safety requires a copy at the public boundary; integrations can use frame dropping to keep allocation bounded.
+Immutable input objects avoid a subtle class of use-after-return bugs in asynchronous camera and native calls. The default constructors copy at that boundary; pipelines that allocate a buffer solely for one image — a camera-frame conversion, a decoder output — can hand it over with the `adopt` constructors instead.
+
+`PixelConverter` turns the camera pixel layouts producers actually deliver — BGRA8888, NV21, and planar or semi-planar YUV420 with padded rows — into packed `MpImage`s through pure Dart kernels. The kernels are the SDK’s per-frame hot path; the repository’s benchmark gate tracks them on every change.
 
 ## Lifecycle and time
 

@@ -7,6 +7,7 @@
     "**/.mp-sdk/**",
     "**/Pods/**",
     "**/build/**",
+    "**/coverage/**",
     "**/*.g.dart",
     "**/*.jaspr.dart",
     "expo-mediapipe/**",

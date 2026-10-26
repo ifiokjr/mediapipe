@@ -47,6 +47,14 @@ tracked Kotlin files to ktlint's formatter and Swift files to `swift-format`.
 `lint:all` separately runs ktlint and SwiftLint so non-formatting violations
 also fail locally and in CI.
 
+Two further gates run on every pull request. `coverage:collect` plus
+`coverage:check` fail when a changed production line is not executed by the
+unit tests, and the `perf` job runs the `benchmarks/` suite at the base commit
+and at the pull-request commit on the same runner, failing when a hot-path
+benchmark regresses. When you add or change a per-frame code path, add a benchmark
+next to it; keep benchmark names stable so regressions cannot hide behind a
+rename.
+
 Generated FFI bindings must be reproducible from the pinned upstream tag. Never
 edit `bindings.g.dart` manually. Model binaries, credentials, and local native
 builds do not belong in Git.

@@ -50,4 +50,7 @@ conversion, scheduling, and failure cleanup. The current real-model lanes run
 language detection in Chrome and macOS, plus face detection against the macOS C
 runtime. The mobile fixture compiles and launches the Android `mp_text` and
 `mp_genai` plugins and the iOS `mp_text` plugin. Proofreader, summarizer, and
-Android GenAI model tests remain pending.
+Android GenAI model tests remain pending. Two gates run on every pull request:
+changed production lines must be covered by the unit tests, and the
+`benchmarks/` hot-path suite must not regress against the base commit on the
+same runner.

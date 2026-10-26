@@ -6,6 +6,7 @@
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
+flutter_*.log
 .pub-cache/
 .pub/
 /build/

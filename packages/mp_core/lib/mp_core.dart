@@ -6,5 +6,6 @@ export 'src/containers.dart';
 export 'src/errors.dart';
 export 'src/image.dart';
 export 'src/options.dart';
+export 'src/pixel_conversion.dart';
 export 'src/platform.dart';
 export 'src/task.dart';
