@@ -132,7 +132,7 @@ void main() {
   });
 
   test('the executable entry point runs the quick suite', () async {
-    final ProcessResult result = await Process.run(Platform.resolvedExecutable, <String>[
+    final ProcessResult result = await Process.run(_dartExecutable(), <String>[
       'run',
       'benchmarks/bin/run.dart',
       '--quick',
@@ -144,7 +144,41 @@ void main() {
     expect(result.exitCode, 0, reason: '${result.stderr}');
     expect(result.stdout, contains('result_containers/normalized_landmarks/face_478'));
   }, timeout: const Timeout(Duration(minutes: 3)));
+
+  test('locates a dart executable', () {
+    final String dart = _dartExecutable();
+
+    expect(dart, isNotEmpty);
+    expect(_fileName(dart), anyOf('dart', 'dart.exe'));
+  });
 }
+
+/// The `dart` command-line tool to spawn.
+///
+/// Under `dart test` the running executable is `dart` itself. Under
+/// `flutter test` it is the `flutter_tester` engine binary, which has no `run`
+/// command, so the Dart SDK bundled with that Flutter checkout is located by
+/// walking up to the SDK root; `dart` on the search path is the last resort.
+String _dartExecutable() {
+  final String resolved = Platform.resolvedExecutable;
+
+  if (_fileName(resolved) == 'dart' || _fileName(resolved) == 'dart.exe') return resolved;
+
+  final String suffix = Platform.isWindows ? '.exe' : '';
+  Directory directory = File(resolved).parent;
+
+  while (directory.path != directory.parent.path) {
+    final File bundled = File('${directory.path}/bin/cache/dart-sdk/bin/dart$suffix');
+
+    if (bundled.existsSync()) return bundled.path;
+
+    directory = directory.parent;
+  }
+
+  return 'dart';
+}
+
+String _fileName(String path) => path.split(RegExp(r'[\\/]')).last;
 
 String _repositoryRoot() {
   Directory directory = Directory.current;

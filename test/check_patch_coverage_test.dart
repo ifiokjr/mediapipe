@@ -297,7 +297,15 @@ part 'c.dart';
       );
       expect(coverage.isDirectiveOnly("export 'a.dart';\nint x = 1;\n"), isFalse);
       expect(coverage.isDirectiveOnly('/* open */ void f() {}'), isFalse);
+      expect(coverage.isDirectiveOnly('/* never closed'), isFalse);
       expect(coverage.isDirectiveOnly(''), isTrue);
+      // The formatter wraps long directives onto continuation lines.
+      expect(
+        coverage.isDirectiveOnly(
+          "export 'package:mp_core/mp_core.dart'\n    show LatestFrameFailure, LatestFrameScheduler;\n",
+        ),
+        isTrue,
+      );
     });
   });
 

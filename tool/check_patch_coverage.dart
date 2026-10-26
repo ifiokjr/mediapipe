@@ -374,37 +374,23 @@ List<String> expandLcovPattern(String root, String pattern) {
 /// contain no executable code, so no coverage record is ever written for them;
 /// without this check a changed export line would be reported as unmeasured.
 bool isDirectiveOnly(String source) {
-  bool inBlockComment = false;
+  // Drop block and line comments, then look at each `;`-terminated statement
+  // so directives wrapped across lines by the formatter still count.
+  final String code = source
+      .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), ' ')
+      .replaceAll(RegExp(r'//[^\n]*'), ' ');
 
-  for (final String rawLine in source.split('\n')) {
-    String line = rawLine.trim();
+  for (final String statement in code.split(';')) {
+    final String trimmed = statement.trim();
 
-    // Strip block comments, which may open or close mid-line, before looking
-    // at whatever code remains on the line.
-    while (true) {
-      if (inBlockComment) {
-        final int end = line.indexOf('*/');
-
-        if (end == -1) break;
-
-        line = line.substring(end + 2).trim();
-        inBlockComment = false;
-      } else if (line.startsWith('/*')) {
-        inBlockComment = true;
-        line = line.substring(2);
-      } else {
-        break;
-      }
-    }
-
-    if (inBlockComment || line.isEmpty || line.startsWith('//')) continue;
+    if (trimmed.isEmpty) continue;
 
     final bool isDirective =
-        line.startsWith('export ') ||
-        line.startsWith('import ') ||
-        line.startsWith('library') ||
-        line.startsWith('part ') ||
-        line.startsWith('@');
+        trimmed.startsWith('export ') ||
+        trimmed.startsWith('import ') ||
+        trimmed.startsWith('library') ||
+        trimmed.startsWith('part ') ||
+        trimmed.startsWith('@');
 
     if (!isDirective) return false;
   }
