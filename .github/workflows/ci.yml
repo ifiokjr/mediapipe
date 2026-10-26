@@ -99,6 +99,72 @@ jobs:
           fi
         shell: devenv shell -- bash -e {0}
 
+  coverage:
+    # Every changed production line must execute under the unit-test lanes.
+    # Browser-only and native-runtime files are excluded inside the tool.
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    defaults:
+      run:
+        shell: devenv shell bash -- -e {0}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect line coverage
+        run: coverage:collect
+
+      - name: Verify patch coverage
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: coverage:check --base "$BASE_SHA" --summary "$GITHUB_STEP_SUMMARY"
+
+  perf:
+    # Runs the hot-path benchmarks at the base commit and at this commit on the
+    # same runner, then fails on median regressions beyond the tolerance. Both
+    # runs sharing one machine cancels out runner-to-runner speed differences.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    defaults:
+      run:
+        shell: devenv shell bash -- -e {0}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up toolchains
+        uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Benchmark the base commit
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: |
+          mkdir -p /tmp/mp-bench
+          bench:baseline "$BASE_SHA" /tmp/mp-bench/base.json
+
+      - name: Benchmark this commit
+        run: bench:run --rounds 2 --json /tmp/mp-bench/head.json
+
+      - name: Compare against the base commit
+        run: |
+          bench:compare --base /tmp/mp-bench/base.json --head /tmp/mp-bench/head.json \
+            --summary "$GITHUB_STEP_SUMMARY"
+
   windows:
     runs-on: windows-latest
     timeout-minutes: 30

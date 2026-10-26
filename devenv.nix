@@ -284,6 +284,69 @@ in
       '';
       description = "Run unit and example tests, then build and validate the documentation site.";
     };
+    "coverage:collect" = {
+      exec = ''
+        set -euo pipefail
+        # Root tool tests run on the VM and are formatted from the workspace
+        # package config so their lcov paths are repository-relative.
+        repo-dart test test --coverage=coverage/root
+        repo-dart run coverage:format_coverage --lcov --in=coverage/root \
+          --out=coverage/lcov.info --report-on=tool \
+          --packages=.dart_tool/package_config.json
+        # Pure Dart packages also run on the VM; the benchmarks suite spawns
+        # `dart run`, which the Flutter tester cannot provide.
+        for package in benchmarks packages/mp_audio packages/mp_core packages/mp_vision; do
+          if [ -d "$package/test" ]; then
+            (cd "$package" && repo-dart test --coverage=coverage)
+            repo-dart run coverage:format_coverage --lcov --in="$package/coverage" \
+              --out="$package/coverage/lcov.info" --report-on="$package/lib" \
+              --packages=.dart_tool/package_config.json
+          fi
+        done
+        # Flutter packages need the Flutter tester.
+        for package in packages/mp_camera packages/mp_genai packages/mp_text; do
+          if [ -d "$package/test" ]; then
+            (cd "$package" && repo-flutter test --coverage)
+          fi
+        done
+      '';
+      description = "Run every unit-test suite with coverage and write lcov files.";
+    };
+    "coverage:check" = {
+      exec = ''repo-dart run tool/check_patch_coverage.dart "$@"'';
+      description = "Fail unless every changed production line is covered by tests.";
+    };
+    "bench:run" = {
+      exec = ''repo-dart run benchmarks/bin/run.dart "$@"'';
+      description = "Run the hot-path benchmarks; pass --help for options.";
+    };
+    "bench:baseline" = {
+      exec = ''
+        set -euo pipefail
+        commit="''${1:?usage: bench:baseline <commit> <output.json>}"
+        output="''${2:?usage: bench:baseline <commit> <output.json>}"
+        parent="$(mktemp -d)"
+        worktree="$parent/base"
+        git worktree add --detach "$worktree" "$commit"
+        trap 'git worktree remove --force "$worktree" >/dev/null 2>&1 || true; rm -rf "$parent"' EXIT
+        if [ ! -f "$worktree/benchmarks/bin/run.dart" ]; then
+          printf '{"schemaVersion":1,"benchmarks":[]}\n' > "$output"
+          echo "No benchmark suite at $commit; every benchmark will be reported as new."
+          exit 0
+        fi
+        (
+          cd "$worktree"
+          export DEVENV_ROOT="$worktree"
+          repo-flutter pub get
+          repo-dart run benchmarks/bin/run.dart --rounds 2 --json "$output"
+        )
+      '';
+      description = "Run the benchmark suite as of another commit and write its JSON results.";
+    };
+    "bench:compare" = {
+      exec = ''repo-dart run tool/compare_benchmarks.dart "$@"'';
+      description = "Compare two benchmark result files and fail on regressions.";
+    };
     "test:examples" = {
       exec = ''
         set -euo pipefail

@@ -39,7 +39,7 @@ void onCameraImage(CameraImage image) {
 }
 ```
 
-The conversion produces tightly packed RGB or RGBA bytes. `mirroredPreview` describes presentation only: inference receives the unmirrored sensor image.
+The conversion produces tightly packed RGB or RGBA bytes in the `PixelConverter` kernels from `mp_core`, and the returned image adopts that buffer without a second copy. The kernels are measured by the repository’s benchmark gate on every change. `mirroredPreview` describes presentation only: inference receives the unmirrored sensor image.
 
 ## Keep results fresh
 
