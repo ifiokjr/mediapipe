@@ -70,6 +70,6 @@ canvas.drawRect(
 );
 ```
 
-`MpImage.toUiImage()` uploads still images and segmentation masks as `ui.Image` for `canvas.drawImage`, and `ui.Image.toMpImage()` reads a decoded image back into an `MpImage` for still-image inference. Confidence masks render as opaque grayscale; other pixel layouts must be converted to sRGB, sRGBA, or gray first.
+`MpImage.toUiImage()` uploads still images and segmentation masks as `ui.Image` for `canvas.drawImage`, and `ui.Image.toMpImage()` reads a decoded image back into an `MpImage` for still-image inference. Confidence masks render as opaque grayscale; other pixel layouts must be converted to sRGB, sRGBA, or gray first. Landmark lists from native inference are `NormalizedLandmarkList`/`LandmarkList` — real `List`s backed by one packed buffer whose `values` holds five floats per landmark, so tight painting loops can read coordinates without building objects.
 
 Processing errors are published on `scheduler.failures` and increment `failedCount`; a failed callback does not stop later frames. `LatestFrameScheduler` lives in `mp_core` and is re-exported here; pair it with `mp_core`'s `FramePacer` to skip frames before converting them, and read `scheduler.stats` for live queue-wait and processing percentiles. The package does not own `CameraController`, render a preview, or request permissions.

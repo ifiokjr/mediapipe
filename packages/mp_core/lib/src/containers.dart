@@ -1,3 +1,4 @@
+import 'dart:collection' show ListBase;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -498,6 +499,179 @@ final class NormalizedLandmark {
 
   @override
   int get hashCode => Object.hash(x, y, z, visibility, presence, name);
+}
+
+/// A list of normalized landmarks backed by one packed coordinate buffer.
+///
+/// Every landmark occupies five consecutive floats in [values]: x, y, z,
+/// visibility, presence. Absent optional confidences are recorded as a quiet
+/// NaN. The list implements [List], so it drops into every existing
+/// `List<NormalizedLandmark>` API, but a frame's landmarks cost one buffer
+/// instead of hundreds of objects — cheaper to allocate, cheaper to copy
+/// between isolates, and readable by tight painting loops through [values]
+/// without materializing landmark objects at all.
+///
+/// Coordinates are 32-bit floats, exactly what the native runtime reports;
+/// packing landmarks built from Dart doubles rounds them to that precision.
+final class NormalizedLandmarkList extends ListBase<NormalizedLandmark> {
+  /// Creates a list over [values], which is adopted without copying.
+  NormalizedLandmarkList(this.values, {this.names}) {
+    if (values.length % stride != 0) {
+      throw ArgumentError.value(values.length, 'values.length', 'must be a multiple of $stride');
+    }
+  }
+
+  /// Packs [landmarks] into a single adopted buffer.
+  factory NormalizedLandmarkList.fromLandmarks(Iterable<NormalizedLandmark> landmarks) {
+    final List<NormalizedLandmark> materialized = landmarks.toList(growable: false);
+    final Float32List values = Float32List(materialized.length * stride);
+    List<String?>? names;
+
+    for (int index = 0; index < materialized.length; index += 1) {
+      final NormalizedLandmark landmark = materialized[index];
+      final int base = index * stride;
+
+      values[base] = landmark.x;
+      values[base + 1] = landmark.y;
+      values[base + 2] = landmark.z;
+      values[base + 3] = landmark.visibility ?? double.nan;
+      values[base + 4] = landmark.presence ?? double.nan;
+
+      if (landmark.name case final String? name when name != null) {
+        names ??= List<String?>.filled(materialized.length, null);
+        names[index] = name;
+      }
+    }
+
+    return NormalizedLandmarkList(values, names: names);
+  }
+
+  /// Floats per landmark in [values].
+  static const int stride = 5;
+
+  /// Packed coordinates: x, y, z, visibility, presence for each landmark.
+  final Float32List values;
+
+  /// Optional parallel landmark names; `null` when no landmark is named.
+  final List<String?>? names;
+
+  @override
+  int get length => values.length ~/ stride;
+
+  @override
+  set length(int newLength) => throw UnsupportedError('Landmark lists are fixed length.');
+
+  @override
+  NormalizedLandmark operator [](int index) {
+    if (index < 0 || index >= length) throw RangeError.index(index, this);
+
+    final int base = index * stride;
+
+    return NormalizedLandmark(
+      x: values[base],
+      y: values[base + 1],
+      z: values[base + 2],
+      visibility: _optional(values[base + 3]),
+      presence: _optional(values[base + 4]),
+      name: names?[index],
+    );
+  }
+
+  @override
+  void operator []=(int index, NormalizedLandmark value) =>
+      throw UnsupportedError('Landmark lists are immutable.');
+
+  static double? _optional(double value) => value.isNaN ? null : value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is List<NormalizedLandmark> && _objectListEquality.equals(this, other);
+
+  @override
+  int get hashCode => _objectListEquality.hash(this);
+}
+
+/// A list of world landmarks backed by one packed coordinate buffer.
+///
+/// Mirrors [NormalizedLandmarkList]: five floats per landmark in [values]
+/// (x, y, z, visibility, presence) and optional parallel [names].
+final class LandmarkList extends ListBase<Landmark> {
+  /// Creates a list over [values], which is adopted without copying.
+  LandmarkList(this.values, {this.names}) {
+    if (values.length % stride != 0) {
+      throw ArgumentError.value(values.length, 'values.length', 'must be a multiple of $stride');
+    }
+  }
+
+  /// Packs [landmarks] into a single adopted buffer.
+  factory LandmarkList.fromLandmarks(Iterable<Landmark> landmarks) {
+    final List<Landmark> materialized = landmarks.toList(growable: false);
+    final Float32List values = Float32List(materialized.length * stride);
+    List<String?>? names;
+
+    for (int index = 0; index < materialized.length; index += 1) {
+      final Landmark landmark = materialized[index];
+      final int base = index * stride;
+
+      values[base] = landmark.x;
+      values[base + 1] = landmark.y;
+      values[base + 2] = landmark.z;
+      values[base + 3] = landmark.visibility ?? double.nan;
+      values[base + 4] = landmark.presence ?? double.nan;
+
+      if (landmark.name case final String? name when name != null) {
+        names ??= List<String?>.filled(materialized.length, null);
+        names[index] = name;
+      }
+    }
+
+    return LandmarkList(values, names: names);
+  }
+
+  /// Floats per landmark in [values].
+  static const int stride = 5;
+
+  /// Packed coordinates: x, y, z, visibility, presence for each landmark.
+  final Float32List values;
+
+  /// Optional parallel landmark names; `null` when no landmark is named.
+  final List<String?>? names;
+
+  @override
+  int get length => values.length ~/ stride;
+
+  @override
+  set length(int newLength) => throw UnsupportedError('Landmark lists are fixed length.');
+
+  @override
+  Landmark operator [](int index) {
+    if (index < 0 || index >= length) throw RangeError.index(index, this);
+
+    final int base = index * stride;
+
+    return Landmark(
+      x: values[base],
+      y: values[base + 1],
+      z: values[base + 2],
+      visibility: _optional(values[base + 3]),
+      presence: _optional(values[base + 4]),
+      name: names?[index],
+    );
+  }
+
+  @override
+  void operator []=(int index, Landmark value) =>
+      throw UnsupportedError('Landmark lists are immutable.');
+
+  static double? _optional(double value) => value.isNaN ? null : value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is List<Landmark> && _objectListEquality.equals(this, other);
+
+  @override
+  int get hashCode => _objectListEquality.hash(this);
 }
 
 /// A row-major floating-point matrix.

@@ -36,6 +36,82 @@ void main() {
     });
   });
 
+  test('packs native world landmarks into one buffer', () {
+    using((Arena arena) {
+      final ffi.Pointer<native.MpLandmark> landmarks = arena<native.MpLandmark>(2);
+      landmarks[0]
+        ..x = 1.5
+        ..y = -2.5
+        ..z = 0.5
+        ..has_visibility = false
+        ..has_presence = true
+        ..presence = 0.75
+        ..name = 'left_hip'.toNativeUtf8(allocator: arena).cast();
+      landmarks[1]
+        ..x = 3
+        ..y = 4
+        ..z = 5
+        ..has_visibility = false
+        ..has_presence = false
+        ..name = ffi.nullptr;
+      final native.MpLandmarks list = native.MpLandmarks.$allocate(
+        arena,
+        landmarks: landmarks,
+        landmarks_count: 2,
+      ).ref;
+
+      final LandmarkList packed = native.landmarksFromNative(list);
+
+      expect(packed.length, 2);
+      expect(packed.names, <String?>['left_hip', null]);
+      expect(packed[0], const Landmark(x: 1.5, y: -2.5, z: 0.5, presence: 0.75, name: 'left_hip'));
+      expect(packed[1], const Landmark(x: 3, y: 4, z: 5));
+    });
+  });
+
+  test('packs native normalized landmarks into one buffer', () {
+    using((Arena arena) {
+      final ffi.Pointer<native.MpNormalizedLandmark> landmarks = arena<native.MpNormalizedLandmark>(
+        2,
+      );
+      landmarks[0]
+        ..x = 0.25
+        ..y = 0.5
+        ..z = 0.75
+        ..has_visibility = true
+        ..visibility = 0.5
+        ..has_presence = false
+        ..name = 'nose'.toNativeUtf8(allocator: arena).cast();
+      landmarks[1]
+        ..x = 0.125
+        ..y = 0.625
+        ..z = -0.5
+        ..has_visibility = false
+        ..has_presence = false
+        ..name = ffi.nullptr;
+      final native.MpNormalizedLandmarks list = native.MpNormalizedLandmarks.$allocate(
+        arena,
+        landmarks: landmarks,
+        landmarks_count: 2,
+      ).ref;
+
+      final NormalizedLandmarkList packed = native.normalizedLandmarksFromNative(list);
+
+      expect(packed, isA<NormalizedLandmarkList>());
+      expect(packed.length, 2);
+      expect(packed.names, <String?>['nose', null]);
+      expect(
+        packed[0],
+        const NormalizedLandmark(x: 0.25, y: 0.5, z: 0.75, visibility: 0.5, name: 'nose'),
+      );
+      expect(packed[1], const NormalizedLandmark(x: 0.125, y: 0.625, z: -0.5));
+      expect(
+        packed.values.sublist(0, NormalizedLandmarkList.stride),
+        Float32List.fromList(<double>[0.25, 0.5, 0.75, 0.5, double.nan]),
+      );
+    });
+  });
+
   test('copies nested classification data out of native memory', () {
     using((Arena arena) {
       final ffi.Pointer<native.MpCategory> categories = arena<native.MpCategory>();
