@@ -1,5 +1,6 @@
 import '../harness.dart';
 import '../synthetic.dart';
+import 'frame_scheduling.dart';
 import 'image_construction.dart';
 import 'isolate_transfer.dart';
 import 'pixel_conversion.dart';
@@ -14,4 +15,5 @@ List<BenchmarkSuite> defaultSuites({FrameSize size = hd720}) => <BenchmarkSuite>
   imageConstructionSuite(size: size),
   isolateTransferSuite(size: size),
   resultContainersSuite(),
+  frameSchedulingSuite(),
 ];
