@@ -55,4 +55,4 @@ final scheduler = LatestFrameScheduler<MpCameraFrame>((frame) async {
 });
 ```
 
-Processing errors are published on `scheduler.failures` and increment `failedCount`; a failed callback does not stop later frames. The package does not own `CameraController`, render a preview, or request permissions.
+Processing errors are published on `scheduler.failures` and increment `failedCount`; a failed callback does not stop later frames. `LatestFrameScheduler` lives in `mp_core` and is re-exported here; pair it with `mp_core`'s `FramePacer` to skip frames before converting them, and read `scheduler.stats` for live queue-wait and processing percentiles. The package does not own `CameraController`, render a preview, or request permissions.

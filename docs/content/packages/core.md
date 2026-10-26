@@ -55,6 +55,8 @@ Immutable input objects avoid a subtle class of use-after-return bugs in asynchr
 
 All tasks implement `MpTask`. Closing is idempotent, and using a closed task fails before crossing the platform boundary. `TimestampTracker` enforces the strict ordering required by video and live-stream tasks.
 
+Live pipelines are paced here too. `FramePacer` admits one frame per interval by timestamp before any conversion runs, `LatestFrameScheduler` serializes inference while keeping only the newest waiting frame (optionally discarding frames that waited longer than `maxQueueAge`) and reports queue wait and processing percentiles through `stats`, and `LatencyWindow` is the rolling percentile window behind those numbers. All three are pure Dart; `mp_camera` re-exports the scheduler.
+
 <!-- {=lifecycleContract} -->
 
 Every created task implements `MpTask`. Call `close()` when inference is no
