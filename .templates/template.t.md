@@ -173,12 +173,15 @@ final memory = ModelAsset.bytes(Uint8List.fromList(modelBytes));
 final remote = ModelAsset.uri(
   Uri.parse('https://cdn.example.com/models/gesture_recognizer.task'),
   sha256: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+  cacheDirectory: 'models/cache',
 );
 ```
 
 The SDK never chooses or downloads a model without an explicit `ModelAsset`.
 Publish immutable, versioned model URLs and always provide a digest for
-production clients.
+production clients. On native platforms `cacheDirectory` keeps the verified
+download in a content-addressed cache, so later task creations open the file by
+path instead of downloading it again.
 
 <!-- {/modelContract} -->
 

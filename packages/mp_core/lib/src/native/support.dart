@@ -8,24 +8,31 @@ import 'package:ffi/ffi.dart';
 
 import '../../mp_core.dart';
 import 'bindings.g.dart' as bindings;
-
-const int _maximumRemoteModelBytes = 512 * 1024 * 1024;
+import 'model_cache.dart';
 
 const String _unknownImageFormatMessage =
     'The native task returned an image with an unknown format.';
 
 /// Resolves URI-backed model assets before crossing the native ABI.
 Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
-  if (asset case ModelAssetUri(:final uri, sha256: final expectedSha256)) {
+  if (asset case ModelAssetUri(:final uri, sha256: final expectedSha256, :final cacheDirectory)) {
     if (uri.scheme == 'file') {
       return ModelAsset.path(uri.toFilePath());
     }
 
-    if (uri.scheme != 'https') {
+    if (uri.scheme != 'https' && !isLoopbackHttp(uri)) {
       throw const MpException(
         MpStatus.invalidArgument,
-        'Native model URIs must use HTTPS or the file scheme.',
+        'Native model URIs must use HTTPS (plain HTTP is accepted only on '
+        'loopback, so local development servers stay testable) or the file '
+        'scheme.',
       );
+    }
+
+    // The content-addressed cache streams straight to a verified file and
+    // serves later task creations without another download.
+    if (cacheDirectory case final String directory) {
+      return ModelCache(directory).fetch(uri, expectedSha256!);
     }
 
     final HttpClient client = HttpClient()..connectionTimeout = const Duration(seconds: 30);
@@ -46,7 +53,7 @@ Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
       await for (final List<int> chunk in response) {
         length += chunk.length;
 
-        if (length > _maximumRemoteModelBytes) {
+        if (length > maximumRemoteModelBytes) {
           throw const MpException(
             MpStatus.resourceExhausted,
             'The remote model exceeds the 512 MiB safety limit.',
@@ -72,6 +79,20 @@ Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
   }
 
   return asset;
+}
+
+/// Whether [uri] is plain HTTP aimed at this machine.
+///
+/// Remote models must arrive over HTTPS; loopback is exempted so applications
+/// and tests can serve models from a local development server. Digest
+/// verification applies to loopback downloads exactly as it does to HTTPS.
+bool isLoopbackHttp(Uri uri) {
+  if (uri.scheme != 'http') return false;
+
+  return switch (uri.host) {
+    'localhost' || '127.0.0.1' || '[::1]' || '::1' => true,
+    _ => false,
+  };
 }
 
 /// Owns temporary native allocations for one task creation or invocation.

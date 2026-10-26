@@ -9,14 +9,17 @@ MediaPipe Task APIs expect task bundles or compatible TFLite models with the met
 
 ## Prefer immutable releases
 
-Do not point production clients at a mutable “latest” URL. Publish versioned model objects and verify their SHA-256 digest. Browser `ModelAsset.uri` values can supply that digest directly; native apps should perform the same check while downloading to application storage.
+Do not point production clients at a mutable “latest” URL. Publish versioned model objects and verify their SHA-256 digest. Browser `ModelAsset.uri` values supply that digest directly; native builds verify it while downloading and, when you pass `cacheDirectory`, keep the verified file in a content-addressed cache so later task creations reuse it instead of downloading again.
 
 ```dart
 final asset = ModelAsset.uri(
   Uri.parse('https://cdn.example.com/models/language_detector/1/model.tflite'),
   sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+  cacheDirectory: '${appSupportDirectory.path}/mp-models',
 );
 ```
+
+The digest is the cache key, so a hit is verified by hashing the file — far cheaper than a download — and a corrupted or truncated file is replaced automatically. Downloads stream to a temporary file and hash as they arrive, so the model never sits in the Dart heap, and MediaPipe opens the finished file by path, which lets it map the file rather than copy it. Remote URIs must use HTTPS; plain HTTP is accepted only on loopback so a local development server stays usable, and digest verification applies there too.
 
 ## Bundled assets
 

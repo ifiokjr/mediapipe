@@ -11,11 +11,13 @@ Task inference can process input locally, but applications still control model d
 
 The native runtime identifies the SDK to MediaPipe with a stable `host_version`
 label (`mp-dart-1`) rather than the Dart VM version or host OS details. The
-`ModelAsset.uri` path downloads over HTTPS and verifies a SHA-256 digest before
-the bytes enter any runtime. No model bytes, input media, inference results, or
-personally identifying data leave the device through this SDK. What an
-application chooses to log, upload, or attach to a crash report is the
-application's decision.
+`ModelAsset.uri` path downloads over HTTPS (plain HTTP is accepted only from
+loopback addresses, for local development servers) and verifies a SHA-256
+digest before the bytes enter any runtime; with a `cacheDirectory` the verified
+file is kept under its digest and re-verified on every reuse. No model bytes,
+input media, inference results, or personally identifying data leave the
+device through this SDK. What an application chooses to log, upload, or attach
+to a crash report is the application's decision.
 
 ## Treat every model boundary as untrusted
 
