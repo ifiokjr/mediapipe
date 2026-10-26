@@ -6,6 +6,7 @@ import 'runtime_stub.dart'
     if (dart.library.io) 'runtime_native.dart'
     if (dart.library.js_interop) 'runtime_web.dart'
     as platform;
+import 'web_video_source.dart';
 
 /// A result emitted by a live-stream vision task.
 final class VisionLiveResult<T> {
@@ -40,6 +41,16 @@ abstract interface class VisionTaskBackend<T> implements MpTask {
   /// Submits one frame from a live stream.
   Future<void> processLive(
     MpImage image,
+    int timestampMs,
+    ImageProcessingOptions? processingOptions,
+  );
+
+  /// Processes the current frame of a live [WebVideoSource].
+  ///
+  /// Only the browser adapter supports video sources; native runtimes fail
+  /// with `MpStatus.unimplemented` and expect converted frames instead.
+  Future<T> processVideoSource(
+    WebVideoSource source,
     int timestampMs,
     ImageProcessingOptions? processingOptions,
   );

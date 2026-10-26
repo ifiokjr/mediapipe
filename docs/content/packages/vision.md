@@ -40,6 +40,8 @@ Construct the task with exactly one `VisionRunningMode`. Calling an image method
 
 The web and current native adapters serialize live-stream submissions over the upstream video APIs, then emit copied results in timestamp order. Native C callbacks remain disabled until the bridge can copy callback-owned memory safely from native worker threads.
 
+On the web, `processVideoElement` accepts a live browser video element — wrapped with `webVideoSource` from `package:mp_vision/mp_vision_web.dart` — and MediaPipe samples the current frame straight from the compositor, so a camera pipeline skips the canvas draw and every pixel copy. It is available in video and live-stream mode; native runtimes reject video sources and expect converted `MpImage` frames instead.
+
 ## Segmentation masks
 
 Native and web mask storage is copied into `MpImage` before the upstream result is closed. Keep mask output disabled when it is not needed; full-resolution floating-point masks can dominate result size.

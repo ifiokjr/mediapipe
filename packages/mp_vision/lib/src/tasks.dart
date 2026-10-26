@@ -3,6 +3,7 @@ import 'package:mp_core/mp_core.dart';
 import 'options.dart';
 import 'results.dart';
 import 'runtime.dart';
+import 'web_video_source.dart';
 
 abstract base class _VisionTask<T> implements MpTask {
   _VisionTask(this.options, this._backend, String taskName) : _lifecycle = TaskLifecycle(taskName);
@@ -43,6 +44,35 @@ abstract base class _VisionTask<T> implements MpTask {
     // Record the timestamp only after the backend accepts the frame so a
     // rejected frame can be retried with the same timestamp.
     return _backend.processVideo(image, timestampMs, processingOptions).then((T result) {
+      _timestamps.add(timestampMs);
+
+      return result;
+    });
+  }
+
+  /// Processes the current frame of [source], a live browser video element.
+  ///
+  /// Accepted in video and live-stream mode with the semantics of
+  /// [processVideo]. Only the web adapter implements video sources; native
+  /// runtimes fail with `MpStatus.unimplemented`, so applications that also
+  /// ship natively convert frames to [MpImage] instead.
+  Future<T> processVideoElement(
+    WebVideoSource source,
+    int timestampMs,
+    ImageProcessingOptions? processingOptions,
+  ) {
+    _lifecycle.ensureOpen();
+
+    if (options.runningMode == VisionRunningMode.image) {
+      throw StateError(
+        'video element processing requires video or liveStream mode; '
+        'this task uses ${options.runningMode.name} mode.',
+      );
+    }
+
+    // Record the timestamp only after the backend accepts the frame so a
+    // rejected frame can be retried with the same timestamp.
+    return _backend.processVideoSource(source, timestampMs, processingOptions).then((T result) {
       _timestamps.add(timestampMs);
 
       return result;
