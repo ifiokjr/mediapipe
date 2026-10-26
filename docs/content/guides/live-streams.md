@@ -11,7 +11,29 @@ Video and stream timestamps must increase. Wall clocks can jump and multiple fra
 
 Do not await every camera frame in an unbounded callback queue. If a model takes 45 ms and the camera produces a frame every 16 ms, old results become less useful with every callback. `LatestFrameScheduler` keeps the active frame and only the newest waiting frame.
 
-Its `submittedCount`, `processedCount`, `droppedCount`, and `failedCount` values expose queue behavior. Processing errors appear on `failures` without stopping subsequent frames. A consistently high drop ratio usually means the capture resolution, model, or delegate should change.
+Its `submittedCount`, `processedCount`, `droppedCount`, `staleCount`, and `failedCount` values expose queue behavior. Processing errors appear on `failures` without stopping subsequent frames. A consistently high drop ratio usually means the capture resolution, model, or delegate should change.
+
+## Skip frames before converting them
+
+A dropped frame still paid for its pixel conversion. When the camera runs at 30 or 60 frames per second and the model sustains far fewer, decide first: `FramePacer.targetFps(15)` admits one timestamp per interval, so a skipped callback costs nothing at all. Pass `maxQueueAge` to the scheduler as well when a long inference stall should discard the frame that waited through it rather than run it late; leave it unset for offline video, where every frame matters.
+
+```dart
+final pacer = FramePacer.targetFps(15);
+final scheduler = LatestFrameScheduler<MpCameraFrame>(
+  (frame) => landmarker.detectAsync(frame.image, frame.timestampMs),
+  maxQueueAge: const Duration(milliseconds: 150),
+);
+
+void onCameraImage(CameraImage image) {
+  final timestampMs = clock.nextTimestampMs();
+  if (!pacer.admit(timestampMs)) return;
+  scheduler.submit(MpCameraFrameConverter.convert(image, timestampMs: timestampMs, rotationDegrees: rotation));
+}
+```
+
+## Watch the numbers
+
+`scheduler.stats` returns a snapshot with the counters above plus `processedPerSecond`, the last and rolling p50/p95 queue wait, and processing time over a bounded window. A rising queue wait means frames arrive faster than inference runs; a rising processing time points at the model or delegate. Every processed frame is also wrapped in a `dart:developer` timeline task named `LatestFrameScheduler.process`, so DevTools shows where each frame's budget went. `LatencyWindow` is public for timing your own stages the same way.
 
 ## Respect platform semantics
 

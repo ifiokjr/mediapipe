@@ -8,6 +8,7 @@ library;
 export 'src/cli.dart';
 export 'src/harness.dart';
 export 'src/report.dart';
+export 'src/suites/frame_scheduling.dart';
 export 'src/suites/image_construction.dart';
 export 'src/suites/isolate_transfer.dart';
 export 'src/suites/pixel_conversion.dart';
