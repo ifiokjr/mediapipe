@@ -17,7 +17,7 @@ mp_genai ───┘
 
 ## Classic native runtime
 
-MediaPipe’s aggregate C target contains all classic vision, text, and audio tasks. A pinned builder applies narrowly documented compatibility patches, builds one library per target, and produces generated `dart:ffi` bindings from the public C headers.
+MediaPipe’s aggregate C target contains all classic vision, text, and audio tasks. A pinned builder applies narrowly documented compatibility patches, compiles the SDK’s own pixel-conversion shim (`tool/native/`, backed by libyuv) into the same library, builds one library per target, and produces generated `dart:ffi` bindings from the public C headers.
 
 The committed bindings are reviewed like source. CI regenerates them and fails on drift. Native results are copied into immutable Dart values and closed in the same operation.
 

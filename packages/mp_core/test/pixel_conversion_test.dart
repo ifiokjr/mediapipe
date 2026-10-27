@@ -14,6 +14,44 @@ void main() {
     });
   });
 
+  group('PixelConverter.forceDartKernels', () {
+    tearDown(() => PixelConverter.forceDartKernels = false);
+
+    test('yields the same output from every kernel as the default dispatch', () {
+      final PixelPlane bgra = _plane(<int>[1, 2, 3, 4, 5, 6, 7, 8], rowStride: 8, pixelStride: 4);
+      final PixelPlane nv21 = _plane(<int>[16, 235, 81, 145, 128, 128], rowStride: 2);
+      final PixelPlane y = _plane(<int>[82, 82, 82, 82], rowStride: 2);
+      final PixelPlane u = _plane(<int>[90], rowStride: 1);
+      final PixelPlane v = _plane(<int>[240], rowStride: 1);
+
+      final MpImageUint8 defaultBgra = PixelConverter.bgra8888ToSrgba(
+        width: 2,
+        height: 1,
+        plane: bgra,
+      );
+      final MpImageUint8 defaultNv21 = PixelConverter.nv21ToSrgb(width: 2, height: 2, plane: nv21);
+      final MpImageUint8 defaultYuv = PixelConverter.yuv420ToSrgb(
+        width: 2,
+        height: 2,
+        y: y,
+        u: u,
+        v: v,
+      );
+
+      PixelConverter.forceDartKernels = true;
+
+      expect(
+        PixelConverter.bgra8888ToSrgba(width: 2, height: 1, plane: bgra).data,
+        defaultBgra.data,
+      );
+      expect(PixelConverter.nv21ToSrgb(width: 2, height: 2, plane: nv21).data, defaultNv21.data);
+      expect(
+        PixelConverter.yuv420ToSrgb(width: 2, height: 2, y: y, u: u, v: v).data,
+        defaultYuv.data,
+      );
+    });
+  });
+
   group('PixelConverter.bgra8888ToSrgba', () {
     test('swizzles channels and drops row padding', () {
       final MpImageUint8 image = PixelConverter.bgra8888ToSrgba(

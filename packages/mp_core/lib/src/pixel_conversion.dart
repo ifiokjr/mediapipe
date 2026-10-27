@@ -3,6 +3,9 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import 'image.dart';
+import 'pixel_acceleration_stub.dart'
+    if (dart.library.io) 'native/pixel_acceleration.dart'
+    as acceleration;
 
 /// One plane of a camera or decoder frame.
 ///
@@ -28,10 +31,21 @@ final class PixelPlane {
 ///
 /// Every conversion validates plane strides and buffer lengths against the
 /// requested dimensions, writes one freshly allocated buffer, and returns an
-/// image that adopts that buffer rather than copying it again. These kernels
-/// are the per-frame hot path for live camera inference; the `benchmarks/`
-/// package measures them and CI fails on regressions.
+/// image that adopts that buffer rather than copying it again. On native
+/// platforms whose bundled runtime carries the pixel-conversion symbols, the
+/// kernels dispatch to SIMD-accelerated libyuv conversion with identical
+/// output, falling back to the pure Dart implementation when the runtime is
+/// absent. These kernels are the per-frame hot path for live camera
+/// inference; the `benchmarks/` package measures them and CI fails on
+/// regressions.
 abstract final class PixelConverter {
+  /// Forces the pure Dart kernels even when native acceleration is available.
+  ///
+  /// Tests use this to compare the accelerated and Dart outputs on the same
+  /// machine; applications should leave it unset.
+  @visibleForTesting
+  static bool forceDartKernels = false;
+
   /// Converts a single BGRA8888 [plane] into an [MpImageFormat.srgba] image.
   ///
   /// MediaPipe has no BGRA input format, so the channels are swizzled while
@@ -56,6 +70,15 @@ abstract final class PixelConverter {
 
     _requireBufferLength(plane, minimumLength: rowStride * height, format: 'BGRA8888');
 
+    return (forceDartKernels
+            ? null
+            : acceleration.acceleratedBgraToSrgba(width, height, plane.bytes, rowStride)) ??
+        _bgra8888ToSrgbaDart(width, height, plane);
+  }
+
+  static MpImageUint8 _bgra8888ToSrgbaDart(int width, int height, PixelPlane plane) {
+    const int bytesPerPixel = 4;
+    final int rowStride = plane.rowStride;
     final Uint8List rgba = Uint8List(width * height * bytesPerPixel);
     final Uint8List bytes = plane.bytes;
     int destination = 0;
@@ -115,6 +138,15 @@ abstract final class PixelConverter {
       format: 'NV21',
     );
 
+    return (forceDartKernels
+            ? null
+            : acceleration.acceleratedNv21ToSrgb(width, height, plane.bytes, rowStride)) ??
+        _nv21ToSrgbDart(width, height, plane);
+  }
+
+  static MpImageUint8 _nv21ToSrgbDart(int width, int height, PixelPlane plane) {
+    final int rowStride = plane.rowStride;
+    final int yPlaneLength = rowStride * height;
     final Uint8List rgb = Uint8List(width * height * 3);
     final Uint8List bytes = plane.bytes;
     int destination = 0;
@@ -155,6 +187,31 @@ abstract final class PixelConverter {
     _validatePlane(u, width: width ~/ 2, height: height ~/ 2, name: 'U');
     _validatePlane(v, width: width ~/ 2, height: height ~/ 2, name: 'V');
 
+    return (forceDartKernels
+            ? null
+            : acceleration.acceleratedYuv420ToSrgb(
+                width: width,
+                height: height,
+                y: y.bytes,
+                yRowStride: y.rowStride,
+                yPixelStride: y.pixelStride,
+                u: u.bytes,
+                uRowStride: u.rowStride,
+                uPixelStride: u.pixelStride,
+                v: v.bytes,
+                vRowStride: v.rowStride,
+                vPixelStride: v.pixelStride,
+              )) ??
+        _yuv420ToSrgbDart(width: width, height: height, y: y, u: u, v: v);
+  }
+
+  static MpImageUint8 _yuv420ToSrgbDart({
+    required int width,
+    required int height,
+    required PixelPlane y,
+    required PixelPlane u,
+    required PixelPlane v,
+  }) {
     final Uint8List rgb = Uint8List(width * height * 3);
     final int rowSamples = width * 3;
     final Uint8List yBytes = y.bytes;
