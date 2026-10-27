@@ -16,10 +16,13 @@ BenchmarkSuite frameSchedulingSuite() {
     name: 'frame_scheduling',
     benchmarks: <Benchmark>[
       Benchmark(
-        name: 'frame_scheduling/scheduler_submit_await/100',
+        // 1 000 frames per iteration (~3 ms) rather than 100 (~0.3 ms):
+        // sub-millisecond event-loop timings are dominated by scheduler
+        // jitter on shared CI runners, which drowns the real signal.
+        name: 'frame_scheduling/scheduler_submit_await/1000',
         setUp: () => scheduler = LatestFrameScheduler<int>((int _) async {}),
         run: () async {
-          for (int frame = 0; frame < 100; frame += 1) {
+          for (int frame = 0; frame < 1000; frame += 1) {
             scheduler.submit(frame);
             await scheduler.idle;
           }

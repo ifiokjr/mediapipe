@@ -8,6 +8,7 @@ import 'options.dart';
 import 'results.dart';
 import 'runtime.dart';
 import 'web_converters.dart';
+import 'web_video_source.dart';
 
 final WebTaskAssets _defaultAssets = WebTaskAssets(
   moduleUri: Uri.parse(
@@ -317,6 +318,23 @@ final class _WebVisionTask<T> implements VisionTaskBackend<T> {
   ) {
     _ensureOpen();
     final List<JSAny?> arguments = <JSAny?>[webImageData(image), timestampMs.toJS];
+
+    if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
+
+    return Future<T>.sync(() => convert(callWebMethod<JSAny?>(_task, videoMethod, arguments)));
+  }
+
+  @override
+  Future<T> processVideoSource(
+    WebVideoSource source,
+    int timestampMs,
+    ImageProcessingOptions? processingOptions,
+  ) {
+    _ensureOpen();
+
+    // The video element crosses into JavaScript untouched; MediaPipe samples
+    // the current frame from the compositor with no pixel conversion.
+    final List<JSAny?> arguments = <JSAny?>[source.handle as JSAny, timestampMs.toJS];
 
     if (processingOptions != null) arguments.add(webJsify(_processingOptions(processingOptions)));
 

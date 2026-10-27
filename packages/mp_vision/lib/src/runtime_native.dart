@@ -8,6 +8,7 @@ import 'native_converters.dart';
 import 'options.dart';
 import 'results.dart';
 import 'runtime.dart';
+import 'web_video_source.dart';
 
 /// Creates the MediaPipe C vision runtime used on native platforms.
 VisionRuntime createVisionRuntime() => const _NativeVisionRuntime();
@@ -167,6 +168,17 @@ final class _NativeVisionBackend<T> implements VisionTaskBackend<T> {
       rethrow;
     }
   });
+
+  @override
+  Future<T> processVideoSource(
+    WebVideoSource source,
+    int timestampMs,
+    ImageProcessingOptions? processingOptions,
+  ) => throw const MpException(
+    MpStatus.unimplemented,
+    'Live video sources are only supported by the web adapter; convert frames '
+    'to MpImage before submitting them on this platform.',
+  );
 
   @override
   Future<void> close() => _run(() async {

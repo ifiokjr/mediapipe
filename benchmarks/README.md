@@ -24,7 +24,10 @@ Or directly: `dart run benchmarks/bin/run.dart --help`.
 
 Every benchmark has a stable `suite/case/variant` name. Keep names unchanged
 unless the measured operation changes; the gate treats a vanished name as a
-failure so a regression cannot hide behind a rename.
+failure so a regression cannot hide behind a rename. A deliberate rename or
+replacement needs the `benchmark rename` label on the pull request — labels
+are snapshotted when the push event fires, so add the label before pushing
+(or push once more after adding it).
 
 ## The gate
 

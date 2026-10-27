@@ -25,6 +25,52 @@ void main() {
     expect(() => detector.detect(_image()), throwsA(isA<MpTaskClosedError>()));
   });
 
+  test('video elements process without pixel conversion and track timestamps', () async {
+    final _FakeVisionBackend<DetectionResult> backend = _FakeVisionBackend<DetectionResult>(
+      DetectionResult(detections: const <Detection>[]),
+    );
+    final FaceDetector detector = await FaceDetector.create(
+      FaceDetectorOptions(baseOptions: _baseOptions(), runningMode: VisionRunningMode.video),
+      runtime: _FaceDetectorRuntime(backend),
+    );
+    final Object element = Object();
+
+    final DetectionResult first = await detector.processVideoElement(
+      WebVideoSource(element),
+      5,
+      null,
+    );
+    final DetectionResult second = await detector.processVideoElement(
+      WebVideoSource(element),
+      7,
+      null,
+    );
+
+    expect(first.detections, isEmpty);
+    expect(second, same(first));
+    expect(backend.videoSources, <Object?>[element, element]);
+    expect(backend.videoTimestamps, isEmpty);
+
+    // Live-stream mode accepts video elements too; still-image mode does not.
+    final FaceDetector live = await FaceDetector.create(
+      FaceDetectorOptions(baseOptions: _baseOptions(), runningMode: VisionRunningMode.liveStream),
+      runtime: _FaceDetectorRuntime(
+        _FakeVisionBackend<DetectionResult>(DetectionResult(detections: const <Detection>[])),
+      ),
+    );
+
+    await live.processVideoElement(WebVideoSource(element), 1, ImageProcessingOptions());
+
+    final FaceDetector still = await FaceDetector.create(
+      FaceDetectorOptions(baseOptions: _baseOptions()),
+      runtime: _FaceDetectorRuntime(
+        _FakeVisionBackend<DetectionResult>(DetectionResult(detections: const <Detection>[])),
+      ),
+    );
+
+    expect(() => still.processVideoElement(WebVideoSource(element), 1, null), throwsStateError);
+  });
+
   test('video mode validates timestamps before invoking the backend', () async {
     final _FakeVisionBackend<DetectionResult> backend = _FakeVisionBackend<DetectionResult>(
       DetectionResult(detections: const <Detection>[]),
@@ -269,6 +315,7 @@ MpImage _image() => MpImage.uint8(
 final class _FakeVisionBackend<T> implements VisionTaskBackend<T> {
   _FakeVisionBackend(this.output);
 
+  final List<Object?> videoSources = <Object?>[];
   final T? output;
   final StreamController<VisionLiveResult<T>> controller =
       StreamController<VisionLiveResult<T>>.broadcast();
@@ -287,6 +334,17 @@ final class _FakeVisionBackend<T> implements VisionTaskBackend<T> {
   @override
   Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) async {
     imageCount++;
+
+    return output as T;
+  }
+
+  @override
+  Future<T> processVideoSource(
+    WebVideoSource source,
+    int timestampMs,
+    ImageProcessingOptions? processingOptions,
+  ) async {
+    videoSources.add(source.handle);
 
     return output as T;
   }
@@ -329,6 +387,13 @@ final class _FlakyCloseBackend<T> implements VisionTaskBackend<T> {
 
   @override
   Stream<VisionLiveResult<T>> get results => controller.stream;
+
+  @override
+  Future<T> processVideoSource(
+    WebVideoSource source,
+    int timestampMs,
+    ImageProcessingOptions? processingOptions,
+  ) => throw UnimplementedError();
 
   @override
   Future<T> processImage(MpImage image, ImageProcessingOptions? processingOptions) async =>
