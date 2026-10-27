@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:mp_core/mp_core.dart';
 import 'package:test/test.dart';
+
+int _plainListHash(List<NormalizedLandmark> list) => const ListEquality<Object?>().hash(list);
 
 void main() {
   test('Category implements value equality', () {
@@ -170,5 +173,96 @@ void main() {
 
     expect(() => cosineSimilarity(float, quantized), throwsArgumentError);
     expect(() => cosineSimilarity(float, longer), throwsArgumentError);
+  });
+  group('NormalizedLandmarkList', () {
+    test('packs and unpacks landmarks, including optional fields and names', () {
+      final NormalizedLandmarkList packed =
+          NormalizedLandmarkList.fromLandmarks(<NormalizedLandmark>[
+            const NormalizedLandmark(
+              x: 0.1,
+              y: 0.2,
+              z: 0.3,
+              visibility: 0.8,
+              presence: 0.9,
+              name: 'nose',
+            ),
+            const NormalizedLandmark(x: 0.4, y: 0.5, z: -0.6),
+          ]);
+
+      expect(packed.length, 2);
+      expect(packed.values, hasLength(2 * NormalizedLandmarkList.stride));
+      expect(packed.names, <String?>['nose', null]);
+      expect(packed[0].x, closeTo(0.1, 1e-7));
+      expect(packed[0].visibility, closeTo(0.8, 1e-7));
+      expect(packed[0].presence, closeTo(0.9, 1e-7));
+      expect(packed[0].name, 'nose');
+      expect(packed[1].visibility, isNull);
+      expect(packed[1].presence, isNull);
+      expect(packed[1].name, isNull);
+      expect(packed[1].z, closeTo(-0.6, 1e-7));
+      expect(packed.first, packed[0]);
+      expect(
+        packed.toList(),
+        isA<List<NormalizedLandmark>>().having(
+          (List<NormalizedLandmark> list) => list.length,
+          'length',
+          2,
+        ),
+      );
+    });
+
+    test('compares equal to a plain list with the same landmarks', () {
+      // Binary fractions survive the float32 packing exactly.
+      final List<NormalizedLandmark> plain = <NormalizedLandmark>[
+        const NormalizedLandmark(x: 0.25, y: 0.5, z: 0.75),
+        const NormalizedLandmark(x: 0.125, y: 0.625, z: 0.875, name: 'chin'),
+      ];
+      final NormalizedLandmarkList packed = NormalizedLandmarkList.fromLandmarks(plain);
+
+      expect(packed, plain);
+      expect(plain, packed);
+      expect(packed.hashCode, _plainListHash(plain));
+      expect(packed, isNot(<NormalizedLandmark>[const NormalizedLandmark(x: 9, y: 9, z: 9)]));
+    });
+
+    test('rejects buffers that are not a whole number of landmarks', () {
+      expect(() => NormalizedLandmarkList(Float32List(7)), throwsArgumentError);
+      expect(() => LandmarkList(Float32List(4)), throwsArgumentError);
+      expect(NormalizedLandmarkList(Float32List(0)).length, 0);
+    });
+
+    test('is fixed length, immutable, and bounds checked', () {
+      final NormalizedLandmarkList packed = NormalizedLandmarkList.fromLandmarks(
+        <NormalizedLandmark>[const NormalizedLandmark(x: 0, y: 0, z: 0)],
+      );
+
+      expect(() => packed.length = 2, throwsUnsupportedError);
+      expect(() => packed[0] = const NormalizedLandmark(x: 1, y: 1, z: 1), throwsUnsupportedError);
+      expect(() => packed[1], throwsRangeError);
+      expect(() => packed[-1], throwsRangeError);
+    });
+  });
+
+  group('LandmarkList', () {
+    test('packs world landmarks with names and compares to plain lists', () {
+      final List<Landmark> plain = <Landmark>[
+        const Landmark(x: 1, y: 2, z: 3, visibility: 0.5, presence: 0.625, name: 'left_shoulder'),
+        const Landmark(x: 4, y: 5, z: 6),
+      ];
+      final LandmarkList packed = LandmarkList.fromLandmarks(plain);
+
+      expect(packed.length, 2);
+      expect(packed[0].name, 'left_shoulder');
+      expect(packed[0].visibility, closeTo(0.5, 1e-7));
+      expect(packed[1].visibility, isNull);
+      expect(packed, plain);
+      expect(plain, packed);
+      expect(packed.names, <String?>['left_shoulder', null]);
+      expect(packed.hashCode, const ListEquality<Object?>().hash(plain));
+      expect(() => packed.length = 3, throwsUnsupportedError);
+      expect(() => packed[0] = plain[0], throwsUnsupportedError);
+      expect(() => packed[2], throwsRangeError);
+      expect(packed[1], const Landmark(x: 4, y: 5, z: 6));
+    });
   });
 }

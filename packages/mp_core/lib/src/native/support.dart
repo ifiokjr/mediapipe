@@ -387,32 +387,58 @@ DetectionResult detectionResultFromNative(bindings.MpDetectionResult value, {int
     );
 
 /// Converts one native normalized-landmark list before its owner is released.
-List<NormalizedLandmark> normalizedLandmarksFromNative(bindings.MpNormalizedLandmarks value) =>
-    List<NormalizedLandmark>.generate(value.landmarks_count, (int index) {
-      final bindings.MpNormalizedLandmark landmark = value.landmarks[index];
-      return NormalizedLandmark(
-        x: landmark.x,
-        y: landmark.y,
-        z: landmark.z,
-        visibility: landmark.has_visibility ? landmark.visibility : null,
-        presence: landmark.has_presence ? landmark.presence : null,
-        name: nativeString(landmark.name),
-      );
-    }, growable: false);
+///
+/// Landmarks land in one packed buffer rather than one object each, so a
+/// 478-point face costs a single allocation and crosses isolates as one
+/// contiguous copy.
+NormalizedLandmarkList normalizedLandmarksFromNative(bindings.MpNormalizedLandmarks value) {
+  final int count = value.landmarks_count;
+  final Float32List flat = Float32List(count * NormalizedLandmarkList.stride);
+  List<String?>? names;
+
+  for (int index = 0; index < count; index += 1) {
+    final bindings.MpNormalizedLandmark landmark = value.landmarks[index];
+    final int base = index * NormalizedLandmarkList.stride;
+
+    flat[base] = landmark.x;
+    flat[base + 1] = landmark.y;
+    flat[base + 2] = landmark.z;
+    flat[base + 3] = landmark.has_visibility ? landmark.visibility : double.nan;
+    flat[base + 4] = landmark.has_presence ? landmark.presence : double.nan;
+
+    if (nativeString(landmark.name) case final String? name when name != null) {
+      names ??= List<String?>.filled(count, null);
+      names[index] = name;
+    }
+  }
+
+  return NormalizedLandmarkList(flat, names: names);
+}
 
 /// Converts one native world-landmark list before its owner is released.
-List<Landmark> landmarksFromNative(bindings.MpLandmarks value) =>
-    List<Landmark>.generate(value.landmarks_count, (int index) {
-      final bindings.MpLandmark landmark = value.landmarks[index];
-      return Landmark(
-        x: landmark.x,
-        y: landmark.y,
-        z: landmark.z,
-        visibility: landmark.has_visibility ? landmark.visibility : null,
-        presence: landmark.has_presence ? landmark.presence : null,
-        name: nativeString(landmark.name),
-      );
-    }, growable: false);
+LandmarkList landmarksFromNative(bindings.MpLandmarks value) {
+  final int count = value.landmarks_count;
+  final Float32List flat = Float32List(count * LandmarkList.stride);
+  List<String?>? names;
+
+  for (int index = 0; index < count; index += 1) {
+    final bindings.MpLandmark landmark = value.landmarks[index];
+    final int base = index * LandmarkList.stride;
+
+    flat[base] = landmark.x;
+    flat[base + 1] = landmark.y;
+    flat[base + 2] = landmark.z;
+    flat[base + 3] = landmark.has_visibility ? landmark.visibility : double.nan;
+    flat[base + 4] = landmark.has_presence ? landmark.presence : double.nan;
+
+    if (nativeString(landmark.name) case final String? name when name != null) {
+      names ??= List<String?>.filled(count, null);
+      names[index] = name;
+    }
+  }
+
+  return LandmarkList(flat, names: names);
+}
 
 /// Converts a native column-major matrix into the public row-major format.
 MpMatrix matrixFromNative(bindings.MpMatrix value) {

@@ -19,6 +19,8 @@ const int embeddingDimensions = 1024;
 /// landmark lists, so they track the allocation cost a frame pays before an
 /// application can read a single coordinate.
 BenchmarkSuite resultContainersSuite() {
+  late NormalizedLandmarkList packed;
+  late List<NormalizedLandmark> source;
   late Embedding floatA;
   late Embedding floatB;
   late Embedding quantizedA;
@@ -34,6 +36,42 @@ BenchmarkSuite resultContainersSuite() {
       Benchmark(
         name: 'result_containers/world_landmarks/pose_$poseLandmarkCount',
         run: () => _worldLandmarks(poseLandmarkCount),
+      ),
+      Benchmark(
+        name: 'result_containers/normalized_landmarks_packed/face_$faceLandmarkCount',
+        setUp: () => source = List<NormalizedLandmark>.generate(
+          faceLandmarkCount,
+          (int index) => NormalizedLandmark(
+            x: index / faceLandmarkCount,
+            y: 1 - index / faceLandmarkCount,
+            z: 0,
+          ),
+          growable: false,
+        ),
+        run: () => NormalizedLandmarkList.fromLandmarks(source),
+      ),
+      Benchmark(
+        name: 'result_containers/landmark_paint_sum/face_$faceLandmarkCount',
+        setUp: () => packed = NormalizedLandmarkList.fromLandmarks(
+          List<NormalizedLandmark>.generate(
+            faceLandmarkCount,
+            (int index) => NormalizedLandmark(
+              x: index / faceLandmarkCount,
+              y: 1 - index / faceLandmarkCount,
+              z: 0,
+            ),
+            growable: false,
+          ),
+        ),
+        run: () {
+          var sum = 0.0;
+
+          for (int base = 0; base < packed.values.length; base += NormalizedLandmarkList.stride) {
+            sum += packed.values[base] + packed.values[base + 1];
+          }
+
+          return sum;
+        },
       ),
       Benchmark(
         name: 'result_containers/cosine_similarity/float_$embeddingDimensions',
