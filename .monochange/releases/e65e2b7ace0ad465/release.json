@@ -1,0 +1,1244 @@
+{
+  "schema_version": "0.10",
+  "kind": "monochange.releaseRecord",
+  "created_at": "2026-10-27T18:48:32Z",
+  "command": "release",
+  "version": "0.1.4",
+  "versions": {
+    "mp": "0.1.4"
+  },
+  "release_targets": [
+    {
+      "id": "mp",
+      "kind": "group",
+      "version": "0.1.4",
+      "version_format": "primary",
+      "tag": true,
+      "release": true,
+      "tag_name": "v0.1.4",
+      "rendered_title": "v0.1.4 (2026-10-27)",
+      "rendered_changelog_title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+      "members": [
+        "mp_core",
+        "mp_vision",
+        "mp_camera",
+        "mp_text",
+        "mp_audio",
+        "mp_genai"
+      ]
+    }
+  ],
+  "released_packages": [
+    "mp_audio",
+    "mp_camera",
+    "mp_core",
+    "mp_genai",
+    "mp_text",
+    "mp_vision"
+  ],
+  "changed_files": [
+    "CHANGELOG.md",
+    "benchmarks/pubspec.yaml",
+    "docs/pubspec.yaml",
+    "examples/cli/pubspec.yaml",
+    "examples/device_demo/pubspec.yaml",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_audio/pubspec.yaml",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_camera/pubspec.yaml",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_core/pubspec.yaml",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_genai/pubspec.yaml",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_text/example/pubspec.yaml",
+    "packages/mp_text/pubspec.yaml",
+    "packages/mp_vision/CHANGELOG.md",
+    "packages/mp_vision/pubspec.yaml",
+    "pubspec.yaml"
+  ],
+  "package_publications": [
+    {
+      "package": "mp_audio",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.4",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_camera",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.4",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_core",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.4",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_genai",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.4",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_text",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.4",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_vision",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.4",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    }
+  ],
+  "updated_changelogs": [
+    "CHANGELOG.md",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_vision/CHANGELOG.md"
+  ],
+  "deleted_changesets": [
+    ".changeset/flat-landmark-lists.md",
+    ".changeset/frame-pacing-telemetry.md",
+    ".changeset/lifecycle-retry-fixes.md",
+    ".changeset/model-cache.md",
+    ".changeset/native-pixel-conversion.md",
+    ".changeset/overlay-transform.md",
+    ".changeset/pixel-conversion-kernels.md",
+    ".changeset/web-video-source.md"
+  ],
+  "changesets": [
+    {
+      "path": ".changeset/flat-landmark-lists.md",
+      "summary": "Packed landmark lists",
+      "details": "- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the\n  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one\n  packed `Float32List` — five floats per landmark (x, y, z, visibility,\n  presence, with absent confidences stored as quiet NaN) plus optional\n  parallel names. A 478-point face result costs one buffer instead of\n  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to\n  copy to the caller, and directly iterable by painting loops through\n  `values` without materializing landmark objects. `fromLandmarks` packs\n  app-built lists the same way; coordinates are 32-bit floats exactly as the\n  native runtime reports them.\n- `mp_vision`: native result conversion fills those packed lists directly\n  from the C structs, so every landmarker result (face, hand, pose, gesture,\n  holistic) crosses isolates as contiguous data. The concrete list type\n  changes; reading code keeps working unchanged because the new lists are\n  real `List`s with the same value equality.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "96bce62f6a2345f9845d7c4e9b844e4b3df33f97",
+            "short_sha": "96bce62",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/96bce62f6a2345f9845d7c4e9b844e4b3df33f97",
+            "authored_at": "2026-10-27T06:46:51Z",
+            "committed_at": "2026-10-27T06:46:51Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#46",
+            "title": "feat(mp_core): packed landmark lists for landmarker results",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/46",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "96bce62f6a2345f9845d7c4e9b844e4b3df33f97",
+            "short_sha": "96bce62",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/96bce62f6a2345f9845d7c4e9b844e4b3df33f97",
+            "authored_at": "2026-10-27T06:46:51Z",
+            "committed_at": "2026-10-27T06:46:51Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#46",
+            "title": "feat(mp_core): packed landmark lists for landmarker results",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/46",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/frame-pacing-telemetry.md",
+      "summary": "Frame pacing and live scheduling telemetry",
+      "details": "- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart\n  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame\n  which waited through a long inference stall instead of running it late, a\n  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95\n  queue-wait and processing times, and a `dart:developer` timeline task around\n  every processed frame for DevTools.\n- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp\n  before any pixel conversion runs, so a skipped frame costs nothing;\n  `FramePacer.targetFps` derives the interval from a target rate.\n- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank\n  percentiles behind the scheduler statistics, public for timing other stages.\n- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and\n  `LatestFrameStats` from `mp_core`; existing imports keep working.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_camera",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "543cf24f923ac0e7f7178567a6def221bbabf02b",
+            "short_sha": "543cf24",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/543cf24f923ac0e7f7178567a6def221bbabf02b",
+            "authored_at": "2026-10-26T22:35:44Z",
+            "committed_at": "2026-10-26T22:35:44Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#43",
+            "title": "feat: frame pacing, stale-frame policy, and live scheduling telemetry",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/43",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "543cf24f923ac0e7f7178567a6def221bbabf02b",
+            "short_sha": "543cf24",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/543cf24f923ac0e7f7178567a6def221bbabf02b",
+            "authored_at": "2026-10-26T22:35:44Z",
+            "committed_at": "2026-10-26T22:35:44Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#43",
+            "title": "feat: frame pacing, stale-frame policy, and live scheduling telemetry",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/43",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/lifecycle-retry-fixes.md",
+      "summary": "Lifecycle cleanup and retry fixes",
+      "details": "- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure).",
+      "targets": [
+        {
+          "id": "mp_audio",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_text",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        },
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "04baa570d6b2cd6f164fb7c78386f5b9a980696a",
+            "short_sha": "04baa57",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/04baa570d6b2cd6f164fb7c78386f5b9a980696a",
+            "authored_at": "2026-10-16T22:06:58+01:00",
+            "committed_at": "2026-10-16T22:06:58+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#34",
+            "title": "fix: make failed task closes retriable and plug native leaks",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/34",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "04baa570d6b2cd6f164fb7c78386f5b9a980696a",
+            "short_sha": "04baa57",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/04baa570d6b2cd6f164fb7c78386f5b9a980696a",
+            "authored_at": "2026-10-16T22:06:58+01:00",
+            "committed_at": "2026-10-16T22:06:58+01:00",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#34",
+            "title": "fix: make failed task closes retriable and plug native leaks",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/34",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/model-cache.md",
+      "summary": "Content-addressed model cache",
+      "details": "- `ModelAsset.uri` accepts `cacheDirectory`. On native platforms a\n  digest-pinned model is downloaded once into a content-addressed cache (the\n  SHA-256 digest is the file name), verified by hashing on every reuse, and\n  replaced automatically when the cached file is corrupted or truncated. The\n  download streams to a temporary file and hashes as bytes arrive, so a\n  multi-hundred-megabyte model never sits in the Dart heap, and MediaPipe\n  opens the finished file by path — which lets it map the file instead of\n  copying it — rather than receiving a buffer. `cacheDirectory` requires a\n  digest; browser builds ignore it.\n- `ModelCache` and `maximumRemoteModelBytes` are exported from\n  `package:mp_core/native.dart` for applications that want to pre-warm models.\n- Remote model URIs still require HTTPS, except that plain HTTP is now accepted\n  from loopback addresses so local development servers (and the SDK's own\n  tests) can serve models; digest verification applies there too.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "19ce9f3958a0a82b2821086c1f7b9c24c94d7249",
+            "short_sha": "19ce9f3",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/19ce9f3958a0a82b2821086c1f7b9c24c94d7249",
+            "authored_at": "2026-10-27T02:49:33Z",
+            "committed_at": "2026-10-27T02:49:33Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#44",
+            "title": "feat(mp_core): content-addressed model cache with path-based loading",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/44",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "19ce9f3958a0a82b2821086c1f7b9c24c94d7249",
+            "short_sha": "19ce9f3",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/19ce9f3958a0a82b2821086c1f7b9c24c94d7249",
+            "authored_at": "2026-10-27T02:49:33Z",
+            "committed_at": "2026-10-27T02:49:33Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#44",
+            "title": "feat(mp_core): content-addressed model cache with path-based loading",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/44",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/native-pixel-conversion.md",
+      "summary": "SIMD pixel conversion through the native runtime",
+      "details": "- `mp_core`: `PixelConverter` dispatches NV21, planar YUV420, and Android's\n  semi-planar YUV420 to libyuv's NEON/SSE paths — compiled into the bundled\n  native runtime as the SDK's own `MpPixel*` shim — when the linked runtime\n  carries those symbols, and runs the pure Dart kernels otherwise. Output\n  matches the Dart kernels to within fixed-point rounding (at most two levels\n  per channel); the BGRA swizzle is exact. `nativePixelConversionSupported`\n  in `package:mp_core/native.dart` reports which path is active, and\n  `PixelConverter.forceDartKernels` lets tests compare the two.\n- The native builder copies the shim from `tool/native/` into the pinned\n  MediaPipe checkout, links `@libyuv`, exports the symbols through the Linux\n  and Android version scripts, and `verify_native` requires them; a native\n  integration test checks the accelerated and Dart conversions against each\n  other on every native CI lane.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "9caeee939a559b3c31e12347a65e4f998f7d9958",
+            "short_sha": "9caeee9",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/9caeee939a559b3c31e12347a65e4f998f7d9958",
+            "authored_at": "2026-10-27T18:31:45Z",
+            "committed_at": "2026-10-27T18:31:45Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#48",
+            "title": "feat(mp_core): SIMD pixel conversion through the native runtime",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/48",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "9caeee939a559b3c31e12347a65e4f998f7d9958",
+            "short_sha": "9caeee9",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/9caeee939a559b3c31e12347a65e4f998f7d9958",
+            "authored_at": "2026-10-27T18:31:45Z",
+            "committed_at": "2026-10-27T18:31:45Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#48",
+            "title": "feat(mp_core): SIMD pixel conversion through the native runtime",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/48",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/overlay-transform.md",
+      "summary": "Overlay coordinate transform and ui.Image interop",
+      "details": "- `mp_camera`: `CameraOverlayTransform` maps MediaPipe's normalized landmarks,\n  pixel bounding boxes, and regions of interest onto the preview widget,\n  accounting for the inference rotation (results are relative to the upright\n  frame), a mirrored front-camera preview, and the `BoxFit` placing the preview\n  — `cover` cropping, `contain` letterboxing, and every other fit included via\n  Flutter's own fitting rules.\n- `mp_camera`: `MpImage.toUiImage()` uploads sRGB, sRGBA, gray, and\n  single-channel float confidence masks as `ui.Image` for canvas painting, and\n  `ui.Image.toMpImage()` reads decoded images back into an sRGBA `MpImage` for\n  still-image inference — no hand-written byte shuffling left to applications.",
+      "targets": [
+        {
+          "id": "mp_camera",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "814b9feb6e8a02283f7ff4e5da7e90f964e46d38",
+            "short_sha": "814b9fe",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/814b9feb6e8a02283f7ff4e5da7e90f964e46d38",
+            "authored_at": "2026-10-27T05:36:16Z",
+            "committed_at": "2026-10-27T05:36:16Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#45",
+            "title": "feat(mp_camera): overlay coordinate transform and ui.Image interop",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/45",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "814b9feb6e8a02283f7ff4e5da7e90f964e46d38",
+            "short_sha": "814b9fe",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/814b9feb6e8a02283f7ff4e5da7e90f964e46d38",
+            "authored_at": "2026-10-27T05:36:16Z",
+            "committed_at": "2026-10-27T05:36:16Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#45",
+            "title": "feat(mp_camera): overlay coordinate transform and ui.Image interop",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/45",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/pixel-conversion-kernels.md",
+      "summary": "Shared pixel-conversion kernels and a performance gate",
+      "details": "- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout\n  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420\n  covering both planar and Android's semi-planar layouts with independent row\n  and pixel strides. Each kernel validates its strides and buffer lengths,\n  writes one freshly allocated buffer, and returns an image that adopts it\n  without a second copy, so the hot path no longer depends on Flutter-only\n  code.\n- `mp_camera`: the frame converter now wraps each `package:camera` plane and\n  delegates to those kernels. Conversion output is unchanged; stride\n  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride\n  other than four now fails with a descriptive `StateError` instead of\n  producing silently wrong colors.\n- The repository gained a `benchmarks/` suite over every pure-Dart hot path —\n  pixel conversion, image construction, isolate frame transfer, result\n  containers, and embedding similarity — plus two gates that run on every pull\n  request: changed production lines must be covered by the unit tests\n  (`tool/check_patch_coverage.dart`), and benchmark results must not regress\n  against the base commit on the same runner (`tool/compare_benchmarks.dart`).",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        },
+        {
+          "id": "mp_camera",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "8d2e44f5f4b0a7d73c0f19b9dd59a8687cd1142a",
+            "short_sha": "8d2e44f",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/8d2e44f5f4b0a7d73c0f19b9dd59a8687cd1142a",
+            "authored_at": "2026-10-26T13:27:39Z",
+            "committed_at": "2026-10-26T13:27:39Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#41",
+            "title": "feat: pixel-conversion kernels, hot-path benchmarks, and PR coverage/perf gates",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/41",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "8d2e44f5f4b0a7d73c0f19b9dd59a8687cd1142a",
+            "short_sha": "8d2e44f",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/8d2e44f5f4b0a7d73c0f19b9dd59a8687cd1142a",
+            "authored_at": "2026-10-26T13:27:39Z",
+            "committed_at": "2026-10-26T13:27:39Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#41",
+            "title": "feat: pixel-conversion kernels, hot-path benchmarks, and PR coverage/perf gates",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/41",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    },
+    {
+      "path": ".changeset/web-video-source.md",
+      "summary": "Live video-element input on the web",
+      "details": "- `mp_vision`: `processVideoElement` on every vision task accepts a live\n  browser video element, wrapped with `webVideoSource` from\n  `package:mp_vision/mp_vision_web.dart`. MediaPipe samples the element's\n  current frame straight from the compositor, so a web camera pipeline skips\n  the canvas draw, the `ImageData` copy, and the `MpImage` round trip that the\n  pixel path pays per frame. Accepted in video and live-stream mode with the\n  semantics of `processVideo`; native runtimes fail with\n  `MpStatus.unimplemented` and continue to expect converted frames.",
+      "targets": [
+        {
+          "id": "mp_vision",
+          "kind": "package",
+          "bump": "minor",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "feat"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "a2ca304adfdde72b87682825c64d5ce7a3658e07",
+            "short_sha": "a2ca304",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/a2ca304adfdde72b87682825c64d5ce7a3658e07",
+            "authored_at": "2026-10-27T15:47:02Z",
+            "committed_at": "2026-10-27T15:47:02Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#47",
+            "title": "feat(mp_vision): live video-element input on the web",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/47",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "a2ca304adfdde72b87682825c64d5ce7a3658e07",
+            "short_sha": "a2ca304",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/a2ca304adfdde72b87682825c64d5ce7a3658e07",
+            "authored_at": "2026-10-27T15:47:02Z",
+            "committed_at": "2026-10-27T15:47:02Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#47",
+            "title": "feat(mp_vision): live video-element input on the web",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/47",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": []
+      }
+    }
+  ],
+  "changelogs": [
+    {
+      "owner_id": "mp",
+      "owner_kind": "group",
+      "output": "default",
+      "stream": "default",
+      "path": "CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+        "summary": [
+          "Grouped release for `mp`."
+        ],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Packed landmark lists\n\n_Packages:_ 🟠 _mp_core_, 🟢 _mp_vision_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)\n\n- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the\n  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one\n  packed `Float32List` — five floats per landmark (x, y, z, visibility,\n  presence, with absent confidences stored as quiet NaN) plus optional\n  parallel names. A 478-point face result costs one buffer instead of\n  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to\n  copy to the caller, and directly iterable by painting loops through\n  `values` without materializing landmark objects. `fromLandmarks` packs\n  app-built lists the same way; coordinates are 32-bit floats exactly as the\n  native runtime reports them.\n- `mp_vision`: native result conversion fills those packed lists directly\n  from the C structs, so every landmarker result (face, hand, pose, gesture,\n  holistic) crosses isolates as contiguous data. The concrete list type\n  changes; reading code keeps working unchanged because the new lists are\n  real `List`s with the same value equality.",
+              "#### Frame pacing and live scheduling telemetry\n\n_Packages:_ 🟠 _mp_core_, 🟢 _mp_camera_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)\n\n- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart\n  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame\n  which waited through a long inference stall instead of running it late, a\n  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95\n  queue-wait and processing times, and a `dart:developer` timeline task around\n  every processed frame for DevTools.\n- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp\n  before any pixel conversion runs, so a skipped frame costs nothing;\n  `FramePacer.targetFps` derives the interval from a target rate.\n- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank\n  percentiles behind the scheduler statistics, public for timing other stages.\n- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and\n  `LatestFrameStats` from `mp_core`; existing imports keep working.",
+              "#### Content-addressed model cache\n\n_Packages:_ 🟠 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #44](https://github.com/ifiokjr/mediapipe/pull/44)\n\n- `ModelAsset.uri` accepts `cacheDirectory`. On native platforms a\n  digest-pinned model is downloaded once into a content-addressed cache (the\n  SHA-256 digest is the file name), verified by hashing on every reuse, and\n  replaced automatically when the cached file is corrupted or truncated. The\n  download streams to a temporary file and hashes as bytes arrive, so a\n  multi-hundred-megabyte model never sits in the Dart heap, and MediaPipe\n  opens the finished file by path — which lets it map the file instead of\n  copying it — rather than receiving a buffer. `cacheDirectory` requires a\n  digest; browser builds ignore it.\n- `ModelCache` and `maximumRemoteModelBytes` are exported from\n  `package:mp_core/native.dart` for applications that want to pre-warm models.\n- Remote model URIs still require HTTPS, except that plain HTTP is now accepted\n  from loopback addresses so local development servers (and the SDK's own\n  tests) can serve models; digest verification applies there too.",
+              "#### SIMD pixel conversion through the native runtime\n\n_Packages:_ 🟠 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #48](https://github.com/ifiokjr/mediapipe/pull/48)\n\n- `mp_core`: `PixelConverter` dispatches NV21, planar YUV420, and Android's\n  semi-planar YUV420 to libyuv's NEON/SSE paths — compiled into the bundled\n  native runtime as the SDK's own `MpPixel*` shim — when the linked runtime\n  carries those symbols, and runs the pure Dart kernels otherwise. Output\n  matches the Dart kernels to within fixed-point rounding (at most two levels\n  per channel); the BGRA swizzle is exact. `nativePixelConversionSupported`\n  in `package:mp_core/native.dart` reports which path is active, and\n  `PixelConverter.forceDartKernels` lets tests compare the two.\n- The native builder copies the shim from `tool/native/` into the pinned\n  MediaPipe checkout, links `@libyuv`, exports the symbols through the Linux\n  and Android version scripts, and `verify_native` requires them; a native\n  integration test checks the accelerated and Dart conversions against each\n  other on every native CI lane.",
+              "#### Shared pixel-conversion kernels and a performance gate\n\n_Packages:_ 🟠 _mp_core_, 🟢 _mp_camera_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)\n\n- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout\n  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420\n  covering both planar and Android's semi-planar layouts with independent row\n  and pixel strides. Each kernel validates its strides and buffer lengths,\n  writes one freshly allocated buffer, and returns an image that adopts it\n  without a second copy, so the hot path no longer depends on Flutter-only\n  code.\n- `mp_camera`: the frame converter now wraps each `package:camera` plane and\n  delegates to those kernels. Conversion output is unchanged; stride\n  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride\n  other than four now fails with a descriptive `StateError` instead of\n  producing silently wrong colors.\n- The repository gained a `benchmarks/` suite over every pure-Dart hot path —\n  pixel conversion, image construction, isolate frame transfer, result\n  containers, and embedding similarity — plus two gates that run on every pull\n  request: changed production lines must be covered by the unit tests\n  (`tool/check_patch_coverage.dart`), and benchmark results must not regress\n  against the base commit on the same runner (`tool/compare_benchmarks.dart`).",
+              "#### Live video-element input on the web\n\n_Packages:_ 🟠 _mp_vision_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #47](https://github.com/ifiokjr/mediapipe/pull/47)\n\n- `mp_vision`: `processVideoElement` on every vision task accepts a live\n  browser video element, wrapped with `webVideoSource` from\n  `package:mp_vision/mp_vision_web.dart`. MediaPipe samples the element's\n  current frame straight from the compositor, so a web camera pipeline skips\n  the canvas draw, the `ImageData` copy, and the `MpImage` round trip that the\n  pixel path pays per frame. Accepted in video and live-stream mode with the\n  semantics of `processVideo`; native runtimes fail with\n  `MpStatus.unimplemented` and continue to expect converted frames.",
+              "#### Overlay coordinate transform and ui.Image interop\n\n_Packages:_ 🟠 _mp_camera_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #45](https://github.com/ifiokjr/mediapipe/pull/45)\n\n- `mp_camera`: `CameraOverlayTransform` maps MediaPipe's normalized landmarks,\n  pixel bounding boxes, and regions of interest onto the preview widget,\n  accounting for the inference rotation (results are relative to the upright\n  frame), a mirrored front-camera preview, and the `BoxFit` placing the preview\n  — `cover` cropping, `contain` letterboxing, and every other fit included via\n  Flutter's own fitting rules.\n- `mp_camera`: `MpImage.toUiImage()` uploads sRGB, sRGBA, gray, and\n  single-channel float confidence masks as `ui.Image` for canvas painting, and\n  `ui.Image.toMpImage()` reads decoded images back into an sRGBA `MpImage` for\n  still-image inference — no hand-written byte shuffling left to applications."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Lifecycle cleanup and retry fixes\n\n_Packages:_ 🟢 _mp_vision_, 🟢 _mp_text_, 🟢 _mp_audio_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)\n\nGrouped release for `mp`.\n\n### Features\n\n#### Packed landmark lists\n\n_Packages:_ 🟠 _mp_core_, 🟢 _mp_vision_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)\n\n- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the\n  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one\n  packed `Float32List` — five floats per landmark (x, y, z, visibility,\n  presence, with absent confidences stored as quiet NaN) plus optional\n  parallel names. A 478-point face result costs one buffer instead of\n  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to\n  copy to the caller, and directly iterable by painting loops through\n  `values` without materializing landmark objects. `fromLandmarks` packs\n  app-built lists the same way; coordinates are 32-bit floats exactly as the\n  native runtime reports them.\n- `mp_vision`: native result conversion fills those packed lists directly\n  from the C structs, so every landmarker result (face, hand, pose, gesture,\n  holistic) crosses isolates as contiguous data. The concrete list type\n  changes; reading code keeps working unchanged because the new lists are\n  real `List`s with the same value equality.\n\n#### Frame pacing and live scheduling telemetry\n\n_Packages:_ 🟠 _mp_core_, 🟢 _mp_camera_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)\n\n- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart\n  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame\n  which waited through a long inference stall instead of running it late, a\n  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95\n  queue-wait and processing times, and a `dart:developer` timeline task around\n  every processed frame for DevTools.\n- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp\n  before any pixel conversion runs, so a skipped frame costs nothing;\n  `FramePacer.targetFps` derives the interval from a target rate.\n- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank\n  percentiles behind the scheduler statistics, public for timing other stages.\n- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and\n  `LatestFrameStats` from `mp_core`; existing imports keep working.\n\n#### Content-addressed model cache\n\n_Packages:_ 🟠 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #44](https://github.com/ifiokjr/mediapipe/pull/44)\n\n- `ModelAsset.uri` accepts `cacheDirectory`. On native platforms a\n  digest-pinned model is downloaded once into a content-addressed cache (the\n  SHA-256 digest is the file name), verified by hashing on every reuse, and\n  replaced automatically when the cached file is corrupted or truncated. The\n  download streams to a temporary file and hashes as bytes arrive, so a\n  multi-hundred-megabyte model never sits in the Dart heap, and MediaPipe\n  opens the finished file by path — which lets it map the file instead of\n  copying it — rather than receiving a buffer. `cacheDirectory` requires a\n  digest; browser builds ignore it.\n- `ModelCache` and `maximumRemoteModelBytes` are exported from\n  `package:mp_core/native.dart` for applications that want to pre-warm models.\n- Remote model URIs still require HTTPS, except that plain HTTP is now accepted\n  from loopback addresses so local development servers (and the SDK's own\n  tests) can serve models; digest verification applies there too.\n\n#### SIMD pixel conversion through the native runtime\n\n_Packages:_ 🟠 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #48](https://github.com/ifiokjr/mediapipe/pull/48)\n\n- `mp_core`: `PixelConverter` dispatches NV21, planar YUV420, and Android's\n  semi-planar YUV420 to libyuv's NEON/SSE paths — compiled into the bundled\n  native runtime as the SDK's own `MpPixel*` shim — when the linked runtime\n  carries those symbols, and runs the pure Dart kernels otherwise. Output\n  matches the Dart kernels to within fixed-point rounding (at most two levels\n  per channel); the BGRA swizzle is exact. `nativePixelConversionSupported`\n  in `package:mp_core/native.dart` reports which path is active, and\n  `PixelConverter.forceDartKernels` lets tests compare the two.\n- The native builder copies the shim from `tool/native/` into the pinned\n  MediaPipe checkout, links `@libyuv`, exports the symbols through the Linux\n  and Android version scripts, and `verify_native` requires them; a native\n  integration test checks the accelerated and Dart conversions against each\n  other on every native CI lane.\n\n#### Shared pixel-conversion kernels and a performance gate\n\n_Packages:_ 🟠 _mp_core_, 🟢 _mp_camera_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)\n\n- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout\n  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420\n  covering both planar and Android's semi-planar layouts with independent row\n  and pixel strides. Each kernel validates its strides and buffer lengths,\n  writes one freshly allocated buffer, and returns an image that adopts it\n  without a second copy, so the hot path no longer depends on Flutter-only\n  code.\n- `mp_camera`: the frame converter now wraps each `package:camera` plane and\n  delegates to those kernels. Conversion output is unchanged; stride\n  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride\n  other than four now fails with a descriptive `StateError` instead of\n  producing silently wrong colors.\n- The repository gained a `benchmarks/` suite over every pure-Dart hot path —\n  pixel conversion, image construction, isolate frame transfer, result\n  containers, and embedding similarity — plus two gates that run on every pull\n  request: changed production lines must be covered by the unit tests\n  (`tool/check_patch_coverage.dart`), and benchmark results must not regress\n  against the base commit on the same runner (`tool/compare_benchmarks.dart`).\n\n#### Live video-element input on the web\n\n_Packages:_ 🟠 _mp_vision_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #47](https://github.com/ifiokjr/mediapipe/pull/47)\n\n- `mp_vision`: `processVideoElement` on every vision task accepts a live\n  browser video element, wrapped with `webVideoSource` from\n  `package:mp_vision/mp_vision_web.dart`. MediaPipe samples the element's\n  current frame straight from the compositor, so a web camera pipeline skips\n  the canvas draw, the `ImageData` copy, and the `MpImage` round trip that the\n  pixel path pays per frame. Accepted in video and live-stream mode with the\n  semantics of `processVideo`; native runtimes fail with\n  `MpStatus.unimplemented` and continue to expect converted frames.\n\n#### Overlay coordinate transform and ui.Image interop\n\n_Packages:_ 🟠 _mp_camera_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #45](https://github.com/ifiokjr/mediapipe/pull/45)\n\n- `mp_camera`: `CameraOverlayTransform` maps MediaPipe's normalized landmarks,\n  pixel bounding boxes, and regions of interest onto the preview widget,\n  accounting for the inference rotation (results are relative to the upright\n  frame), a mirrored front-camera preview, and the `BoxFit` placing the preview\n  — `cover` cropping, `contain` letterboxing, and every other fit included via\n  Flutter's own fitting rules.\n- `mp_camera`: `MpImage.toUiImage()` uploads sRGB, sRGBA, gray, and\n  single-channel float confidence masks as `ui.Image` for canvas painting, and\n  `ui.Image.toMpImage()` reads decoded images back into an sRGBA `MpImage` for\n  still-image inference — no hand-written byte shuffling left to applications.\n\n### Fixes\n\n#### Lifecycle cleanup and retry fixes\n\n_Packages:_ 🟢 _mp_vision_, 🟢 _mp_text_, 🟢 _mp_audio_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+    },
+    {
+      "owner_id": "mp_audio",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_audio/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Lifecycle cleanup and retry fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)\n\n### Fixes\n\n#### Lifecycle cleanup and retry fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+    },
+    {
+      "owner_id": "mp_camera",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_camera/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Overlay coordinate transform and ui.Image interop\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #45](https://github.com/ifiokjr/mediapipe/pull/45)\n\n- `mp_camera`: `CameraOverlayTransform` maps MediaPipe's normalized landmarks,\n  pixel bounding boxes, and regions of interest onto the preview widget,\n  accounting for the inference rotation (results are relative to the upright\n  frame), a mirrored front-camera preview, and the `BoxFit` placing the preview\n  — `cover` cropping, `contain` letterboxing, and every other fit included via\n  Flutter's own fitting rules.\n- `mp_camera`: `MpImage.toUiImage()` uploads sRGB, sRGBA, gray, and\n  single-channel float confidence masks as `ui.Image` for canvas painting, and\n  `ui.Image.toMpImage()` reads decoded images back into an sRGBA `MpImage` for\n  still-image inference — no hand-written byte shuffling left to applications."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Frame pacing and live scheduling telemetry\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)\n\n- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart\n  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame\n  which waited through a long inference stall instead of running it late, a\n  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95\n  queue-wait and processing times, and a `dart:developer` timeline task around\n  every processed frame for DevTools.\n- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp\n  before any pixel conversion runs, so a skipped frame costs nothing;\n  `FramePacer.targetFps` derives the interval from a target rate.\n- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank\n  percentiles behind the scheduler statistics, public for timing other stages.\n- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and\n  `LatestFrameStats` from `mp_core`; existing imports keep working.",
+              "#### Shared pixel-conversion kernels and a performance gate\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)\n\n- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout\n  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420\n  covering both planar and Android's semi-planar layouts with independent row\n  and pixel strides. Each kernel validates its strides and buffer lengths,\n  writes one freshly allocated buffer, and returns an image that adopts it\n  without a second copy, so the hot path no longer depends on Flutter-only\n  code.\n- `mp_camera`: the frame converter now wraps each `package:camera` plane and\n  delegates to those kernels. Conversion output is unchanged; stride\n  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride\n  other than four now fails with a descriptive `StateError` instead of\n  producing silently wrong colors.\n- The repository gained a `benchmarks/` suite over every pure-Dart hot path —\n  pixel conversion, image construction, isolate frame transfer, result\n  containers, and embedding similarity — plus two gates that run on every pull\n  request: changed production lines must be covered by the unit tests\n  (`tool/check_patch_coverage.dart`), and benchmark results must not regress\n  against the base commit on the same runner (`tool/compare_benchmarks.dart`)."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)\n\n### Features\n\n#### Overlay coordinate transform and ui.Image interop\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #45](https://github.com/ifiokjr/mediapipe/pull/45)\n\n- `mp_camera`: `CameraOverlayTransform` maps MediaPipe's normalized landmarks,\n  pixel bounding boxes, and regions of interest onto the preview widget,\n  accounting for the inference rotation (results are relative to the upright\n  frame), a mirrored front-camera preview, and the `BoxFit` placing the preview\n  — `cover` cropping, `contain` letterboxing, and every other fit included via\n  Flutter's own fitting rules.\n- `mp_camera`: `MpImage.toUiImage()` uploads sRGB, sRGBA, gray, and\n  single-channel float confidence masks as `ui.Image` for canvas painting, and\n  `ui.Image.toMpImage()` reads decoded images back into an sRGBA `MpImage` for\n  still-image inference — no hand-written byte shuffling left to applications.\n\n### Fixes\n\n#### Frame pacing and live scheduling telemetry\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)\n\n- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart\n  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame\n  which waited through a long inference stall instead of running it late, a\n  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95\n  queue-wait and processing times, and a `dart:developer` timeline task around\n  every processed frame for DevTools.\n- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp\n  before any pixel conversion runs, so a skipped frame costs nothing;\n  `FramePacer.targetFps` derives the interval from a target rate.\n- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank\n  percentiles behind the scheduler statistics, public for timing other stages.\n- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and\n  `LatestFrameStats` from `mp_core`; existing imports keep working.\n\n#### Shared pixel-conversion kernels and a performance gate\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)\n\n- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout\n  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420\n  covering both planar and Android's semi-planar layouts with independent row\n  and pixel strides. Each kernel validates its strides and buffer lengths,\n  writes one freshly allocated buffer, and returns an image that adopts it\n  without a second copy, so the hot path no longer depends on Flutter-only\n  code.\n- `mp_camera`: the frame converter now wraps each `package:camera` plane and\n  delegates to those kernels. Conversion output is unchanged; stride\n  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride\n  other than four now fails with a descriptive `StateError` instead of\n  producing silently wrong colors.\n- The repository gained a `benchmarks/` suite over every pure-Dart hot path —\n  pixel conversion, image construction, isolate frame transfer, result\n  containers, and embedding similarity — plus two gates that run on every pull\n  request: changed production lines must be covered by the unit tests\n  (`tool/check_patch_coverage.dart`), and benchmark results must not regress\n  against the base commit on the same runner (`tool/compare_benchmarks.dart`)."
+    },
+    {
+      "owner_id": "mp_core",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_core/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Packed landmark lists\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)\n\n- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the\n  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one\n  packed `Float32List` — five floats per landmark (x, y, z, visibility,\n  presence, with absent confidences stored as quiet NaN) plus optional\n  parallel names. A 478-point face result costs one buffer instead of\n  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to\n  copy to the caller, and directly iterable by painting loops through\n  `values` without materializing landmark objects. `fromLandmarks` packs\n  app-built lists the same way; coordinates are 32-bit floats exactly as the\n  native runtime reports them.\n- `mp_vision`: native result conversion fills those packed lists directly\n  from the C structs, so every landmarker result (face, hand, pose, gesture,\n  holistic) crosses isolates as contiguous data. The concrete list type\n  changes; reading code keeps working unchanged because the new lists are\n  real `List`s with the same value equality.",
+              "#### Frame pacing and live scheduling telemetry\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)\n\n- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart\n  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame\n  which waited through a long inference stall instead of running it late, a\n  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95\n  queue-wait and processing times, and a `dart:developer` timeline task around\n  every processed frame for DevTools.\n- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp\n  before any pixel conversion runs, so a skipped frame costs nothing;\n  `FramePacer.targetFps` derives the interval from a target rate.\n- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank\n  percentiles behind the scheduler statistics, public for timing other stages.\n- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and\n  `LatestFrameStats` from `mp_core`; existing imports keep working.",
+              "#### Content-addressed model cache\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #44](https://github.com/ifiokjr/mediapipe/pull/44)\n\n- `ModelAsset.uri` accepts `cacheDirectory`. On native platforms a\n  digest-pinned model is downloaded once into a content-addressed cache (the\n  SHA-256 digest is the file name), verified by hashing on every reuse, and\n  replaced automatically when the cached file is corrupted or truncated. The\n  download streams to a temporary file and hashes as bytes arrive, so a\n  multi-hundred-megabyte model never sits in the Dart heap, and MediaPipe\n  opens the finished file by path — which lets it map the file instead of\n  copying it — rather than receiving a buffer. `cacheDirectory` requires a\n  digest; browser builds ignore it.\n- `ModelCache` and `maximumRemoteModelBytes` are exported from\n  `package:mp_core/native.dart` for applications that want to pre-warm models.\n- Remote model URIs still require HTTPS, except that plain HTTP is now accepted\n  from loopback addresses so local development servers (and the SDK's own\n  tests) can serve models; digest verification applies there too.",
+              "#### SIMD pixel conversion through the native runtime\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #48](https://github.com/ifiokjr/mediapipe/pull/48)\n\n- `mp_core`: `PixelConverter` dispatches NV21, planar YUV420, and Android's\n  semi-planar YUV420 to libyuv's NEON/SSE paths — compiled into the bundled\n  native runtime as the SDK's own `MpPixel*` shim — when the linked runtime\n  carries those symbols, and runs the pure Dart kernels otherwise. Output\n  matches the Dart kernels to within fixed-point rounding (at most two levels\n  per channel); the BGRA swizzle is exact. `nativePixelConversionSupported`\n  in `package:mp_core/native.dart` reports which path is active, and\n  `PixelConverter.forceDartKernels` lets tests compare the two.\n- The native builder copies the shim from `tool/native/` into the pinned\n  MediaPipe checkout, links `@libyuv`, exports the symbols through the Linux\n  and Android version scripts, and `verify_native` requires them; a native\n  integration test checks the accelerated and Dart conversions against each\n  other on every native CI lane.",
+              "#### Shared pixel-conversion kernels and a performance gate\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)\n\n- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout\n  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420\n  covering both planar and Android's semi-planar layouts with independent row\n  and pixel strides. Each kernel validates its strides and buffer lengths,\n  writes one freshly allocated buffer, and returns an image that adopts it\n  without a second copy, so the hot path no longer depends on Flutter-only\n  code.\n- `mp_camera`: the frame converter now wraps each `package:camera` plane and\n  delegates to those kernels. Conversion output is unchanged; stride\n  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride\n  other than four now fails with a descriptive `StateError` instead of\n  producing silently wrong colors.\n- The repository gained a `benchmarks/` suite over every pure-Dart hot path —\n  pixel conversion, image construction, isolate frame transfer, result\n  containers, and embedding similarity — plus two gates that run on every pull\n  request: changed production lines must be covered by the unit tests\n  (`tool/check_patch_coverage.dart`), and benchmark results must not regress\n  against the base commit on the same runner (`tool/compare_benchmarks.dart`)."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)\n\n### Features\n\n#### Packed landmark lists\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)\n\n- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the\n  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one\n  packed `Float32List` — five floats per landmark (x, y, z, visibility,\n  presence, with absent confidences stored as quiet NaN) plus optional\n  parallel names. A 478-point face result costs one buffer instead of\n  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to\n  copy to the caller, and directly iterable by painting loops through\n  `values` without materializing landmark objects. `fromLandmarks` packs\n  app-built lists the same way; coordinates are 32-bit floats exactly as the\n  native runtime reports them.\n- `mp_vision`: native result conversion fills those packed lists directly\n  from the C structs, so every landmarker result (face, hand, pose, gesture,\n  holistic) crosses isolates as contiguous data. The concrete list type\n  changes; reading code keeps working unchanged because the new lists are\n  real `List`s with the same value equality.\n\n#### Frame pacing and live scheduling telemetry\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)\n\n- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart\n  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame\n  which waited through a long inference stall instead of running it late, a\n  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95\n  queue-wait and processing times, and a `dart:developer` timeline task around\n  every processed frame for DevTools.\n- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp\n  before any pixel conversion runs, so a skipped frame costs nothing;\n  `FramePacer.targetFps` derives the interval from a target rate.\n- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank\n  percentiles behind the scheduler statistics, public for timing other stages.\n- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and\n  `LatestFrameStats` from `mp_core`; existing imports keep working.\n\n#### Content-addressed model cache\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #44](https://github.com/ifiokjr/mediapipe/pull/44)\n\n- `ModelAsset.uri` accepts `cacheDirectory`. On native platforms a\n  digest-pinned model is downloaded once into a content-addressed cache (the\n  SHA-256 digest is the file name), verified by hashing on every reuse, and\n  replaced automatically when the cached file is corrupted or truncated. The\n  download streams to a temporary file and hashes as bytes arrive, so a\n  multi-hundred-megabyte model never sits in the Dart heap, and MediaPipe\n  opens the finished file by path — which lets it map the file instead of\n  copying it — rather than receiving a buffer. `cacheDirectory` requires a\n  digest; browser builds ignore it.\n- `ModelCache` and `maximumRemoteModelBytes` are exported from\n  `package:mp_core/native.dart` for applications that want to pre-warm models.\n- Remote model URIs still require HTTPS, except that plain HTTP is now accepted\n  from loopback addresses so local development servers (and the SDK's own\n  tests) can serve models; digest verification applies there too.\n\n#### SIMD pixel conversion through the native runtime\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #48](https://github.com/ifiokjr/mediapipe/pull/48)\n\n- `mp_core`: `PixelConverter` dispatches NV21, planar YUV420, and Android's\n  semi-planar YUV420 to libyuv's NEON/SSE paths — compiled into the bundled\n  native runtime as the SDK's own `MpPixel*` shim — when the linked runtime\n  carries those symbols, and runs the pure Dart kernels otherwise. Output\n  matches the Dart kernels to within fixed-point rounding (at most two levels\n  per channel); the BGRA swizzle is exact. `nativePixelConversionSupported`\n  in `package:mp_core/native.dart` reports which path is active, and\n  `PixelConverter.forceDartKernels` lets tests compare the two.\n- The native builder copies the shim from `tool/native/` into the pinned\n  MediaPipe checkout, links `@libyuv`, exports the symbols through the Linux\n  and Android version scripts, and `verify_native` requires them; a native\n  integration test checks the accelerated and Dart conversions against each\n  other on every native CI lane.\n\n#### Shared pixel-conversion kernels and a performance gate\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)\n\n- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout\n  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420\n  covering both planar and Android's semi-planar layouts with independent row\n  and pixel strides. Each kernel validates its strides and buffer lengths,\n  writes one freshly allocated buffer, and returns an image that adopts it\n  without a second copy, so the hot path no longer depends on Flutter-only\n  code.\n- `mp_camera`: the frame converter now wraps each `package:camera` plane and\n  delegates to those kernels. Conversion output is unchanged; stride\n  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride\n  other than four now fails with a descriptive `StateError` instead of\n  producing silently wrong colors.\n- The repository gained a `benchmarks/` suite over every pure-Dart hot path —\n  pixel conversion, image construction, isolate frame transfer, result\n  containers, and embedding similarity — plus two gates that run on every pull\n  request: changed production lines must be covered by the unit tests\n  (`tool/check_patch_coverage.dart`), and benchmark results must not regress\n  against the base commit on the same runner (`tool/compare_benchmarks.dart`)."
+    },
+    {
+      "owner_id": "mp_genai",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_genai/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Changed",
+            "collapsed": false,
+            "entries": [
+              "- **No package-specific changes were recorded; `mp_genai` was updated to 0.1.4 as part of group `mp`.**"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)\n\n### Changed\n\n- **No package-specific changes were recorded; `mp_genai` was updated to 0.1.4 as part of group `mp`.**"
+    },
+    {
+      "owner_id": "mp_text",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_text/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Lifecycle cleanup and retry fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)\n\n### Fixes\n\n#### Lifecycle cleanup and retry fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+    },
+    {
+      "owner_id": "mp_vision",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_vision/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Features",
+            "collapsed": false,
+            "entries": [
+              "#### Live video-element input on the web\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #47](https://github.com/ifiokjr/mediapipe/pull/47)\n\n- `mp_vision`: `processVideoElement` on every vision task accepts a live\n  browser video element, wrapped with `webVideoSource` from\n  `package:mp_vision/mp_vision_web.dart`. MediaPipe samples the element's\n  current frame straight from the compositor, so a web camera pipeline skips\n  the canvas draw, the `ImageData` copy, and the `MpImage` round trip that the\n  pixel path pays per frame. Accepted in video and live-stream mode with the\n  semantics of `processVideo`; native runtimes fail with\n  `MpStatus.unimplemented` and continue to expect converted frames."
+            ]
+          },
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Packed landmark lists\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)\n\n- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the\n  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one\n  packed `Float32List` — five floats per landmark (x, y, z, visibility,\n  presence, with absent confidences stored as quiet NaN) plus optional\n  parallel names. A 478-point face result costs one buffer instead of\n  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to\n  copy to the caller, and directly iterable by painting loops through\n  `values` without materializing landmark objects. `fromLandmarks` packs\n  app-built lists the same way; coordinates are 32-bit floats exactly as the\n  native runtime reports them.\n- `mp_vision`: native result conversion fills those packed lists directly\n  from the C structs, so every landmarker result (face, hand, pose, gesture,\n  holistic) crosses isolates as contiguous data. The concrete list type\n  changes; reading code keeps working unchanged because the new lists are\n  real `List`s with the same value equality.",
+              "#### Lifecycle cleanup and retry fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)\n\n### Features\n\n#### Live video-element input on the web\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #47](https://github.com/ifiokjr/mediapipe/pull/47)\n\n- `mp_vision`: `processVideoElement` on every vision task accepts a live\n  browser video element, wrapped with `webVideoSource` from\n  `package:mp_vision/mp_vision_web.dart`. MediaPipe samples the element's\n  current frame straight from the compositor, so a web camera pipeline skips\n  the canvas draw, the `ImageData` copy, and the `MpImage` round trip that the\n  pixel path pays per frame. Accepted in video and live-stream mode with the\n  semantics of `processVideo`; native runtimes fail with\n  `MpStatus.unimplemented` and continue to expect converted frames.\n\n### Fixes\n\n#### Packed landmark lists\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)\n\n- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the\n  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one\n  packed `Float32List` — five floats per landmark (x, y, z, visibility,\n  presence, with absent confidences stored as quiet NaN) plus optional\n  parallel names. A 478-point face result costs one buffer instead of\n  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to\n  copy to the caller, and directly iterable by painting loops through\n  `values` without materializing landmark objects. `fromLandmarks` packs\n  app-built lists the same way; coordinates are 32-bit floats exactly as the\n  native runtime reports them.\n- `mp_vision`: native result conversion fills those packed lists directly\n  from the C structs, so every landmarker result (face, hand, pose, gesture,\n  holistic) crosses isolates as contiguous data. The concrete list type\n  changes; reading code keeps working unchanged because the new lists are\n  real `List`s with the same value equality.\n\n#### Lifecycle cleanup and retry fixes\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)\n\n- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only\n  after the native task is released. Previously a failed close left the\n  backend marked closed, so the facade's documented retry re-invoked a no-op\n  and permanently leaked the worker isolate and native task. A failed close\n  now leaves the task open for a retried cleanup.\n- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the\n  `mp_vision` behavior — and a concurrent second `close()` now awaits the\n  in-flight attempt instead of resolving before cleanup finishes.\n- `mp_vision`: frame processing allocates the native image inside the scope's\n  error boundary, so an image-creation failure on the worker no longer leaks\n  the per-call native arena (previously one full-frame buffer per failure)."
+    }
+  ],
+  "provider": {
+    "kind": "github",
+    "owner": "ifiokjr",
+    "repo": "mediapipe",
+    "host": null
+  }
+}

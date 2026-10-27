@@ -1,3 +1,105 @@
+## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)
+
+### Features
+
+#### Packed landmark lists
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)
+
+- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the
+  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one
+  packed `Float32List` — five floats per landmark (x, y, z, visibility,
+  presence, with absent confidences stored as quiet NaN) plus optional
+  parallel names. A 478-point face result costs one buffer instead of
+  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to
+  copy to the caller, and directly iterable by painting loops through
+  `values` without materializing landmark objects. `fromLandmarks` packs
+  app-built lists the same way; coordinates are 32-bit floats exactly as the
+  native runtime reports them.
+- `mp_vision`: native result conversion fills those packed lists directly
+  from the C structs, so every landmarker result (face, hand, pose, gesture,
+  holistic) crosses isolates as contiguous data. The concrete list type
+  changes; reading code keeps working unchanged because the new lists are
+  real `List`s with the same value equality.
+
+#### Frame pacing and live scheduling telemetry
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)
+
+- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart
+  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame
+  which waited through a long inference stall instead of running it late, a
+  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95
+  queue-wait and processing times, and a `dart:developer` timeline task around
+  every processed frame for DevTools.
+- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp
+  before any pixel conversion runs, so a skipped frame costs nothing;
+  `FramePacer.targetFps` derives the interval from a target rate.
+- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank
+  percentiles behind the scheduler statistics, public for timing other stages.
+- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and
+  `LatestFrameStats` from `mp_core`; existing imports keep working.
+
+#### Content-addressed model cache
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #44](https://github.com/ifiokjr/mediapipe/pull/44)
+
+- `ModelAsset.uri` accepts `cacheDirectory`. On native platforms a
+  digest-pinned model is downloaded once into a content-addressed cache (the
+  SHA-256 digest is the file name), verified by hashing on every reuse, and
+  replaced automatically when the cached file is corrupted or truncated. The
+  download streams to a temporary file and hashes as bytes arrive, so a
+  multi-hundred-megabyte model never sits in the Dart heap, and MediaPipe
+  opens the finished file by path — which lets it map the file instead of
+  copying it — rather than receiving a buffer. `cacheDirectory` requires a
+  digest; browser builds ignore it.
+- `ModelCache` and `maximumRemoteModelBytes` are exported from
+  `package:mp_core/native.dart` for applications that want to pre-warm models.
+- Remote model URIs still require HTTPS, except that plain HTTP is now accepted
+  from loopback addresses so local development servers (and the SDK's own
+  tests) can serve models; digest verification applies there too.
+
+#### SIMD pixel conversion through the native runtime
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #48](https://github.com/ifiokjr/mediapipe/pull/48)
+
+- `mp_core`: `PixelConverter` dispatches NV21, planar YUV420, and Android's
+  semi-planar YUV420 to libyuv's NEON/SSE paths — compiled into the bundled
+  native runtime as the SDK's own `MpPixel*` shim — when the linked runtime
+  carries those symbols, and runs the pure Dart kernels otherwise. Output
+  matches the Dart kernels to within fixed-point rounding (at most two levels
+  per channel); the BGRA swizzle is exact. `nativePixelConversionSupported`
+  in `package:mp_core/native.dart` reports which path is active, and
+  `PixelConverter.forceDartKernels` lets tests compare the two.
+- The native builder copies the shim from `tool/native/` into the pinned
+  MediaPipe checkout, links `@libyuv`, exports the symbols through the Linux
+  and Android version scripts, and `verify_native` requires them; a native
+  integration test checks the accelerated and Dart conversions against each
+  other on every native CI lane.
+
+#### Shared pixel-conversion kernels and a performance gate
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)
+
+- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout
+  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420
+  covering both planar and Android's semi-planar layouts with independent row
+  and pixel strides. Each kernel validates its strides and buffer lengths,
+  writes one freshly allocated buffer, and returns an image that adopts it
+  without a second copy, so the hot path no longer depends on Flutter-only
+  code.
+- `mp_camera`: the frame converter now wraps each `package:camera` plane and
+  delegates to those kernels. Conversion output is unchanged; stride
+  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride
+  other than four now fails with a descriptive `StateError` instead of
+  producing silently wrong colors.
+- The repository gained a `benchmarks/` suite over every pure-Dart hot path —
+  pixel conversion, image construction, isolate frame transfer, result
+  containers, and embedding similarity — plus two gates that run on every pull
+  request: changed production lines must be covered by the unit tests
+  (`tool/check_patch_coverage.dart`), and benchmark results must not regress
+  against the base commit on the same runner (`tool/compare_benchmarks.dart`).
+
 ## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)
 
 ### Features

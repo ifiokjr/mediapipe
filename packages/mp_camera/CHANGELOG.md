@@ -1,3 +1,65 @@
+## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)
+
+### Features
+
+#### Overlay coordinate transform and ui.Image interop
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #45](https://github.com/ifiokjr/mediapipe/pull/45)
+
+- `mp_camera`: `CameraOverlayTransform` maps MediaPipe's normalized landmarks,
+  pixel bounding boxes, and regions of interest onto the preview widget,
+  accounting for the inference rotation (results are relative to the upright
+  frame), a mirrored front-camera preview, and the `BoxFit` placing the preview
+  — `cover` cropping, `contain` letterboxing, and every other fit included via
+  Flutter's own fitting rules.
+- `mp_camera`: `MpImage.toUiImage()` uploads sRGB, sRGBA, gray, and
+  single-channel float confidence masks as `ui.Image` for canvas painting, and
+  `ui.Image.toMpImage()` reads decoded images back into an sRGBA `MpImage` for
+  still-image inference — no hand-written byte shuffling left to applications.
+
+### Fixes
+
+#### Frame pacing and live scheduling telemetry
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #43](https://github.com/ifiokjr/mediapipe/pull/43)
+
+- `mp_core`: `LatestFrameScheduler` moves here from `mp_camera` so pure Dart
+  pipelines can use it, and gains a `maxQueueAge` policy that discards a frame
+  which waited through a long inference stall instead of running it late, a
+  `stats` snapshot with counters, `processedPerSecond`, and rolling p50/p95
+  queue-wait and processing times, and a `dart:developer` timeline task around
+  every processed frame for DevTools.
+- `mp_core`: `FramePacer` admits one frame per interval by camera timestamp
+  before any pixel conversion runs, so a skipped frame costs nothing;
+  `FramePacer.targetFps` derives the interval from a target rate.
+- `mp_core`: `LatencyWindow` is the bounded rolling window with nearest-rank
+  percentiles behind the scheduler statistics, public for timing other stages.
+- `mp_camera`: re-exports `LatestFrameScheduler`, `LatestFrameFailure`, and
+  `LatestFrameStats` from `mp_core`; existing imports keep working.
+
+#### Shared pixel-conversion kernels and a performance gate
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #41](https://github.com/ifiokjr/mediapipe/pull/41)
+
+- `mp_core`: `PixelConverter` and `PixelPlane` expose the camera pixel-layout
+  conversions as pure Dart kernels — BGRA8888, NV21, and three-plane YUV420
+  covering both planar and Android's semi-planar layouts with independent row
+  and pixel strides. Each kernel validates its strides and buffer lengths,
+  writes one freshly allocated buffer, and returns an image that adopts it
+  without a second copy, so the hot path no longer depends on Flutter-only
+  code.
+- `mp_camera`: the frame converter now wraps each `package:camera` plane and
+  delegates to those kernels. Conversion output is unchanged; stride
+  validation moved into `mp_core`, so a BGRA plane reporting a pixel stride
+  other than four now fails with a descriptive `StateError` instead of
+  producing silently wrong colors.
+- The repository gained a `benchmarks/` suite over every pure-Dart hot path —
+  pixel conversion, image construction, isolate frame transfer, result
+  containers, and embedding similarity — plus two gates that run on every pull
+  request: changed production lines must be covered by the unit tests
+  (`tool/check_patch_coverage.dart`), and benchmark results must not regress
+  against the base commit on the same runner (`tool/compare_benchmarks.dart`).
+
 ## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)
 
 ### Fixes
