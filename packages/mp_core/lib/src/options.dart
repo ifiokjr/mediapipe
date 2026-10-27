@@ -76,7 +76,11 @@ sealed class ModelAsset {
   factory ModelAsset.bytes(Uint8List bytes, {String? name}) = ModelAssetBytes;
 
   /// Loads a model from [uri], optionally checking [sha256].
-  factory ModelAsset.uri(Uri uri, {String? sha256}) = ModelAssetUri;
+  ///
+  /// On native platforms, [cacheDirectory] stores the downloaded model in a
+  /// content-addressed cache so later task creations reuse the verified file
+  /// instead of downloading it again; it requires [sha256].
+  factory ModelAsset.uri(Uri uri, {String? sha256, String? cacheDirectory}) = ModelAssetUri;
 }
 
 /// A model stored at a local filesystem path.
@@ -132,13 +136,32 @@ final class ModelAssetBytes extends ModelAsset {
 @immutable
 final class ModelAssetUri extends ModelAsset {
   /// Creates a URI-backed model asset.
-  ModelAssetUri(this.uri, {this.sha256}) : super._() {
+  ///
+  /// [cacheDirectory] enables the native content-addressed download cache and
+  /// requires [sha256]: the digest is the cache key, so a cache hit is verified
+  /// by construction and a mismatching file is re-downloaded automatically.
+  /// Browser builds ignore it and rely on the HTTP cache.
+  ModelAssetUri(this.uri, {this.sha256, this.cacheDirectory}) : super._() {
     if (!uri.hasScheme) {
       throw ArgumentError.value(uri, 'uri', 'must be absolute');
     }
 
     if (sha256 != null && !RegExp(r'^[a-f0-9]{64}$').hasMatch(sha256!)) {
       throw ArgumentError.value(sha256, 'sha256', 'must be a lowercase SHA-256 digest');
+    }
+
+    if (cacheDirectory != null) {
+      if (cacheDirectory!.trim().isEmpty) {
+        throw ArgumentError.value(cacheDirectory, 'cacheDirectory', 'must not be empty');
+      }
+
+      if (sha256 == null) {
+        throw ArgumentError.value(
+          cacheDirectory,
+          'cacheDirectory',
+          'requires a sha256 digest; without one a cached file could never be verified',
+        );
+      }
     }
   }
 
@@ -148,13 +171,19 @@ final class ModelAssetUri extends ModelAsset {
   /// An optional lowercase SHA-256 digest for supply-chain verification.
   final String? sha256;
 
+  /// An optional directory for the native content-addressed model cache.
+  final String? cacheDirectory;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ModelAssetUri && uri == other.uri && sha256 == other.sha256;
+      other is ModelAssetUri &&
+          uri == other.uri &&
+          sha256 == other.sha256 &&
+          cacheDirectory == other.cacheDirectory;
 
   @override
-  int get hashCode => Object.hash(uri, sha256);
+  int get hashCode => Object.hash(uri, sha256, cacheDirectory);
 }
 
 /// Options shared by every MediaPipe task.
