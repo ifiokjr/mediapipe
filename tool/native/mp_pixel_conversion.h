@@ -10,6 +10,7 @@
 #ifndef MP_PIXEL_CONVERSION_H_
 #define MP_PIXEL_CONVERSION_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

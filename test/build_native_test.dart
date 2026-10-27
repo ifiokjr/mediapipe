@@ -102,7 +102,10 @@ void main() {
         read('WORKSPACE'),
         contains('patches = ["@//third_party:opencv_modern_toolchains.patch"],'),
       );
-      expect(read('mediapipe/tasks/c/BUILD'), contains('srcs = ["mp_pixel_conversion.cc"],'));
+      expect(
+        read('mediapipe/tasks/c/BUILD'),
+        contains('srcs = ["mp_pixel_conversion.cc", "mp_pixel_conversion.h"],'),
+      );
       expect(read('mediapipe/tasks/c/BUILD'), contains('        "@libyuv",\n    ],'));
       expect(read('mediapipe/tasks/c/BUILD'), isNot(contains('@platforms//os:android')));
       expect(

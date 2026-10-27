@@ -270,7 +270,9 @@ void copyPixelConversionShim(Directory repositoryRoot, Directory upstream) {
   _replaceExactly(
     File.fromUri(destination.uri.resolve('BUILD')),
     'cc_binary(\n    name = "mediapipe_source",\n    linkopts = select({',
-    'cc_binary(\n    name = "mediapipe_source",\n    srcs = ["mp_pixel_conversion.cc"],\n    linkopts = select({',
+    'cc_binary(\n    name = "mediapipe_source",\n'
+        '    srcs = ["mp_pixel_conversion.cc", "mp_pixel_conversion.h"],\n'
+        '    linkopts = select({',
   );
   _replaceExactly(
     File.fromUri(destination.uri.resolve('BUILD')),
