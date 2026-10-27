@@ -1,3 +1,58 @@
+## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-10-27)
+
+### Features
+
+#### Live video-element input on the web
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #47](https://github.com/ifiokjr/mediapipe/pull/47)
+
+- `mp_vision`: `processVideoElement` on every vision task accepts a live
+  browser video element, wrapped with `webVideoSource` from
+  `package:mp_vision/mp_vision_web.dart`. MediaPipe samples the element's
+  current frame straight from the compositor, so a web camera pipeline skips
+  the canvas draw, the `ImageData` copy, and the `MpImage` round trip that the
+  pixel path pays per frame. Accepted in video and live-stream mode with the
+  semantics of `processVideo`; native runtimes fail with
+  `MpStatus.unimplemented` and continue to expect converted frames.
+
+### Fixes
+
+#### Packed landmark lists
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #46](https://github.com/ifiokjr/mediapipe/pull/46)
+
+- `mp_core`: `NormalizedLandmarkList` and `LandmarkList` implement the
+  existing `List<NormalizedLandmark>`/`List<Landmark>` contracts over one
+  packed `Float32List` — five floats per landmark (x, y, z, visibility,
+  presence, with absent confidences stored as quiet NaN) plus optional
+  parallel names. A 478-point face result costs one buffer instead of
+  hundreds of objects: cheaper to allocate on the worker isolate, cheaper to
+  copy to the caller, and directly iterable by painting loops through
+  `values` without materializing landmark objects. `fromLandmarks` packs
+  app-built lists the same way; coordinates are 32-bit floats exactly as the
+  native runtime reports them.
+- `mp_vision`: native result conversion fills those packed lists directly
+  from the C structs, so every landmarker result (face, hand, pose, gesture,
+  holistic) crosses isolates as contiguous data. The concrete list type
+  changes; reading code keeps working unchanged because the new lists are
+  real `List`s with the same value equality.
+
+#### Lifecycle cleanup and retry fixes
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #34](https://github.com/ifiokjr/mediapipe/pull/34)
+
+- `mp_vision`, `mp_audio`, `mp_text`: native backends seal themselves only
+  after the native task is released. Previously a failed close left the
+  backend marked closed, so the facade's documented retry re-invoked a no-op
+  and permanently leaked the worker isolate and native task. A failed close
+  now leaves the task open for a retried cleanup.
+- `mp_audio`, `mp_text`: facades reopen after a failed close — matching the
+  `mp_vision` behavior — and a concurrent second `close()` now awaits the
+  in-flight attempt instead of resolving before cleanup finishes.
+- `mp_vision`: frame processing allocates the native image inside the scope's
+  error boundary, so an image-creation failure on the worker no longer leaks
+  the per-call native arena (previously one full-frame buffer per failure).
+
 ## [0.1.3](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.3) (2026-10-12)
 
 ### Fixes
