@@ -164,12 +164,17 @@ jobs:
       - name: Compare against the base commit
         env:
           BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          # A deliberately renamed or replaced benchmark must be labelled so
+          # the comparison accepts the removal; nothing else may remove one.
+          ALLOW_REMOVED: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'benchmark rename') }}
         # Transient runner contention can inflate one side of the comparison;
         # a real regression fails again, so re-measure both commits once more
         # before failing.
         run: |
+          extra_args=""
+          if [ "$ALLOW_REMOVED" = "true" ]; then extra_args="--allow-removed"; fi
           if ! bench:compare --base /tmp/mp-bench/base.json --head /tmp/mp-bench/head.json \
-              --summary "$GITHUB_STEP_SUMMARY"; then
+              --summary "$GITHUB_STEP_SUMMARY" $extra_args; then
             echo "::warning::The first comparison flagged regressions; re-measuring both commits once before failing."
             bench:baseline "$BASE_SHA" /tmp/mp-bench/base.json
             bench:run --rounds 3 --json /tmp/mp-bench/head.json

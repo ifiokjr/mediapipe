@@ -31,7 +31,10 @@ BenchmarkSuite isolateTransferSuite({FrameSize size = hd720}) {
         tearDown: () => byteLengthWorker!.dispose(),
       ),
       Benchmark(
-        name: 'isolate_transfer/roundtrip_image/${label}_srgb',
+        // Five round trips per iteration (~5 ms): a single 720p round trip
+        // can swing by tens of percent on a shared runner, which is jitter
+        // in the event loop rather than in the transfer itself.
+        name: 'isolate_transfer/roundtrip_image/${label}_srgb_x5',
         setUp: () async {
           image = _srgbImage(size);
           echoWorker = await NativeTaskIsolate.spawn(
@@ -40,7 +43,15 @@ BenchmarkSuite isolateTransferSuite({FrameSize size = hd720}) {
             debugName: 'mp_benchmarks.echo',
           );
         },
-        run: () => echoWorker!.request<MpImage>(image),
+        run: () async {
+          MpImage latest = image;
+
+          for (int trip = 0; trip < 5; trip += 1) {
+            latest = await echoWorker!.request<MpImage>(latest);
+          }
+
+          return latest;
+        },
         tearDown: () => echoWorker!.dispose(),
       ),
     ],
