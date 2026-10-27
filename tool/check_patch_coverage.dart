@@ -46,6 +46,9 @@ const List<String> defaultExcludes = <String>[
   // Needs the MediaPipe native runtime; covered by the native integration
   // lanes, which do not emit lcov yet.
   '**/runtime_native.dart',
+  '**/native/pixel_acceleration.dart',
+  // Browser-only accelerator stub selected by a conditional import.
+  '**/pixel_acceleration_stub.dart',
   // Executables and examples are not part of the coverage contract.
   '**/bin/**',
   '**/example/**',

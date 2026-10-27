@@ -127,6 +127,16 @@ Future<void> _ensureUpstream(Directory repositoryRoot, Directory upstream) async
   }
 }
 
+/// Rewrites the pinned upstream checkout so it builds with current toolchains
+/// and carries this repository's native shim.
+///
+/// Every edit is an exact-text replacement that fails loudly when upstream
+/// moves; `test/build_native_test.dart` runs the whole chain against fixture
+/// files holding the anchors, so a drifted anchor is caught before CI spends
+/// half an hour on a Bazel build. Re-running on a patched checkout is a no-op.
+void applyCompatibilityPatches(Directory repositoryRoot, Directory upstream, NativeTarget target) =>
+    _applyCompatibilityPatches(repositoryRoot, upstream, target);
+
 void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream, NativeTarget target) {
   final String javaDependency = target.isAndroid
       ? 'bazel_dep(name = "rules_android_ndk", version = "0.1.3")\n'
@@ -238,6 +248,39 @@ void _applyCompatibilityPatches(Directory repositoryRoot, Directory upstream, Na
         '        "BUILD_ANDROID_PROJECTS": "OFF",\n'
         '$targetCacheEntries'
         '        "BUILD_SHARED_LIBS": "ON" if OPENCV_SHARED_LIBS else "OFF",',
+  );
+  copyPixelConversionShim(repositoryRoot, upstream);
+}
+
+/// Adds the libyuv-backed pixel conversion shim to the aggregate library.
+///
+/// The shim sources live in this repository (`tool/native/`) so they are
+/// reviewed like any other code; the build copies them into the pinned
+/// upstream checkout, compiles them into `libmediapipe`, and exports their
+/// symbols through the Linux and Android version scripts. Re-running on an
+/// already patched checkout is a no-op.
+void copyPixelConversionShim(Directory repositoryRoot, Directory upstream) {
+  final Directory destination = Directory.fromUri(upstream.uri.resolve('mediapipe/tasks/c/'));
+  for (final String name in <String>['mp_pixel_conversion.cc', 'mp_pixel_conversion.h']) {
+    File.fromUri(destination.uri.resolve(name)).writeAsStringSync(
+      File.fromUri(repositoryRoot.uri.resolve('tool/native/$name')).readAsStringSync(),
+    );
+  }
+
+  _replaceExactly(
+    File.fromUri(destination.uri.resolve('BUILD')),
+    'cc_binary(\n    name = "mediapipe_source",\n    linkopts = select({',
+    'cc_binary(\n    name = "mediapipe_source",\n    srcs = ["mp_pixel_conversion.cc"],\n    linkopts = select({',
+  );
+  _replaceExactly(
+    File.fromUri(destination.uri.resolve('BUILD')),
+    '        "//mediapipe/tasks/c/vision/pose_landmarker:pose_landmarker_c_lib",\n    ],',
+    '        "//mediapipe/tasks/c/vision/pose_landmarker:pose_landmarker_c_lib",\n        "@libyuv",\n    ],',
+  );
+  _replaceExactly(
+    File.fromUri(destination.uri.resolve('mediapipe_tasks_c_version_script.lds')),
+    '    MpObjectDetector*;',
+    '    MpObjectDetector*;\n    MpPixel*;',
   );
 }
 

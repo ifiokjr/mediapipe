@@ -52,7 +52,7 @@ path instead of downloading it again.
 
 Immutable input objects avoid a subtle class of use-after-return bugs in asynchronous camera and native calls. The default constructors copy at that boundary; pipelines that allocate a buffer solely for one image — a camera-frame conversion, a decoder output — can hand it over with the `adopt` constructors instead.
 
-`PixelConverter` turns the camera pixel layouts producers actually deliver — BGRA8888, NV21, and planar or semi-planar YUV420 with padded rows — into packed `MpImage`s through pure Dart kernels. The kernels are the SDK’s per-frame hot path; the repository’s benchmark gate tracks them on every change.
+`PixelConverter` turns the camera pixel layouts producers actually deliver — BGRA8888, NV21, and planar or semi-planar YUV420 with padded rows — into packed `MpImage`s. On native platforms whose bundled runtime carries the SDK’s pixel shim, the YUV conversions run through libyuv’s SIMD paths (`nativePixelConversionSupported` in `package:mp_core/native.dart` reports this); everywhere else, and whenever the runtime is absent, the pure Dart kernels run with the same results to within fixed-point rounding. The kernels are the SDK’s per-frame hot path; the repository’s benchmark gate tracks the Dart path on every change and the native lanes check the accelerated path against it.
 
 ## Lifecycle and time
 

@@ -223,6 +223,7 @@ in
     "test:native" = {
       exec = ''
         set -euo pipefail
+        (cd packages/mp_core && repo-dart test integration_test/native_pixel_conversion_test.dart)
         (cd packages/mp_text && repo-dart test integration_test/native_language_detector_test.dart)
         (cd packages/mp_vision && repo-dart test integration_test/native_face_detector_test.dart)
       '';
