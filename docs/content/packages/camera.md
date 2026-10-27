@@ -14,6 +14,8 @@ description: A small, explicit bridge from package:camera frames to MP vision in
 | `MpCameraRotation`        | `isPreviewMirrored(camera)`           | Reports front-camera preview mirroring.                  |
 | `MpCameraClock`           | `nextTimestampMs()`                   | Returns a strictly increasing monotonic timestamp.       |
 | `LatestFrameScheduler<T>` | `submit`, `idle`, `failures`, `close` | Bounds inference work to one active and one queued item. |
+| `CameraOverlayTransform`  | `mapLandmark`, `mapBoundingBox`, …    | Maps inference coordinates onto the preview widget.      |
+| `MpImage` / `ui.Image`    | `toUiImage` / `toMpImage`             | Converts between inference pixels and paintable images.  |
 
 `MpCameraFrame` contains the converted `MpImage`, timestamp, `ImageProcessingOptions`, and preview-mirroring flag. The converter accepts BGRA8888, NV21, and three-plane YUV420 camera data.
 
@@ -54,5 +56,20 @@ final scheduler = LatestFrameScheduler<MpCameraFrame>((frame) async {
   );
 });
 ```
+
+## Paint results over the preview
+
+Normalized landmarks are relative to the frame _after_ the inference rotation — the upright image the preview shows — and a front-camera preview mirrors it. `CameraOverlayTransform` folds in that rotation, the mirroring, and the fit between the image and the widget, so a painter never re-derives the geometry:
+
+```dart
+final transform = CameraOverlayTransform.forFrame(frame, viewSize: size);
+
+canvas.drawRect(
+  transform.mapBoundingBox(detection.boundingBox),
+  boxPaint,
+);
+```
+
+`MpImage.toUiImage()` uploads still images and segmentation masks as `ui.Image` for `canvas.drawImage`, and `ui.Image.toMpImage()` reads a decoded image back into an `MpImage` for still-image inference. Confidence masks render as opaque grayscale; other pixel layouts must be converted to sRGB, sRGBA, or gray first.
 
 Processing errors are published on `scheduler.failures` and increment `failedCount`; a failed callback does not stop later frames. `LatestFrameScheduler` lives in `mp_core` and is re-exported here; pair it with `mp_core`'s `FramePacer` to skip frames before converting them, and read `scheduler.stats` for live queue-wait and processing percentiles. The package does not own `CameraController`, render a preview, or request permissions.
