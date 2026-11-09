@@ -364,9 +364,37 @@ void main() {
       ModelAsset.uri(model.uri, sha256: digestOf(served)),
     );
 
-    expect(
-      resolved,
-      isA<ModelAssetPath>().having((ModelAssetPath asset) => asset.path, 'path', model.path),
+    expect(resolved, isA<ModelAssetPath>());
+    final String resolvedPath = (resolved as ModelAssetPath).path;
+    expect(File(resolvedPath).readAsBytesSync(), served);
+    // `File.path` keeps the separators used to build it, while `toFilePath`
+    // uses the platform separator, so compare the files rather than the strings.
+    expect(File(resolvedPath).resolveSymbolicLinksSync(), model.resolveSymbolicLinksSync());
+  });
+
+  test('an unreadable file URI with a digest is not found', () async {
+    final File model = File('${temporary.path}/secret.tflite')..writeAsBytesSync(served);
+    if (!Platform.isWindows) {
+      final ProcessResult chmod = await Process.run('chmod', <String>['000', model.path]);
+      expect(chmod.exitCode, 0);
+      addTearDown(() async {
+        await Process.run('chmod', <String>['644', model.path]);
+      });
+    }
+
+    try {
+      await model.openRead().drain<void>();
+      // The owner can still read the file, which is typical on Windows.
+      return;
+    } on FileSystemException {
+      // The digest check has to surface this as not found.
+    }
+
+    await expectLater(
+      native.resolveNativeModelAsset(ModelAsset.uri(model.uri, sha256: digestOf(served))),
+      throwsA(
+        isA<MpException>().having((MpException error) => error.status, 'status', MpStatus.notFound),
+      ),
     );
   });
 
