@@ -9,7 +9,7 @@
 library;
 
 export 'src/native/bindings.g.dart' hide MpStatus;
-export 'src/native/model_cache.dart';
+export 'src/native/model_cache.dart' hide fileMatchesDigest, openRemoteModel;
 export 'src/native/pixel_acceleration.dart' show nativePixelConversionSupported;
 export 'src/native/support.dart';
 export 'src/native/task_isolate.dart';

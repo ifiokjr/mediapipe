@@ -23,9 +23,30 @@ void main() {
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     server.listen((HttpRequest request) {
       requests += 1;
+      final String path = request.uri.path;
 
-      if (request.uri.path.startsWith('/models/')) {
+      if (path.startsWith('/models/')) {
         request.response.add(served);
+      } else if (path == '/redirect-relative') {
+        request.response.statusCode = HttpStatus.found;
+        request.response.headers.set(HttpHeaders.locationHeader, '/models/detector.task');
+      } else if (path == '/redirect-absolute') {
+        request.response.statusCode = HttpStatus.movedPermanently;
+        request.response.headers.set(
+          HttpHeaders.locationHeader,
+          'http://127.0.0.1:${server.port}/models/detector.task',
+        );
+      } else if (path == '/redirect-off-host') {
+        request.response.statusCode = HttpStatus.found;
+        request.response.headers.set(HttpHeaders.locationHeader, 'http://10.255.255.1/stolen.task');
+      } else if (path == '/redirect-file') {
+        request.response.statusCode = HttpStatus.found;
+        request.response.headers.set(HttpHeaders.locationHeader, 'file:///etc/passwd');
+      } else if (path == '/redirect-loop') {
+        request.response.statusCode = HttpStatus.found;
+        request.response.headers.set(HttpHeaders.locationHeader, '/redirect-loop');
+      } else if (path == '/redirect-missing-location') {
+        request.response.statusCode = HttpStatus.temporaryRedirect;
       } else {
         request.response.statusCode = HttpStatus.notFound;
       }
@@ -208,6 +229,176 @@ void main() {
       ),
       throwsA(
         isA<MpException>().having((MpException error) => error.status, 'status', MpStatus.dataLoss),
+      ),
+    );
+  });
+
+  test('follows a relative redirect and then verifies the digest', () async {
+    final String digest = digestOf(served);
+
+    final ModelAsset resolved = await native.resolveNativeModelAsset(
+      ModelAsset.uri(
+        Uri.parse('http://127.0.0.1:${server.port}/redirect-relative'),
+        sha256: digest,
+      ),
+    );
+
+    expect(resolved, isA<ModelAssetBytes>());
+    expect((resolved as ModelAssetBytes).bytes, served);
+    expect(requests, 2);
+  });
+
+  test('follows an absolute loopback redirect into the cache', () async {
+    final String digest = digestOf(served);
+    final native.ModelCache cache = native.ModelCache('${temporary.path}/cache');
+
+    final ModelAssetPath asset = await cache.fetch(
+      Uri.parse('http://127.0.0.1:${server.port}/redirect-absolute'),
+      digest,
+    );
+
+    expect(File(asset.path).readAsBytesSync(), served);
+    expect(requests, 2);
+  });
+
+  test('refuses a redirect off loopback and does not follow it', () async {
+    final native.ModelCache cache = native.ModelCache('${temporary.path}/cache');
+
+    await expectLater(
+      cache.fetch(Uri.parse('http://127.0.0.1:${server.port}/redirect-off-host'), digestOf(served)),
+      throwsA(
+        isA<MpException>().having(
+          (MpException error) => error.status,
+          'status',
+          MpStatus.invalidArgument,
+        ),
+      ),
+    );
+
+    expect(requests, 1);
+    expect(Directory('${temporary.path}/cache').listSync().whereType<File>(), isEmpty);
+  });
+
+  test('refuses a redirect to a file URI', () async {
+    await expectLater(
+      native.resolveNativeModelAsset(
+        ModelAsset.uri(Uri.parse('http://127.0.0.1:${server.port}/redirect-file')),
+      ),
+      throwsA(
+        isA<MpException>().having(
+          (MpException error) => error.status,
+          'status',
+          MpStatus.invalidArgument,
+        ),
+      ),
+    );
+
+    expect(requests, 1);
+  });
+
+  test('stops after five redirects', () async {
+    await expectLater(
+      native.resolveNativeModelAsset(
+        ModelAsset.uri(Uri.parse('http://127.0.0.1:${server.port}/redirect-loop')),
+      ),
+      throwsA(
+        isA<MpException>().having(
+          (MpException error) => error.status,
+          'status',
+          MpStatus.unavailable,
+        ),
+      ),
+    );
+
+    expect(requests, 6);
+  });
+
+  test('rejects a redirect that omits Location', () async {
+    await expectLater(
+      native.resolveNativeModelAsset(
+        ModelAsset.uri(Uri.parse('http://127.0.0.1:${server.port}/redirect-missing-location')),
+      ),
+      throwsA(
+        isA<MpException>().having(
+          (MpException error) => error.status,
+          'status',
+          MpStatus.unavailable,
+        ),
+      ),
+    );
+  });
+
+  test('HTTPS stays allowed when loopback HTTP is not', () {
+    expect(
+      () => native.requireRemoteModelUri(
+        Uri.parse('https://cdn.example.com/m.task'),
+        allowLoopbackHttp: false,
+      ),
+      returnsNormally,
+    );
+    expect(
+      () => native.requireRemoteModelUri(
+        Uri.parse('http://127.0.0.1/m.task'),
+        allowLoopbackHttp: false,
+      ),
+      throwsA(
+        isA<MpException>().having(
+          (MpException error) => error.status,
+          'status',
+          MpStatus.invalidArgument,
+        ),
+      ),
+    );
+    expect(
+      () => native.requireRemoteModelUri(
+        Uri.parse('http://127.0.0.1/m.task'),
+        allowLoopbackHttp: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  test('a file URI with a digest hashes the file before returning its path', () async {
+    final File model = File('${temporary.path}/model.tflite')..writeAsBytesSync(served);
+    final ModelAsset resolved = await native.resolveNativeModelAsset(
+      ModelAsset.uri(model.uri, sha256: digestOf(served)),
+    );
+
+    expect(
+      resolved,
+      isA<ModelAssetPath>().having((ModelAssetPath asset) => asset.path, 'path', model.path),
+    );
+  });
+
+  test('a file URI with the wrong digest fails before the path is used', () async {
+    final File model = File('${temporary.path}/model.tflite')..writeAsBytesSync(served);
+
+    await expectLater(
+      native.resolveNativeModelAsset(
+        ModelAsset.uri(model.uri, sha256: 'b${digestOf(served).substring(1)}'),
+      ),
+      throwsA(
+        isA<MpException>().having((MpException error) => error.status, 'status', MpStatus.dataLoss),
+      ),
+    );
+  });
+
+  test('a missing file URI with a digest is not found', () async {
+    await expectLater(
+      native.resolveNativeModelAsset(
+        ModelAsset.uri(Uri.file('${temporary.path}/missing.tflite'), sha256: digestOf(served)),
+      ),
+      throwsA(
+        isA<MpException>().having((MpException error) => error.status, 'status', MpStatus.notFound),
+      ),
+    );
+  });
+
+  test('a directory presented as a file URI with a digest is not found', () async {
+    await expectLater(
+      native.resolveNativeModelAsset(ModelAsset.uri(temporary.uri, sha256: digestOf(served))),
+      throwsA(
+        isA<MpException>().having((MpException error) => error.status, 'status', MpStatus.notFound),
       ),
     );
   });

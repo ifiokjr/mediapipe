@@ -19,7 +19,7 @@ final asset = ModelAsset.uri(
 );
 ```
 
-The digest is the cache key, so a hit is verified by hashing the file — far cheaper than a download — and a corrupted or truncated file is replaced automatically. Downloads stream to a temporary file and hash as they arrive, so the model never sits in the Dart heap, and MediaPipe opens the finished file by path, which lets it map the file rather than copy it. Remote URIs must use HTTPS; plain HTTP is accepted only on loopback so a local development server stays usable, and digest verification applies there too.
+The digest is the cache key, so a hit is verified by hashing the file — far cheaper than a download — and a corrupted or truncated file is replaced automatically. Downloads stream to a temporary file and hash as they arrive, so the model never sits in the Dart heap, and MediaPipe opens the finished file by path, which lets it map the file rather than copy it. Remote URIs must use HTTPS; plain HTTP is accepted only on loopback so a local development server stays usable, and digest verification applies there too. Redirects are checked the same way: an HTTPS download cannot be downgraded to HTTP or sent to loopback, and a loopback download cannot be redirected off the machine. A `file` URI that includes a digest is hashed before the path is used.
 
 ## Bundled assets
 
