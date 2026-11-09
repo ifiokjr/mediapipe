@@ -77,9 +77,14 @@ sealed class ModelAsset {
 
   /// Loads a model from [uri], optionally checking [sha256].
   ///
-  /// On native platforms, [cacheDirectory] stores the downloaded model in a
-  /// content-addressed cache so later task creations reuse the verified file
-  /// instead of downloading it again; it requires [sha256].
+  /// On native platforms, remote URIs must use HTTPS. Plain HTTP is accepted
+  /// only for a loopback address, and only when that is the original URI, so a
+  /// local development server stays usable. Redirects are checked the same
+  /// way: an HTTPS download cannot be downgraded to HTTP or sent to loopback,
+  /// and a loopback download cannot be redirected off the machine. A `file`
+  /// URI that sets [sha256] is hashed before the path is returned.
+  /// [cacheDirectory] stores a downloaded model in a content-addressed cache
+  /// and requires [sha256]; browser builds ignore it.
   factory ModelAsset.uri(Uri uri, {String? sha256, String? cacheDirectory}) = ModelAssetUri;
 }
 

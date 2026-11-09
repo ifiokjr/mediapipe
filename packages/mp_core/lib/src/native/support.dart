@@ -17,28 +17,23 @@ const String _unknownImageFormatMessage =
 Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
   if (asset case ModelAssetUri(:final uri, sha256: final expectedSha256, :final cacheDirectory)) {
     if (uri.scheme == 'file') {
-      return ModelAsset.path(uri.toFilePath());
-    }
-
-    if (uri.scheme != 'https' && !isLoopbackHttp(uri)) {
-      throw const MpException(
-        MpStatus.invalidArgument,
-        'Native model URIs must use HTTPS (plain HTTP is accepted only on '
-        'loopback, so local development servers stay testable) or the file '
-        'scheme.',
-      );
+      final String path = uri.toFilePath();
+      if (expectedSha256 != null) {
+        await _verifyFileDigest(path, expectedSha256);
+      }
+      return ModelAsset.path(path);
     }
 
     // The content-addressed cache streams straight to a verified file and
-    // serves later task creations without another download.
+    // serves later task creations without another download. Transport checks,
+    // including redirects, happen inside the download.
     if (cacheDirectory case final String directory) {
       return ModelCache(directory).fetch(uri, expectedSha256!);
     }
 
     final HttpClient client = HttpClient()..connectionTimeout = const Duration(seconds: 30);
     try {
-      final HttpClientRequest request = await client.getUrl(uri);
-      final HttpClientResponse response = await request.close();
+      final HttpClientResponse response = await openRemoteModel(client, uri);
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw MpException(
@@ -81,18 +76,24 @@ Future<ModelAsset> resolveNativeModelAsset(ModelAsset asset) async {
   return asset;
 }
 
-/// Whether [uri] is plain HTTP aimed at this machine.
-///
-/// Remote models must arrive over HTTPS; loopback is exempted so applications
-/// and tests can serve models from a local development server. Digest
-/// verification applies to loopback downloads exactly as it does to HTTPS.
-bool isLoopbackHttp(Uri uri) {
-  if (uri.scheme != 'http') return false;
+/// Hashes the file at [path] and rejects a missing file or a digest mismatch.
+Future<void> _verifyFileDigest(String path, String digest) async {
+  final File file = File(path);
 
-  return switch (uri.host) {
-    'localhost' || '127.0.0.1' || '[::1]' || '::1' => true,
-    _ => false,
-  };
+  if (!file.existsSync()) {
+    throw MpException(MpStatus.notFound, 'The model file could not be read: $path');
+  }
+
+  try {
+    if (!await fileMatchesDigest(file, digest)) {
+      throw const MpException(
+        MpStatus.dataLoss,
+        'The model file does not match its SHA-256 digest.',
+      );
+    }
+  } on FileSystemException catch (error) {
+    throw MpException(MpStatus.notFound, 'The model file could not be read: $path', cause: error);
+  }
 }
 
 /// Owns temporary native allocations for one task creation or invocation.
