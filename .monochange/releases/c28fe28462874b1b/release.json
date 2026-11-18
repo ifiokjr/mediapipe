@@ -1,0 +1,446 @@
+{
+  "schema_version": "0.10",
+  "kind": "monochange.releaseRecord",
+  "created_at": "2026-11-18T09:44:30Z",
+  "command": "release",
+  "version": "0.1.5",
+  "versions": {
+    "mp": "0.1.5"
+  },
+  "release_targets": [
+    {
+      "id": "mp",
+      "kind": "group",
+      "version": "0.1.5",
+      "version_format": "primary",
+      "tag": true,
+      "release": true,
+      "tag_name": "v0.1.5",
+      "rendered_title": "v0.1.5 (2026-11-18)",
+      "rendered_changelog_title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+      "members": [
+        "mp_core",
+        "mp_vision",
+        "mp_camera",
+        "mp_text",
+        "mp_audio",
+        "mp_genai"
+      ]
+    }
+  ],
+  "released_packages": [
+    "mp_audio",
+    "mp_camera",
+    "mp_core",
+    "mp_genai",
+    "mp_text",
+    "mp_vision"
+  ],
+  "changed_files": [
+    "CHANGELOG.md",
+    "benchmarks/pubspec.yaml",
+    "docs/pubspec.yaml",
+    "examples/cli/pubspec.yaml",
+    "examples/device_demo/pubspec.yaml",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_audio/pubspec.yaml",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_camera/pubspec.yaml",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_core/pubspec.yaml",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_genai/pubspec.yaml",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_text/example/pubspec.yaml",
+    "packages/mp_text/pubspec.yaml",
+    "packages/mp_vision/CHANGELOG.md",
+    "packages/mp_vision/pubspec.yaml",
+    "pubspec.yaml"
+  ],
+  "package_publications": [
+    {
+      "package": "mp_audio",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.5",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_camera",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.5",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_core",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.5",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_genai",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.5",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_text",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.5",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    },
+    {
+      "package": "mp_vision",
+      "ecosystem": "dart",
+      "registry": "pub_dev",
+      "version": "0.1.5",
+      "mode": "builtin",
+      "trusted_publishing": {
+        "enabled": true,
+        "mode": "required",
+        "repository": "ifiokjr/mediapipe",
+        "workflow": "publish.yml",
+        "environment": "publisher"
+      }
+    }
+  ],
+  "updated_changelogs": [
+    "CHANGELOG.md",
+    "packages/mp_audio/CHANGELOG.md",
+    "packages/mp_camera/CHANGELOG.md",
+    "packages/mp_core/CHANGELOG.md",
+    "packages/mp_genai/CHANGELOG.md",
+    "packages/mp_text/CHANGELOG.md",
+    "packages/mp_vision/CHANGELOG.md"
+  ],
+  "deleted_changesets": [
+    ".changeset/model-uri-transport.md"
+  ],
+  "changesets": [
+    {
+      "path": ".changeset/model-uri-transport.md",
+      "summary": "Model URI transport and digest checks",
+      "details": "- Native model downloads no longer follow redirects blindly. Each hop must\n  stay on HTTPS, and plain HTTP is still accepted only when the original URI\n  is loopback. An HTTPS URL therefore cannot be downgraded to HTTP or turned\n  into a request to a loopback service, and a loopback download cannot be\n  redirected off the machine.\n- A `file` URI that includes a SHA-256 digest is verified before the path is\n  handed to the runtime. A missing file or a digest mismatch fails instead of\n  loading the bytes unchecked.\n- `requireRemoteModelUri` is exported from `package:mp_core/native.dart` as\n  the transport check both download paths use.",
+      "targets": [
+        {
+          "id": "mp_core",
+          "kind": "package",
+          "bump": "patch",
+          "origin": "direct-change",
+          "evidence_refs": [],
+          "change_type": "fix"
+        }
+      ],
+      "context": {
+        "provider": "github",
+        "host": "github.com",
+        "capabilities": {
+          "commit_web_urls": true,
+          "actor_profiles": true,
+          "review_request_lookup": true,
+          "related_issues": true,
+          "issue_comments": true
+        },
+        "introduced": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e2b7d221bd8dc66766c9a5b48bb73c2e7203aec7",
+            "short_sha": "e2b7d22",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e2b7d221bd8dc66766c9a5b48bb73c2e7203aec7",
+            "authored_at": "2026-11-18T09:41:20Z",
+            "committed_at": "2026-11-18T09:41:20Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#52",
+            "title": "fix(mp_core): verify model URI redirects and file digests",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/52",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "last_updated": {
+          "actor": {
+            "provider": "github",
+            "host": "github.com",
+            "id": null,
+            "login": "ifiokjr",
+            "display_name": "ifiokjr",
+            "url": "https://github.com/ifiokjr",
+            "source": "review_request_author"
+          },
+          "commit": {
+            "provider": "github",
+            "host": "github.com",
+            "sha": "e2b7d221bd8dc66766c9a5b48bb73c2e7203aec7",
+            "short_sha": "e2b7d22",
+            "url": "https://github.com/ifiokjr/mediapipe/commit/e2b7d221bd8dc66766c9a5b48bb73c2e7203aec7",
+            "authored_at": "2026-11-18T09:41:20Z",
+            "committed_at": "2026-11-18T09:41:20Z",
+            "author_name": "Ifiok Jr.",
+            "author_email": "1160934+ifiokjr@users.noreply.github.com"
+          },
+          "review_request": {
+            "provider": "github",
+            "host": "github.com",
+            "kind": "pull_request",
+            "id": "#52",
+            "title": "fix(mp_core): verify model URI redirects and file digests",
+            "url": "https://github.com/ifiokjr/mediapipe/pull/52",
+            "author": {
+              "provider": "github",
+              "host": "github.com",
+              "id": null,
+              "login": "ifiokjr",
+              "display_name": "ifiokjr",
+              "url": "https://github.com/ifiokjr",
+              "source": "review_request_author"
+            }
+          }
+        },
+        "related_issues": [
+          {
+            "provider": "github",
+            "host": "github.com",
+            "id": "#49",
+            "title": "Native live-stream callbacks via NativeCallable.listener (unblock graph pipelining + audio streaming)",
+            "url": "https://github.com/ifiokjr/mediapipe/issues/49",
+            "relationship": "referenced_by_review_request"
+          },
+          {
+            "provider": "github",
+            "host": "github.com",
+            "id": "#50",
+            "title": "iOS native runtime packaging (XCFramework) to move classic tasks from 'packaging planned' to supported",
+            "url": "https://github.com/ifiokjr/mediapipe/issues/50",
+            "relationship": "referenced_by_review_request"
+          }
+        ]
+      }
+    }
+  ],
+  "changelogs": [
+    {
+      "owner_id": "mp",
+      "owner_kind": "group",
+      "output": "default",
+      "stream": "default",
+      "path": "CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+        "summary": [
+          "Grouped release for `mp`."
+        ],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Model URI transport and digest checks\n\n_Packages:_ 🟢 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #52](https://github.com/ifiokjr/mediapipe/pull/52) · _Related issues:_ [#49](https://github.com/ifiokjr/mediapipe/issues/49), [#50](https://github.com/ifiokjr/mediapipe/issues/50)\n\n- Native model downloads no longer follow redirects blindly. Each hop must\n  stay on HTTPS, and plain HTTP is still accepted only when the original URI\n  is loopback. An HTTPS URL therefore cannot be downgraded to HTTP or turned\n  into a request to a loopback service, and a loopback download cannot be\n  redirected off the machine.\n- A `file` URI that includes a SHA-256 digest is verified before the path is\n  handed to the runtime. A missing file or a digest mismatch fails instead of\n  loading the bytes unchecked.\n- `requireRemoteModelUri` is exported from `package:mp_core/native.dart` as\n  the transport check both download paths use."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)\n\nGrouped release for `mp`.\n\n### Fixes\n\n#### Model URI transport and digest checks\n\n_Packages:_ 🟢 _mp_core_\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #52](https://github.com/ifiokjr/mediapipe/pull/52) · _Related issues:_ [#49](https://github.com/ifiokjr/mediapipe/issues/49), [#50](https://github.com/ifiokjr/mediapipe/issues/50)\n\n- Native model downloads no longer follow redirects blindly. Each hop must\n  stay on HTTPS, and plain HTTP is still accepted only when the original URI\n  is loopback. An HTTPS URL therefore cannot be downgraded to HTTP or turned\n  into a request to a loopback service, and a loopback download cannot be\n  redirected off the machine.\n- A `file` URI that includes a SHA-256 digest is verified before the path is\n  handed to the runtime. A missing file or a digest mismatch fails instead of\n  loading the bytes unchecked.\n- `requireRemoteModelUri` is exported from `package:mp_core/native.dart` as\n  the transport check both download paths use."
+    },
+    {
+      "owner_id": "mp_audio",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_audio/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Changed",
+            "collapsed": false,
+            "entries": [
+              "- **No package-specific changes were recorded; `mp_audio` was updated to 0.1.5 as part of group `mp`.**"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)\n\n### Changed\n\n- **No package-specific changes were recorded; `mp_audio` was updated to 0.1.5 as part of group `mp`.**"
+    },
+    {
+      "owner_id": "mp_camera",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_camera/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Changed",
+            "collapsed": false,
+            "entries": [
+              "- **No package-specific changes were recorded; `mp_camera` was updated to 0.1.5 as part of group `mp`.**"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)\n\n### Changed\n\n- **No package-specific changes were recorded; `mp_camera` was updated to 0.1.5 as part of group `mp`.**"
+    },
+    {
+      "owner_id": "mp_core",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_core/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Fixes",
+            "collapsed": false,
+            "entries": [
+              "#### Model URI transport and digest checks\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #52](https://github.com/ifiokjr/mediapipe/pull/52) · _Related issues:_ [#49](https://github.com/ifiokjr/mediapipe/issues/49), [#50](https://github.com/ifiokjr/mediapipe/issues/50)\n\n- Native model downloads no longer follow redirects blindly. Each hop must\n  stay on HTTPS, and plain HTTP is still accepted only when the original URI\n  is loopback. An HTTPS URL therefore cannot be downgraded to HTTP or turned\n  into a request to a loopback service, and a loopback download cannot be\n  redirected off the machine.\n- A `file` URI that includes a SHA-256 digest is verified before the path is\n  handed to the runtime. A missing file or a digest mismatch fails instead of\n  loading the bytes unchecked.\n- `requireRemoteModelUri` is exported from `package:mp_core/native.dart` as\n  the transport check both download paths use."
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)\n\n### Fixes\n\n#### Model URI transport and digest checks\n\n_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #52](https://github.com/ifiokjr/mediapipe/pull/52) · _Related issues:_ [#49](https://github.com/ifiokjr/mediapipe/issues/49), [#50](https://github.com/ifiokjr/mediapipe/issues/50)\n\n- Native model downloads no longer follow redirects blindly. Each hop must\n  stay on HTTPS, and plain HTTP is still accepted only when the original URI\n  is loopback. An HTTPS URL therefore cannot be downgraded to HTTP or turned\n  into a request to a loopback service, and a loopback download cannot be\n  redirected off the machine.\n- A `file` URI that includes a SHA-256 digest is verified before the path is\n  handed to the runtime. A missing file or a digest mismatch fails instead of\n  loading the bytes unchecked.\n- `requireRemoteModelUri` is exported from `package:mp_core/native.dart` as\n  the transport check both download paths use."
+    },
+    {
+      "owner_id": "mp_genai",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_genai/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Changed",
+            "collapsed": false,
+            "entries": [
+              "- **No package-specific changes were recorded; `mp_genai` was updated to 0.1.5 as part of group `mp`.**"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)\n\n### Changed\n\n- **No package-specific changes were recorded; `mp_genai` was updated to 0.1.5 as part of group `mp`.**"
+    },
+    {
+      "owner_id": "mp_text",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_text/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Changed",
+            "collapsed": false,
+            "entries": [
+              "- **No package-specific changes were recorded; `mp_text` was updated to 0.1.5 as part of group `mp`.**"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)\n\n### Changed\n\n- **No package-specific changes were recorded; `mp_text` was updated to 0.1.5 as part of group `mp`.**"
+    },
+    {
+      "owner_id": "mp_vision",
+      "owner_kind": "package",
+      "output": "default",
+      "stream": "default",
+      "path": "packages/mp_vision/CHANGELOG.md",
+      "format": "keep_a_changelog",
+      "notes": {
+        "title": "[0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)",
+        "summary": [],
+        "sections": [
+          {
+            "title": "Changed",
+            "collapsed": false,
+            "entries": [
+              "- **No package-specific changes were recorded; `mp_vision` was updated to 0.1.5 as part of group `mp`.**"
+            ]
+          }
+        ]
+      },
+      "rendered": "## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)\n\n### Changed\n\n- **No package-specific changes were recorded; `mp_vision` was updated to 0.1.5 as part of group `mp`.**"
+    }
+  ],
+  "provider": {
+    "kind": "github",
+    "owner": "ifiokjr",
+    "repo": "mediapipe",
+    "host": null
+  }
+}

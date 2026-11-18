@@ -5,6 +5,29 @@ share one version and are released together.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)
+
+Grouped release for `mp`.
+
+### Fixes
+
+#### Model URI transport and digest checks
+
+_Packages:_ 🟢 _mp_core_
+
+_Owner:_ [@ifiokjr](https://github.com/ifiokjr) · _Review:_ [PR #52](https://github.com/ifiokjr/mediapipe/pull/52) · _Related issues:_ [#49](https://github.com/ifiokjr/mediapipe/issues/49), [#50](https://github.com/ifiokjr/mediapipe/issues/50)
+
+- Native model downloads no longer follow redirects blindly. Each hop must
+  stay on HTTPS, and plain HTTP is still accepted only when the original URI
+  is loopback. An HTTPS URL therefore cannot be downgraded to HTTP or turned
+  into a request to a loopback service, and a loopback download cannot be
+  redirected off the machine.
+- A `file` URI that includes a SHA-256 digest is verified before the path is
+  handed to the runtime. A missing file or a digest mismatch fails instead of
+  loading the bytes unchecked.
+- `requireRemoteModelUri` is exported from `package:mp_core/native.dart` as
+  the transport check both download paths use.
+
 ## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-11-05)
 
 Grouped release for `mp`.
