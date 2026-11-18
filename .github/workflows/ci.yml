@@ -29,7 +29,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: ifiokjr/monostyle@ab5d8d2f6af6ea12d5655a11ab61b92c2365ddfe # v0.3.27
+      - uses: ifiokjr/monostyle@6c44db9dc614ce3cd3724eaeb4af549932469f01 # v0.3.28
         if: always()
         with:
           version: 0.3.27
@@ -385,7 +385,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Audit workflow permissions
-        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
         with:
           inputs: ".github/workflows/ .github/actions/"
           advanced-security: true
