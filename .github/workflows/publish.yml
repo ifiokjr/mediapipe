@@ -9,18 +9,22 @@ name: Publish
 #
 # The release flow is:
 #   1. release-pr.yml pushes the release tag with a PAT so the `push` trigger
-#      below fires a run on the tag ref, then creates the draft release.
-#   2. The first run publishes the first batch of at most four packages (the
-#      pub.dev publish rate limit) in dependency order.
-#   3. The scheduled drain dispatches the next batch on the same tag ref until
-#      every package of the release is published, then publishes the GitHub
-#      release and removes the draft release-pr.yml created (monochange
-#      publishes a fresh release because GitHub's by-tag lookup cannot see
-#      drafts, so the draft has to be reconciled away afterwards).
+#      below fires a run on the tag ref, then creates one draft GitHub release.
+#   2. After a single `publisher` environment approval, the `publish` job
+#      queries pub.dev for package versions still missing in dependency order
+#      (`mp_core` first), publishes all pending packages in one pass (up to the
+#      12-package per-run ceiling enforced by MonoChange; pub.dev allows 200
+#      `package-published` uploads per 2-minute/hourly/daily window per
+#      repository OIDC agent for existing packages), and makes the existing
+#      draft GitHub release public in place with
+#      monochange/actions/publish-draft-releases.
+#   3. If a future release ever has more pending packages than one run may
+#      publish, the `continue` job dispatches the next batch directly on the
+#      same tag ref instead of relying on a cron schedule.
 #
 # Manual retries must be dispatched ON the release tag ref:
 #
-#   gh workflow run publish.yml --ref v0.1.0
+#   gh workflow run publish.yml --ref v0.1.5
 #
 on:
   push:
@@ -32,10 +36,6 @@ on:
         description: Release tag to resume; defaults to the oldest draft release
         required: false
         type: string
-  schedule:
-    # The drain dispatches only while a draft release is waiting, so the
-    # schedule stays quiet between releases.
-    - cron: "17 */4 * * *"
 
 permissions:
   contents: read
@@ -45,45 +45,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  drain:
-    name: Dispatch the next publishing batch
-    if: github.repository == 'ifiokjr/mediapipe' && github.event_name == 'schedule'
-    permissions:
-      actions: write # Dispatch the OIDC-eligible workflow_dispatch run.
-      # Draft releases are only visible to tokens with write access; a
-      # read-only token makes the listing below silently miss every draft,
-      # so the drain never dispatches and releases stay drafted forever.
-      contents: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Dispatch publishing on the release tag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          tag="$(
-            gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-              --jq '[.[] | select(.draft == true and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+([+-].*)?$")))] | sort_by(.created_at) | .[0].tag_name'
-          )"
-          if [ -z "$tag" ] || [ "$tag" = "null" ]; then
-            echo "No draft package release is waiting to be published."
-            exit 0
-          fi
-          # pub.dev trusted publishing validates the run ref, so the batch is
-          # dispatched ON the release tag instead of a branch.
-          gh workflow run publish.yml \
-            --repo "$GITHUB_REPOSITORY" \
-            --ref "$tag" \
-            --field "tag=$tag"
-        shell: bash
-
   publish:
-    if: github.repository == 'ifiokjr/mediapipe' && github.event_name != 'schedule'
+    if: github.repository == 'ifiokjr/mediapipe'
     environment: publisher
     permissions:
       contents: write
       id-token: write
+    outputs:
+      present: ${{ steps.release.outputs.present }}
+      tag: ${{ steps.release.outputs.tag }}
+      final: ${{ steps.batch.outputs.final }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -103,9 +74,9 @@ jobs:
           else
             tag="$(
               gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-                --jq '[.[] | select(.draft == true and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+([+-].*)?$")))] | sort_by(.created_at) | .[0].tag_name'
+                | jq -rs 'add // [] | [.[] | select(.draft == true and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+([+-].*)?$")))] | sort_by(.created_at) | .[0].tag_name // empty'
             )"
-            if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+            if [ -z "$tag" ]; then
               echo "No draft package release is waiting to be published."
               echo "present=false" >> "$GITHUB_OUTPUT"
               exit 0
@@ -198,7 +169,7 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
       - name: Check publish readiness
-        if: steps.batch.outputs.count != '0'
+        if: steps.release.outputs.present == 'true' && steps.batch.outputs.count != '0'
         env:
           PACKAGE_IDS: ${{ steps.batch.outputs.packages }}
         run: |
@@ -215,7 +186,7 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
       - name: Publish package batch
-        if: steps.batch.outputs.count != '0'
+        if: steps.release.outputs.present == 'true' && steps.batch.outputs.count != '0'
         env:
           PACKAGE_IDS: ${{ steps.batch.outputs.packages }}
         run: |
@@ -230,58 +201,15 @@ jobs:
             "${package_args[@]}"
         shell: devenv shell -- bash -e {0}
 
-      - name: Publish the GitHub release
+      - name: Publish draft releases
         # GitHub Actions coerces an empty step output to the number 0 in
-        # comparisons, so this step must never rely on `count == '0'` alone:
-        # gate it on the release being present, otherwise a run without a
-        # draft release would still run `devenv` without a toolchain.
+        # comparisons, so gate on the release being present.
         if: >-
           steps.release.outputs.present == 'true' &&
           (steps.batch.outputs.count == '0' || steps.batch.outputs.final == 'true')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: monochange step publish-release --from-ref HEAD --format json
-        shell: devenv shell -- bash -e {0}
-
-      - name: Reconcile the published release
-        # monochange resolves releases through GitHub's by-tag endpoint,
-        # which never returns drafts, so the step above cannot un-draft the
-        # release release-pr.yml created; it publishes a second release and
-        # leaves the draft behind. Fail loudly when nothing is published and
-        # delete the superseded draft, which would otherwise keep the drain
-        # dispatching forever.
-        if: >-
-          steps.release.outputs.present == 'true' &&
-          (steps.batch.outputs.count == '0' || steps.batch.outputs.final == 'true')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
-        run: |
-          set -euo pipefail
-          releases="$(
-            gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-              | jq -s 'add // []'
-          )"
-          published_count="$(
-            jq --arg tag "$RELEASE_TAG" \
-              '[.[] | select(.tag_name == $tag and .draft == false)] | length' \
-              <<<"$releases"
-          )"
-          if [ "$published_count" -eq 0 ]; then
-            echo "::error::No published GitHub release exists for $RELEASE_TAG."
-            exit 1
-          fi
-          while IFS= read -r draft_id; do
-            [ -n "$draft_id" ] || continue
-            echo "Deleting superseded draft release $draft_id for $RELEASE_TAG."
-            gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/$draft_id"
-          done < <(
-            jq --arg tag "$RELEASE_TAG" \
-              '.[] | select(.tag_name == $tag and .draft == true) | .id' \
-              <<<"$releases"
-          )
-          echo "Release $RELEASE_TAG is published."
-        shell: bash
+        uses: monochange/actions/publish-draft-releases@ccd95cf2e01389dfd19a8d59c8c09edaaf0cc5ef # v0.12.3
+        with:
+          release-tag: ${{ steps.release.outputs.tag }}
 
       - name: Upload MonoChange reports
         if: always() && steps.release.outputs.present == 'true'
@@ -293,3 +221,29 @@ jobs:
             ${{ runner.temp }}/publish-result.json
           if-no-files-found: ignore
           retention-days: 14
+
+  continue:
+    name: Dispatch the next publishing batch
+    needs: publish
+    if: >-
+      github.repository == 'ifiokjr/mediapipe' &&
+      needs.publish.outputs.present == 'true' &&
+      needs.publish.outputs.final == 'false'
+    permissions:
+      actions: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch remaining packages on the release tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.publish.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # pub.dev trusted publishing validates the run ref, so the follow-up
+          # batch is dispatched directly on the release tag.
+          gh workflow run publish.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$RELEASE_TAG" \
+            --field "tag=$RELEASE_TAG"
+        shell: bash
