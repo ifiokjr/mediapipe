@@ -1,3 +1,9 @@
+## [0.1.5](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.5) (2026-11-18)
+
+### Changed
+
+- **No package-specific changes were recorded; `mp_camera` was updated to 0.1.5 as part of group `mp`.**
+
 ## [0.1.4](https://github.com/ifiokjr/mediapipe/releases/tag/v0.1.4) (2026-11-05)
 
 ### Features
