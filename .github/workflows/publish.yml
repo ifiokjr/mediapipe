@@ -207,10 +207,8 @@ jobs:
         if: >-
           steps.release.outputs.present == 'true' &&
           (steps.batch.outputs.count == '0' || steps.batch.outputs.final == 'true')
-        # The `name` input is a workaround for the v0.12.2 metadata defect and can be dropped at v0.12.3.
-        uses: monochange/actions/publish-draft-releases@a7340074f50aa9814222cb88a2128f3865539f2f # v0.12.2
+        uses: monochange/actions/publish-draft-releases@ccd95cf2e01389dfd19a8d59c8c09edaaf0cc5ef # v0.12.3
         with:
-          name: publish-draft-releases
           release-tag: ${{ steps.release.outputs.tag }}
 
       - name: Upload MonoChange reports
